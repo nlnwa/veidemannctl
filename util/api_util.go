@@ -14,8 +14,8 @@
 package util
 
 import (
-	"strings"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	"strings"
 )
 
 func CreateSelector(labelString string) *api.Selector {

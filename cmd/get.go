@@ -21,9 +21,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"golang.org/x/net/context"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"github.com/nlnwa/veidemannctl/util"
+	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	"golang.org/x/net/context"
 )
 
 var (
@@ -287,6 +287,7 @@ var getCmd = &cobra.Command{
 			fmt.Println("See 'veidemannctl get -h' for help")
 		}
 	},
+	ValidArgs: util.GetObjectNames(),
 }
 
 func printValidObjectTypes() string {

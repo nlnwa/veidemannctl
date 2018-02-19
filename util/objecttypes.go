@@ -15,9 +15,9 @@ package util
 
 import (
 	"github.com/golang/protobuf/proto"
+	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"reflect"
 	"strings"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
 )
 
 var objectTypes = []struct {

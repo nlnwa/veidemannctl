@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/nlnwa/veidemannctl/util"
+	"github.com/spf13/cobra"
 )
 
 // loginCmd represents the login command

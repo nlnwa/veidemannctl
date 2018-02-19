@@ -16,9 +16,9 @@ package cmd
 import (
 	"log"
 
-	"golang.org/x/net/context"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"github.com/nlnwa/veidemannctl/util"
+	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	"golang.org/x/net/context"
 
 	"fmt"
 	"github.com/spf13/cobra"

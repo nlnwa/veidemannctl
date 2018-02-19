@@ -14,8 +14,8 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/nlnwa/veidemannctl/cmd"
+	log "github.com/sirupsen/logrus"
 )
 
 //go:generate scripts/git-version.sh

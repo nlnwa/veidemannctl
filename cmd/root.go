@@ -18,12 +18,12 @@ import (
 	"os"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/nlnwa/veidemannctl/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"strings"
-	"github.com/nlnwa/veidemannctl/util"
 )
 
 var (

@@ -22,6 +22,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/nlnwa/veidemannctl/bindata"
+	"github.com/nlnwa/veidemannctl/util"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"log"
@@ -30,8 +32,6 @@ import (
 	"strings"
 	"text/template"
 	"time"
-	"github.com/nlnwa/veidemannctl/bindata"
-	"github.com/nlnwa/veidemannctl/util"
 )
 
 var (
@@ -44,6 +44,7 @@ var (
 	page           int32
 	goTemplate     string
 	filter         []string
+	validArgs      = []string{"crawllog", "pagelog", "screenshot"}
 )
 
 // reportCmd represents the report command
@@ -133,6 +134,7 @@ var reportCmd = &cobra.Command{
 			fmt.Println("See 'veidemannctl get -h' for help")
 		}
 	},
+	ValidArgs: validArgs,
 }
 
 func init() {

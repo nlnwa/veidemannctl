@@ -14,12 +14,12 @@
 package util
 
 import (
+	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
 )
 
 func NewControllerClient() (api.ControllerClient, *grpc.ClientConn) {
