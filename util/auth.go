@@ -34,15 +34,22 @@ import (
 
 // return an HTTP client which trusts the provided root CAs.
 func httpClientForRootCAs() *http.Client {
-	tlsConfig := tls.Config{RootCAs: x509.NewCertPool()}
-	if viper.GetString("rootCAs") == "" {
-		return nil
+	// Create a pool with systems CAs
+	certPool, err := x509.SystemCertPool()
+	if err != nil {
+		log.Warn("Could not read systems trusted certificates, uses only the configured ones")
+		certPool = x509.NewCertPool()
 	}
-	rootCABytes := []byte(viper.GetString("rootCAs"))
-	if !tlsConfig.RootCAs.AppendCertsFromPEM(rootCABytes) {
-		log.Warn("no certs found in root CA file")
-		return nil
+	tlsConfig := tls.Config{RootCAs: certPool}
+
+	// Add CAs from config
+	if viper.GetString("rootCAs") != "" {
+		rootCABytes := []byte(viper.GetString("rootCAs"))
+		if !tlsConfig.RootCAs.AppendCertsFromPEM(rootCABytes) {
+			log.Warn("no certs found in root CA file")
+		}
 	}
+
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tlsConfig,
@@ -78,7 +85,7 @@ type auth struct {
 	enabled bool
 }
 
-func NewAuth() *auth {
+func NewAuth(idp string) *auth {
 	a := auth{}
 	a.enabled = true
 	a.offlineAsScope = true
@@ -94,8 +101,12 @@ func NewAuth() *auth {
 
 	a.ctx = oidc.ClientContext(context.Background(), a.client)
 
+	if idp == "" {
+		a.enabled = false
+		return &a
+	}
+
 	// Initialize a provider by specifying dex's issuer URL.
-	idp := viper.GetString("idp")
 	p, err := oidc.NewProvider(a.ctx, idp)
 	if err != nil {
 		log.Warn(fmt.Errorf("Could not connect to authentication server '%s': %v. Proceeding without authentication", idp, err))
@@ -119,6 +130,10 @@ func (a *auth) oauth2Config() *oauth2.Config {
 }
 
 func (a *auth) CreateAuthCodeURL() string {
+	if !a.enabled {
+		log.Fatal("Cannot create authentication URL since authentication is not enabled")
+	}
+
 	a.state = RandStringBytesMaskImprSrc(16)
 	viper.Set("nonce", a.state)
 

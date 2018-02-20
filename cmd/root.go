@@ -23,15 +23,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
-	"strings"
 )
 
 var (
-	cfgFile           string
-	controllerAddress string
-	Idp               string
-	rootCAs           string
-	debug             bool
+	cfgFile            string
+	controllerAddress  string
+	rootCAs            string
+	serverNameOverride string
+	debug              bool
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -62,10 +61,12 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&controllerAddress, "controllerAddress", "c", "localhost:50051", "Address to the Controller service")
 	viper.BindPFlag("controllerAddress", RootCmd.PersistentFlags().Lookup("controllerAddress"))
 
-	RootCmd.PersistentFlags().StringVar(&Idp, "idp", "", "Address to identity provider")
-	viper.BindPFlag("idp", RootCmd.PersistentFlags().Lookup("idp"))
+	RootCmd.PersistentFlags().StringVar(&rootCAs, "trusted-ca", "", "File with trusted certificate chains for the idp and controller."+
+		" These are in addition to the default certs configured for the OS.")
 
-	RootCmd.PersistentFlags().StringVar(&rootCAs, "issuer-root-ca", "", "Root certificate authorities for the issuer. Defaults to host certs.")
+	RootCmd.PersistentFlags().StringVar(&serverNameOverride, "serverNameOverride", "",
+		"If set, it will override the virtual host name of authority (e.g. :authority header field) in requests.")
+	viper.BindPFlag("serverNameOverride", RootCmd.PersistentFlags().Lookup("serverNameOverride"))
 
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Turn on debugging")
 }
@@ -101,14 +102,6 @@ func initConfig() {
 		viper.SetConfigFile(home + "/.veidemannctl.yaml")
 	}
 
-	if viper.GetString("idp") == "" && viper.GetString("controllerAddress") != "" {
-		ca := strings.SplitN(viper.GetString("controllerAddress"), ":", 2)
-		host := ca[0]
-		Idp = "https://" + host + ":32000/dex"
-	} else {
-		Idp = viper.GetString("idp")
-	}
-
 	if rootCAs != "" {
 		rootCABytes, err := ioutil.ReadFile(rootCAs)
 		if err != nil {
@@ -119,7 +112,8 @@ func initConfig() {
 
 	if RootCmd.PersistentFlags().Changed("controllerAddress") ||
 		RootCmd.PersistentFlags().Changed("idp") ||
-		RootCmd.PersistentFlags().Changed("issuer-root-ca") {
+		RootCmd.PersistentFlags().Changed("trusted-ca") ||
+		RootCmd.PersistentFlags().Changed("serverNameOverride") {
 
 		util.WriteConfig()
 	}

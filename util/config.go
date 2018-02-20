@@ -21,11 +21,12 @@ import (
 )
 
 type config struct {
-	ControllerAddress string `json:"controllerAddress"`
-	Idp               string `json:"idp"`
-	AccessToken       string `json:"accessToken"`
-	Nonce             string `json:"nonce"`
-	RootCAs           string `json:"rootCAs"`
+	ControllerAddress  string `json:"controllerAddress"`
+	Idp                string `json:"idp"`
+	AccessToken        string `json:"accessToken"`
+	Nonce              string `json:"nonce"`
+	RootCAs            string `json:"rootCAs"`
+	ServerNameOverride string `json:"serverNameOverride"`
 }
 
 func WriteConfig() {
@@ -37,6 +38,7 @@ func WriteConfig() {
 		viper.GetString("accessToken"),
 		viper.GetString("nonce"),
 		viper.GetString("rootCAs"),
+		viper.GetString("serverNameOverride"),
 	}
 
 	y, err := yaml.Marshal(c)

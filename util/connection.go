@@ -14,12 +14,17 @@
 package util
 
 import (
+	"crypto/x509"
+	"github.com/golang/protobuf/ptypes/empty"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"net"
+	"strings"
+	"time"
 )
 
 func NewControllerClient() (api.ControllerClient, *grpc.ClientConn) {
@@ -41,18 +46,81 @@ func NewReportClient() (api.ReportClient, *grpc.ClientConn) {
 }
 
 func newConnection() *grpc.ClientConn {
-	address := viper.GetString("controllerAddress")
-	log.Debugf("Connecting to %s", address)
-
-	dialOptions := []grpc.DialOption{grpc.WithInsecure()}
-	dialOptions = AddCredentials(dialOptions)
+	idp, tls := GetIdp()
 
 	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, dialOptions...)
-	if err != nil {
-		log.Fatalf("Could not connect: %v", err)
-	}
+	conn, _ := connect(idp, tls)
 	return conn
+}
+
+func connect(idp string, tls bool) (*grpc.ClientConn, bool) {
+	address := viper.GetString("controllerAddress")
+
+	dialOptions := []grpc.DialOption{}
+	if idp != "" {
+		dialOptions = AddCredentials(idp, dialOptions)
+	}
+
+	// Set up a connection to the server.
+	creds := ClientTransportCredentials(tls)
+	conn, err := BlockingDial(context.Background(), address, creds, dialOptions...)
+	if err != nil {
+		if strings.Contains(err.Error(), "first record does not look like a TLS handshake") {
+			log.Debug("Could not connect with TLS, retrying without credentials")
+			tls = false
+			conn, err = BlockingDial(context.Background(), address, nil, dialOptions...)
+			if err != nil {
+				log.Fatalf("Could not connect: %v", err)
+			}
+			log.Warn("Connected with insecure transport. Server does not support TLS")
+		} else {
+			log.Fatalf("Could not connect: %v", err)
+		}
+	}
+	return conn, tls
+}
+
+func ClientTransportCredentials(tls bool) credentials.TransportCredentials {
+	var creds credentials.TransportCredentials
+
+	if tls {
+		certPool, err := x509.SystemCertPool()
+		if err != nil {
+			log.Fatalf("Failed to create TLS credentials %v", err)
+		}
+
+		// Add CAs from config
+		if viper.GetString("rootCAs") != "" {
+			rootCABytes := []byte(viper.GetString("rootCAs"))
+			if !certPool.AppendCertsFromPEM(rootCABytes) {
+				log.Warn("no certs found in root CA file")
+			}
+		}
+
+		serverNameOverride := viper.GetString("serverNameOverride")
+		log.Debugf("Using server name override: %s", serverNameOverride)
+		creds = credentials.NewClientTLSFromCert(certPool, serverNameOverride)
+	}
+
+	return creds
+}
+
+func GetIdp() (string, bool) {
+	conn, tls := connect("", true)
+	defer conn.Close()
+
+	c := api.NewControllerClient(conn)
+	reply, err := c.GetOpenIdConnectIssuer(context.Background(), &empty.Empty{})
+	if err != nil {
+		log.Fatalf("Could not get idp address: %v", err)
+	}
+
+	idp := reply.GetOpenIdConnectIssuer()
+	if idp == "" {
+		log.Warn("Server was not configured with an idp. Proceeding without authentication")
+	}
+
+	return idp, tls
 }
 
 type bearerTokenCred struct {
@@ -60,8 +128,18 @@ type bearerTokenCred struct {
 	token     string
 }
 
-func AddCredentials(opts []grpc.DialOption) []grpc.DialOption {
-	a := NewAuth()
+func (b bearerTokenCred) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+	return map[string]string{
+		"authorization": b.tokenType + " " + b.token,
+	}, nil
+}
+
+func (b bearerTokenCred) RequireTransportSecurity() bool {
+	return false
+}
+
+func AddCredentials(idp string, opts []grpc.DialOption) []grpc.DialOption {
+	a := NewAuth(idp)
 	if !a.enabled {
 		return opts
 	}
@@ -78,12 +156,71 @@ func AddCredentials(opts []grpc.DialOption) []grpc.DialOption {
 	return append(opts, grpc.WithPerRPCCredentials(bt))
 }
 
-func (b bearerTokenCred) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	return map[string]string{
-		"authorization": b.tokenType + " " + b.token,
-	}, nil
-}
+// BlockingDial is a helper method to dial the given address, using optional TLS credentials,
+// and blocking until the returned connection is ready. If the given credentials are nil, the
+// connection will be insecure (plain-text).
+// This function is borrowed from https://github.com/fullstorydev/grpcurl/blob/master/grpcurl.go
+func BlockingDial(ctx context.Context, address string, creds credentials.TransportCredentials, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
+	// grpc.Dial doesn't provide any information on permanent connection errors (like
+	// TLS handshake failures). So in order to provide good error messages, we need a
+	// custom dialer that can provide that info. That means we manage the TLS handshake.
+	result := make(chan interface{}, 1)
 
-func (b bearerTokenCred) RequireTransportSecurity() bool {
-	return false
+	writeResult := func(res interface{}) {
+		// non-blocking write: we only need the first result
+		select {
+		case result <- res:
+		default:
+		}
+	}
+
+	dialer := func(address string, timeout time.Duration) (net.Conn, error) {
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+		conn, err := (&net.Dialer{Cancel: ctx.Done()}).Dial("tcp", address)
+		if err != nil {
+			writeResult(err)
+			return nil, err
+		}
+		if creds != nil {
+			conn, _, err = creds.ClientHandshake(ctx, address, conn)
+			if err != nil {
+				writeResult(err)
+				return nil, err
+			}
+		}
+		return conn, nil
+	}
+
+	// Even with grpc.FailOnNonTempDialError, this call will usually timeout in
+	// the face of TLS handshake errors. So we can't rely on grpc.WithBlock() to
+	// know when we're done. So we run it in a goroutine and then use result
+	// channel to either get the channel or fail-fast.
+	go func() {
+		opts = append(opts,
+			grpc.WithBlock(),
+			grpc.FailOnNonTempDialError(true),
+			grpc.WithDialer(dialer),
+			grpc.WithInsecure(), // we are handling TLS, so tell grpc not to
+		)
+		conn, err := grpc.DialContext(ctx, address, opts...)
+		var res interface{}
+		if err != nil {
+			res = err
+		} else {
+			res = conn
+		}
+		writeResult(res)
+	}()
+
+	select {
+	case res := <-result:
+		if conn, ok := res.(*grpc.ClientConn); ok {
+			return conn, nil
+		} else {
+			return nil, res.(error)
+		}
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 }

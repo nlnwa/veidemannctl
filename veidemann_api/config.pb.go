@@ -58,6 +58,7 @@ It has these top-level messages:
 	RoleList
 	RoleMappingsListRequest
 	RoleMappingsListReply
+	OpenIdConnectIssuerReply
 	ResolveRequest
 	ResolveReply
 	CrawlSeedRequest
