@@ -18,18 +18,23 @@ import (
 	"strings"
 )
 
-func CreateSelector(labelString string) *api.Selector {
-	ls := strings.Split(labelString, ",")
-	labels := make([]*api.Label, len(ls))
-	for i := range ls {
-		l := strings.Split(ls[i], "=")
-		switch len(l) {
-		case 2:
-			labels[i] = &api.Label{Key: strings.TrimSpace(l[0]), Value: strings.TrimSpace(l[1])}
-		case 1:
-			labels[i] = &api.Label{Value: strings.TrimSpace(l[0])}
-		}
+func CreateSelector(labelString string) []string {
+	var result []string
+	if labelString != "" {
+		result = strings.Split(labelString, ",")
 	}
+	return result
+}
 
-	return &api.Selector{labels}
+func CreateListRequest(ids []string, name string, labelString string, pageSize int32, page int32) api.ListRequest {
+	selector := CreateSelector(labelString)
+
+	request := api.ListRequest{}
+	request.Id = ids
+	request.Name = name
+	request.LabelSelector = selector
+	request.Page = page
+	request.PageSize = pageSize
+
+	return request
 }

@@ -7,6 +7,8 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import google_protobuf1 "github.com/golang/protobuf/ptypes/empty"
+import _ "google.golang.org/genproto/googleapis/api/annotations"
+import _ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options"
 
 import (
 	context "golang.org/x/net/context"
@@ -18,64 +20,83 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// Request for getting an object by id
+type GetRequest struct {
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+}
+
+func (m *GetRequest) Reset()                    { *m = GetRequest{} }
+func (m *GetRequest) String() string            { return proto.CompactTextString(m) }
+func (*GetRequest) ProtoMessage()               {}
+func (*GetRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{0} }
+
+func (m *GetRequest) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
 // Specification of wich entities to get.
 type ListRequest struct {
-	// Types that are valid to be assigned to Qry:
-	//	*ListRequest_Id
-	//	*ListRequest_Name
-	//	*ListRequest_Selector
-	Qry      isListRequest_Qry `protobuf_oneof:"qry"`
-	PageSize int32             `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32             `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	// Select objects by id
+	Id []string `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
+	// Select objects by name
+	// The name query is a case insensitive regular expresion search on name.
+	// <pre>
+	// Examples:
+	//   "foo"       - matches all names containing the phrase foo
+	//   "^foo$"     - matches the exact name foo
+	//   "foo.*bar$" - matches names containing foo followed by zero or more tokens and ends with bar
+	// </pre>
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// Select objects by label
+	// A string representing a label query. The query matches if at least one label matches the query.
+	// If there are multiple queries, then each query must match at least one label.
+	// Label quries are case insensitive. The basic format is <code>key:value</code> where both key and value must match.
+	// If value ends with <code>&ast;</code> then the key must match and value must match up until the <code>&ast;</code>.
+	// If value is empty, all labels matching the key will match.
+	// If key is empty, then the matching is done on the value for all keys.
+	// If key is empty, then the <code>:</code> might be ommitted.
+	// <pre>
+	// Examples:
+	//   "foo:bar"  - matches exactly labels with key=foo and value=bar
+	//   "foo:"     - matches all labels with key=foo
+	//   ":bar"     - matches all labels with value=bar
+	//   "bar"      - matches all labels with value=bar
+	//   "foo:ba*"  - matches labels with key=foo and value starting with ba (e.g. matches bar, but not ber)
+	//   ":ba*"     - matches labels with any key and value starting with ba (e.g. matches bar, but not ber)
+	//   "ba*"      - matches labels with any key and value starting with ba (e.g. matches bar, but not ber)
+	//   ":"        - matches every label
+	//   ""         - matches every label
+	// </pre>
+	LabelSelector []string `protobuf:"bytes,3,rep,name=label_selector,json=labelSelector" json:"label_selector,omitempty"`
+	PageSize      int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page          int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
 }
 
 func (m *ListRequest) Reset()                    { *m = ListRequest{} }
 func (m *ListRequest) String() string            { return proto.CompactTextString(m) }
 func (*ListRequest) ProtoMessage()               {}
-func (*ListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{0} }
+func (*ListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{1} }
 
-type isListRequest_Qry interface {
-	isListRequest_Qry()
-}
-
-type ListRequest_Id struct {
-	Id string `protobuf:"bytes,1,opt,name=id,oneof"`
-}
-type ListRequest_Name struct {
-	Name string `protobuf:"bytes,2,opt,name=name,oneof"`
-}
-type ListRequest_Selector struct {
-	Selector *Selector `protobuf:"bytes,3,opt,name=selector,oneof"`
-}
-
-func (*ListRequest_Id) isListRequest_Qry()       {}
-func (*ListRequest_Name) isListRequest_Qry()     {}
-func (*ListRequest_Selector) isListRequest_Qry() {}
-
-func (m *ListRequest) GetQry() isListRequest_Qry {
+func (m *ListRequest) GetId() []string {
 	if m != nil {
-		return m.Qry
+		return m.Id
 	}
 	return nil
 }
 
-func (m *ListRequest) GetId() string {
-	if x, ok := m.GetQry().(*ListRequest_Id); ok {
-		return x.Id
-	}
-	return ""
-}
-
 func (m *ListRequest) GetName() string {
-	if x, ok := m.GetQry().(*ListRequest_Name); ok {
-		return x.Name
+	if m != nil {
+		return m.Name
 	}
 	return ""
 }
 
-func (m *ListRequest) GetSelector() *Selector {
-	if x, ok := m.GetQry().(*ListRequest_Selector); ok {
-		return x.Selector
+func (m *ListRequest) GetLabelSelector() []string {
+	if m != nil {
+		return m.LabelSelector
 	}
 	return nil
 }
@@ -94,91 +115,6 @@ func (m *ListRequest) GetPage() int32 {
 	return 0
 }
 
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*ListRequest) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _ListRequest_OneofMarshaler, _ListRequest_OneofUnmarshaler, _ListRequest_OneofSizer, []interface{}{
-		(*ListRequest_Id)(nil),
-		(*ListRequest_Name)(nil),
-		(*ListRequest_Selector)(nil),
-	}
-}
-
-func _ListRequest_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*ListRequest)
-	// qry
-	switch x := m.Qry.(type) {
-	case *ListRequest_Id:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.Id)
-	case *ListRequest_Name:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.Name)
-	case *ListRequest_Selector:
-		b.EncodeVarint(3<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Selector); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("ListRequest.Qry has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _ListRequest_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*ListRequest)
-	switch tag {
-	case 1: // qry.id
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &ListRequest_Id{x}
-		return true, err
-	case 2: // qry.name
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &ListRequest_Name{x}
-		return true, err
-	case 3: // qry.selector
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Selector)
-		err := b.DecodeMessage(msg)
-		m.Qry = &ListRequest_Selector{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _ListRequest_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*ListRequest)
-	// qry
-	switch x := m.Qry.(type) {
-	case *ListRequest_Id:
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.Id)))
-		n += len(x.Id)
-	case *ListRequest_Name:
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.Name)))
-		n += len(x.Name)
-	case *ListRequest_Selector:
-		s := proto.Size(x.Selector)
-		n += proto.SizeVarint(3<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
 // A list of entities
 type CrawlEntityListReply struct {
 	Value    []*CrawlEntity `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
@@ -190,7 +126,7 @@ type CrawlEntityListReply struct {
 func (m *CrawlEntityListReply) Reset()                    { *m = CrawlEntityListReply{} }
 func (m *CrawlEntityListReply) String() string            { return proto.CompactTextString(m) }
 func (*CrawlEntityListReply) ProtoMessage()               {}
-func (*CrawlEntityListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{1} }
+func (*CrawlEntityListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{2} }
 
 func (m *CrawlEntityListReply) GetValue() []*CrawlEntity {
 	if m != nil {
@@ -221,86 +157,82 @@ func (m *CrawlEntityListReply) GetPage() int32 {
 }
 
 type SeedListRequest struct {
-	// Types that are valid to be assigned to Qry:
-	//	*SeedListRequest_Id
-	//	*SeedListRequest_Name
-	//	*SeedListRequest_CrawlJobId
-	//	*SeedListRequest_Selector
-	//	*SeedListRequest_EntityId
-	Qry      isSeedListRequest_Qry `protobuf_oneof:"qry"`
-	PageSize int32                 `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32                 `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	// Select objects by id
+	Id []string `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
+	// Select objects by name
+	// The name query is a case insensitive regular expresion search on name.
+	// <pre>
+	// Examples:
+	//   "foo"       - matches all names containing the phrase foo
+	//   "^foo$"     - matches the exact name foo
+	//   "foo.*bar$" - matches names containing foo followed by zero or more tokens and ends with bar
+	// </pre>
+	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	// Select objects by label
+	// A string representing a label query. The query matches if at least one label matches the query.
+	// If there are multiple queries, then each query must match at least one label.
+	// Label quries are case insensitive. The basic format is <code>key:value</code> where both key and value must match.
+	// If value ends with <code>&ast;</code> then the key must match and value must match up until the <code>&ast;</code>.
+	// If value is empty, all labels matching the key will match.
+	// If key is empty, then the matching is done on the value for all keys.
+	// If key is empty, then the <code>:</code> might be ommitted.
+	// <pre>
+	// Examples:
+	//   "foo:bar"  - matches exactly labels with key=foo and value=bar
+	//   "foo:"     - matches all labels with key=foo
+	//   ":bar"     - matches all labels with value=bar
+	//   "bar"      - matches all labels with value=bar
+	//   "foo:ba*"  - matches labels with key=foo and value starting with ba (e.g. matches bar, but not ber)
+	//   ":ba*"     - matches labels with any key and value starting with ba (e.g. matches bar, but not ber)
+	//   "ba*"      - matches labels with any key and value starting with ba (e.g. matches bar, but not ber)
+	//   ":"        - matches every label
+	//   ""         - matches every label
+	// </pre>
+	LabelSelector []string `protobuf:"bytes,3,rep,name=label_selector,json=labelSelector" json:"label_selector,omitempty"`
+	// Select objects by crawl job id
+	CrawlJobId string `protobuf:"bytes,4,opt,name=crawl_job_id,json=crawlJobId" json:"crawl_job_id,omitempty"`
+	// Select objects by entity id
+	EntityId string `protobuf:"bytes,5,opt,name=entity_id,json=entityId" json:"entity_id,omitempty"`
+	PageSize int32  `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page     int32  `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
 }
 
 func (m *SeedListRequest) Reset()                    { *m = SeedListRequest{} }
 func (m *SeedListRequest) String() string            { return proto.CompactTextString(m) }
 func (*SeedListRequest) ProtoMessage()               {}
-func (*SeedListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{2} }
+func (*SeedListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{3} }
 
-type isSeedListRequest_Qry interface {
-	isSeedListRequest_Qry()
-}
-
-type SeedListRequest_Id struct {
-	Id string `protobuf:"bytes,1,opt,name=id,oneof"`
-}
-type SeedListRequest_Name struct {
-	Name string `protobuf:"bytes,2,opt,name=name,oneof"`
-}
-type SeedListRequest_CrawlJobId struct {
-	CrawlJobId string `protobuf:"bytes,3,opt,name=crawl_job_id,json=crawlJobId,oneof"`
-}
-type SeedListRequest_Selector struct {
-	Selector *Selector `protobuf:"bytes,4,opt,name=selector,oneof"`
-}
-type SeedListRequest_EntityId struct {
-	EntityId string `protobuf:"bytes,5,opt,name=entity_id,json=entityId,oneof"`
-}
-
-func (*SeedListRequest_Id) isSeedListRequest_Qry()         {}
-func (*SeedListRequest_Name) isSeedListRequest_Qry()       {}
-func (*SeedListRequest_CrawlJobId) isSeedListRequest_Qry() {}
-func (*SeedListRequest_Selector) isSeedListRequest_Qry()   {}
-func (*SeedListRequest_EntityId) isSeedListRequest_Qry()   {}
-
-func (m *SeedListRequest) GetQry() isSeedListRequest_Qry {
+func (m *SeedListRequest) GetId() []string {
 	if m != nil {
-		return m.Qry
+		return m.Id
 	}
 	return nil
-}
-
-func (m *SeedListRequest) GetId() string {
-	if x, ok := m.GetQry().(*SeedListRequest_Id); ok {
-		return x.Id
-	}
-	return ""
 }
 
 func (m *SeedListRequest) GetName() string {
-	if x, ok := m.GetQry().(*SeedListRequest_Name); ok {
-		return x.Name
+	if m != nil {
+		return m.Name
 	}
 	return ""
 }
 
-func (m *SeedListRequest) GetCrawlJobId() string {
-	if x, ok := m.GetQry().(*SeedListRequest_CrawlJobId); ok {
-		return x.CrawlJobId
-	}
-	return ""
-}
-
-func (m *SeedListRequest) GetSelector() *Selector {
-	if x, ok := m.GetQry().(*SeedListRequest_Selector); ok {
-		return x.Selector
+func (m *SeedListRequest) GetLabelSelector() []string {
+	if m != nil {
+		return m.LabelSelector
 	}
 	return nil
 }
 
+func (m *SeedListRequest) GetCrawlJobId() string {
+	if m != nil {
+		return m.CrawlJobId
+	}
+	return ""
+}
+
 func (m *SeedListRequest) GetEntityId() string {
-	if x, ok := m.GetQry().(*SeedListRequest_EntityId); ok {
-		return x.EntityId
+	if m != nil {
+		return m.EntityId
 	}
 	return ""
 }
@@ -319,121 +251,6 @@ func (m *SeedListRequest) GetPage() int32 {
 	return 0
 }
 
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*SeedListRequest) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _SeedListRequest_OneofMarshaler, _SeedListRequest_OneofUnmarshaler, _SeedListRequest_OneofSizer, []interface{}{
-		(*SeedListRequest_Id)(nil),
-		(*SeedListRequest_Name)(nil),
-		(*SeedListRequest_CrawlJobId)(nil),
-		(*SeedListRequest_Selector)(nil),
-		(*SeedListRequest_EntityId)(nil),
-	}
-}
-
-func _SeedListRequest_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*SeedListRequest)
-	// qry
-	switch x := m.Qry.(type) {
-	case *SeedListRequest_Id:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.Id)
-	case *SeedListRequest_Name:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.Name)
-	case *SeedListRequest_CrawlJobId:
-		b.EncodeVarint(3<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.CrawlJobId)
-	case *SeedListRequest_Selector:
-		b.EncodeVarint(4<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Selector); err != nil {
-			return err
-		}
-	case *SeedListRequest_EntityId:
-		b.EncodeVarint(5<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.EntityId)
-	case nil:
-	default:
-		return fmt.Errorf("SeedListRequest.Qry has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _SeedListRequest_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*SeedListRequest)
-	switch tag {
-	case 1: // qry.id
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &SeedListRequest_Id{x}
-		return true, err
-	case 2: // qry.name
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &SeedListRequest_Name{x}
-		return true, err
-	case 3: // qry.crawl_job_id
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &SeedListRequest_CrawlJobId{x}
-		return true, err
-	case 4: // qry.selector
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Selector)
-		err := b.DecodeMessage(msg)
-		m.Qry = &SeedListRequest_Selector{msg}
-		return true, err
-	case 5: // qry.entity_id
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &SeedListRequest_EntityId{x}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _SeedListRequest_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*SeedListRequest)
-	// qry
-	switch x := m.Qry.(type) {
-	case *SeedListRequest_Id:
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.Id)))
-		n += len(x.Id)
-	case *SeedListRequest_Name:
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.Name)))
-		n += len(x.Name)
-	case *SeedListRequest_CrawlJobId:
-		n += proto.SizeVarint(3<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.CrawlJobId)))
-		n += len(x.CrawlJobId)
-	case *SeedListRequest_Selector:
-		s := proto.Size(x.Selector)
-		n += proto.SizeVarint(4<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case *SeedListRequest_EntityId:
-		n += proto.SizeVarint(5<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.EntityId)))
-		n += len(x.EntityId)
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
 type SeedListReply struct {
 	Value    []*Seed `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
 	Count    int64   `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
@@ -444,7 +261,7 @@ type SeedListReply struct {
 func (m *SeedListReply) Reset()                    { *m = SeedListReply{} }
 func (m *SeedListReply) String() string            { return proto.CompactTextString(m) }
 func (*SeedListReply) ProtoMessage()               {}
-func (*SeedListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{3} }
+func (*SeedListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{4} }
 
 func (m *SeedListReply) GetValue() []*Seed {
 	if m != nil {
@@ -472,175 +289,6 @@ func (m *SeedListReply) GetPage() int32 {
 		return m.Page
 	}
 	return 0
-}
-
-type CrawlJobListRequest struct {
-	// Types that are valid to be assigned to Qry:
-	//	*CrawlJobListRequest_Id
-	//	*CrawlJobListRequest_Name
-	//	*CrawlJobListRequest_Selector
-	Qry isCrawlJobListRequest_Qry `protobuf_oneof:"qry"`
-	// Expand dependencies (i.e. include the complete object graph)
-	Expand   bool  `protobuf:"varint,13,opt,name=expand" json:"expand,omitempty"`
-	PageSize int32 `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32 `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
-}
-
-func (m *CrawlJobListRequest) Reset()                    { *m = CrawlJobListRequest{} }
-func (m *CrawlJobListRequest) String() string            { return proto.CompactTextString(m) }
-func (*CrawlJobListRequest) ProtoMessage()               {}
-func (*CrawlJobListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{4} }
-
-type isCrawlJobListRequest_Qry interface {
-	isCrawlJobListRequest_Qry()
-}
-
-type CrawlJobListRequest_Id struct {
-	Id string `protobuf:"bytes,1,opt,name=id,oneof"`
-}
-type CrawlJobListRequest_Name struct {
-	Name string `protobuf:"bytes,2,opt,name=name,oneof"`
-}
-type CrawlJobListRequest_Selector struct {
-	Selector *Selector `protobuf:"bytes,3,opt,name=selector,oneof"`
-}
-
-func (*CrawlJobListRequest_Id) isCrawlJobListRequest_Qry()       {}
-func (*CrawlJobListRequest_Name) isCrawlJobListRequest_Qry()     {}
-func (*CrawlJobListRequest_Selector) isCrawlJobListRequest_Qry() {}
-
-func (m *CrawlJobListRequest) GetQry() isCrawlJobListRequest_Qry {
-	if m != nil {
-		return m.Qry
-	}
-	return nil
-}
-
-func (m *CrawlJobListRequest) GetId() string {
-	if x, ok := m.GetQry().(*CrawlJobListRequest_Id); ok {
-		return x.Id
-	}
-	return ""
-}
-
-func (m *CrawlJobListRequest) GetName() string {
-	if x, ok := m.GetQry().(*CrawlJobListRequest_Name); ok {
-		return x.Name
-	}
-	return ""
-}
-
-func (m *CrawlJobListRequest) GetSelector() *Selector {
-	if x, ok := m.GetQry().(*CrawlJobListRequest_Selector); ok {
-		return x.Selector
-	}
-	return nil
-}
-
-func (m *CrawlJobListRequest) GetExpand() bool {
-	if m != nil {
-		return m.Expand
-	}
-	return false
-}
-
-func (m *CrawlJobListRequest) GetPageSize() int32 {
-	if m != nil {
-		return m.PageSize
-	}
-	return 0
-}
-
-func (m *CrawlJobListRequest) GetPage() int32 {
-	if m != nil {
-		return m.Page
-	}
-	return 0
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*CrawlJobListRequest) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _CrawlJobListRequest_OneofMarshaler, _CrawlJobListRequest_OneofUnmarshaler, _CrawlJobListRequest_OneofSizer, []interface{}{
-		(*CrawlJobListRequest_Id)(nil),
-		(*CrawlJobListRequest_Name)(nil),
-		(*CrawlJobListRequest_Selector)(nil),
-	}
-}
-
-func _CrawlJobListRequest_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*CrawlJobListRequest)
-	// qry
-	switch x := m.Qry.(type) {
-	case *CrawlJobListRequest_Id:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.Id)
-	case *CrawlJobListRequest_Name:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.Name)
-	case *CrawlJobListRequest_Selector:
-		b.EncodeVarint(3<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Selector); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("CrawlJobListRequest.Qry has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _CrawlJobListRequest_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*CrawlJobListRequest)
-	switch tag {
-	case 1: // qry.id
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &CrawlJobListRequest_Id{x}
-		return true, err
-	case 2: // qry.name
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &CrawlJobListRequest_Name{x}
-		return true, err
-	case 3: // qry.selector
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Selector)
-		err := b.DecodeMessage(msg)
-		m.Qry = &CrawlJobListRequest_Selector{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _CrawlJobListRequest_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*CrawlJobListRequest)
-	// qry
-	switch x := m.Qry.(type) {
-	case *CrawlJobListRequest_Id:
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.Id)))
-		n += len(x.Id)
-	case *CrawlJobListRequest_Name:
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.Name)))
-		n += len(x.Name)
-	case *CrawlJobListRequest_Selector:
-		s := proto.Size(x.Selector)
-		n += proto.SizeVarint(3<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
 }
 
 type CrawlJobListReply struct {
@@ -843,167 +491,6 @@ func (m *BrowserConfigListReply) GetPage() int32 {
 	return 0
 }
 
-// Specification of wich browserscripts to get.
-type BrowserScriptListRequest struct {
-	// Types that are valid to be assigned to Qry:
-	//	*BrowserScriptListRequest_Id
-	//	*BrowserScriptListRequest_Name
-	//	*BrowserScriptListRequest_Selector
-	Qry      isBrowserScriptListRequest_Qry `protobuf_oneof:"qry"`
-	PageSize int32                          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32                          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
-}
-
-func (m *BrowserScriptListRequest) Reset()                    { *m = BrowserScriptListRequest{} }
-func (m *BrowserScriptListRequest) String() string            { return proto.CompactTextString(m) }
-func (*BrowserScriptListRequest) ProtoMessage()               {}
-func (*BrowserScriptListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{10} }
-
-type isBrowserScriptListRequest_Qry interface {
-	isBrowserScriptListRequest_Qry()
-}
-
-type BrowserScriptListRequest_Id struct {
-	Id string `protobuf:"bytes,1,opt,name=id,oneof"`
-}
-type BrowserScriptListRequest_Name struct {
-	Name string `protobuf:"bytes,2,opt,name=name,oneof"`
-}
-type BrowserScriptListRequest_Selector struct {
-	Selector *Selector `protobuf:"bytes,4,opt,name=selector,oneof"`
-}
-
-func (*BrowserScriptListRequest_Id) isBrowserScriptListRequest_Qry()       {}
-func (*BrowserScriptListRequest_Name) isBrowserScriptListRequest_Qry()     {}
-func (*BrowserScriptListRequest_Selector) isBrowserScriptListRequest_Qry() {}
-
-func (m *BrowserScriptListRequest) GetQry() isBrowserScriptListRequest_Qry {
-	if m != nil {
-		return m.Qry
-	}
-	return nil
-}
-
-func (m *BrowserScriptListRequest) GetId() string {
-	if x, ok := m.GetQry().(*BrowserScriptListRequest_Id); ok {
-		return x.Id
-	}
-	return ""
-}
-
-func (m *BrowserScriptListRequest) GetName() string {
-	if x, ok := m.GetQry().(*BrowserScriptListRequest_Name); ok {
-		return x.Name
-	}
-	return ""
-}
-
-func (m *BrowserScriptListRequest) GetSelector() *Selector {
-	if x, ok := m.GetQry().(*BrowserScriptListRequest_Selector); ok {
-		return x.Selector
-	}
-	return nil
-}
-
-func (m *BrowserScriptListRequest) GetPageSize() int32 {
-	if m != nil {
-		return m.PageSize
-	}
-	return 0
-}
-
-func (m *BrowserScriptListRequest) GetPage() int32 {
-	if m != nil {
-		return m.Page
-	}
-	return 0
-}
-
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*BrowserScriptListRequest) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _BrowserScriptListRequest_OneofMarshaler, _BrowserScriptListRequest_OneofUnmarshaler, _BrowserScriptListRequest_OneofSizer, []interface{}{
-		(*BrowserScriptListRequest_Id)(nil),
-		(*BrowserScriptListRequest_Name)(nil),
-		(*BrowserScriptListRequest_Selector)(nil),
-	}
-}
-
-func _BrowserScriptListRequest_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*BrowserScriptListRequest)
-	// qry
-	switch x := m.Qry.(type) {
-	case *BrowserScriptListRequest_Id:
-		b.EncodeVarint(1<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.Id)
-	case *BrowserScriptListRequest_Name:
-		b.EncodeVarint(2<<3 | proto.WireBytes)
-		b.EncodeStringBytes(x.Name)
-	case *BrowserScriptListRequest_Selector:
-		b.EncodeVarint(4<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.Selector); err != nil {
-			return err
-		}
-	case nil:
-	default:
-		return fmt.Errorf("BrowserScriptListRequest.Qry has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _BrowserScriptListRequest_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*BrowserScriptListRequest)
-	switch tag {
-	case 1: // qry.id
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &BrowserScriptListRequest_Id{x}
-		return true, err
-	case 2: // qry.name
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Qry = &BrowserScriptListRequest_Name{x}
-		return true, err
-	case 4: // qry.selector
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		msg := new(Selector)
-		err := b.DecodeMessage(msg)
-		m.Qry = &BrowserScriptListRequest_Selector{msg}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _BrowserScriptListRequest_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*BrowserScriptListRequest)
-	// qry
-	switch x := m.Qry.(type) {
-	case *BrowserScriptListRequest_Id:
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.Id)))
-		n += len(x.Id)
-	case *BrowserScriptListRequest_Name:
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(len(x.Name)))
-		n += len(x.Name)
-	case *BrowserScriptListRequest_Selector:
-		s := proto.Size(x.Selector)
-		n += proto.SizeVarint(4<<3 | proto.WireBytes)
-		n += proto.SizeVarint(uint64(s))
-		n += s
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
-}
-
 // A list of browserscripts
 type BrowserScriptListReply struct {
 	Value    []*BrowserScript `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
@@ -1015,7 +502,7 @@ type BrowserScriptListReply struct {
 func (m *BrowserScriptListReply) Reset()                    { *m = BrowserScriptListReply{} }
 func (m *BrowserScriptListReply) String() string            { return proto.CompactTextString(m) }
 func (*BrowserScriptListReply) ProtoMessage()               {}
-func (*BrowserScriptListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{11} }
+func (*BrowserScriptListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{10} }
 
 func (m *BrowserScriptListReply) GetValue() []*BrowserScript {
 	if m != nil {
@@ -1056,7 +543,7 @@ type CrawlHostGroupConfigListReply struct {
 func (m *CrawlHostGroupConfigListReply) Reset()                    { *m = CrawlHostGroupConfigListReply{} }
 func (m *CrawlHostGroupConfigListReply) String() string            { return proto.CompactTextString(m) }
 func (*CrawlHostGroupConfigListReply) ProtoMessage()               {}
-func (*CrawlHostGroupConfigListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{12} }
+func (*CrawlHostGroupConfigListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{11} }
 
 func (m *CrawlHostGroupConfigListReply) GetValue() []*CrawlHostGroupConfig {
 	if m != nil {
@@ -1097,7 +584,7 @@ type RunCrawlRequest struct {
 func (m *RunCrawlRequest) Reset()                    { *m = RunCrawlRequest{} }
 func (m *RunCrawlRequest) String() string            { return proto.CompactTextString(m) }
 func (*RunCrawlRequest) ProtoMessage()               {}
-func (*RunCrawlRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{13} }
+func (*RunCrawlRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{12} }
 
 func (m *RunCrawlRequest) GetJobId() string {
 	if m != nil {
@@ -1120,7 +607,7 @@ type RunCrawlReply struct {
 func (m *RunCrawlReply) Reset()                    { *m = RunCrawlReply{} }
 func (m *RunCrawlReply) String() string            { return proto.CompactTextString(m) }
 func (*RunCrawlReply) ProtoMessage()               {}
-func (*RunCrawlReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{14} }
+func (*RunCrawlReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{13} }
 
 func (m *RunCrawlReply) GetSeedExecutionId() []string {
 	if m != nil {
@@ -1136,7 +623,7 @@ type AbortCrawlRequest struct {
 func (m *AbortCrawlRequest) Reset()                    { *m = AbortCrawlRequest{} }
 func (m *AbortCrawlRequest) String() string            { return proto.CompactTextString(m) }
 func (*AbortCrawlRequest) ProtoMessage()               {}
-func (*AbortCrawlRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{15} }
+func (*AbortCrawlRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{14} }
 
 func (m *AbortCrawlRequest) GetExecutionId() string {
 	if m != nil {
@@ -1152,7 +639,7 @@ type RoleList struct {
 func (m *RoleList) Reset()                    { *m = RoleList{} }
 func (m *RoleList) String() string            { return proto.CompactTextString(m) }
 func (*RoleList) ProtoMessage()               {}
-func (*RoleList) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{16} }
+func (*RoleList) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{15} }
 
 func (m *RoleList) GetRole() []Role {
 	if m != nil {
@@ -1170,7 +657,7 @@ type RoleMappingsListRequest struct {
 func (m *RoleMappingsListRequest) Reset()                    { *m = RoleMappingsListRequest{} }
 func (m *RoleMappingsListRequest) String() string            { return proto.CompactTextString(m) }
 func (*RoleMappingsListRequest) ProtoMessage()               {}
-func (*RoleMappingsListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{17} }
+func (*RoleMappingsListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{16} }
 
 func (m *RoleMappingsListRequest) GetId() string {
 	if m != nil {
@@ -1203,7 +690,7 @@ type RoleMappingsListReply struct {
 func (m *RoleMappingsListReply) Reset()                    { *m = RoleMappingsListReply{} }
 func (m *RoleMappingsListReply) String() string            { return proto.CompactTextString(m) }
 func (*RoleMappingsListReply) ProtoMessage()               {}
-func (*RoleMappingsListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{18} }
+func (*RoleMappingsListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{17} }
 
 func (m *RoleMappingsListReply) GetValue() []*RoleMapping {
 	if m != nil {
@@ -1240,7 +727,7 @@ type OpenIdConnectIssuerReply struct {
 func (m *OpenIdConnectIssuerReply) Reset()                    { *m = OpenIdConnectIssuerReply{} }
 func (m *OpenIdConnectIssuerReply) String() string            { return proto.CompactTextString(m) }
 func (*OpenIdConnectIssuerReply) ProtoMessage()               {}
-func (*OpenIdConnectIssuerReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{19} }
+func (*OpenIdConnectIssuerReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{18} }
 
 func (m *OpenIdConnectIssuerReply) GetOpenIdConnectIssuer() string {
 	if m != nil {
@@ -1250,17 +737,16 @@ func (m *OpenIdConnectIssuerReply) GetOpenIdConnectIssuer() string {
 }
 
 func init() {
+	proto.RegisterType((*GetRequest)(nil), "veidemann.api.GetRequest")
 	proto.RegisterType((*ListRequest)(nil), "veidemann.api.ListRequest")
 	proto.RegisterType((*CrawlEntityListReply)(nil), "veidemann.api.CrawlEntityListReply")
 	proto.RegisterType((*SeedListRequest)(nil), "veidemann.api.SeedListRequest")
 	proto.RegisterType((*SeedListReply)(nil), "veidemann.api.SeedListReply")
-	proto.RegisterType((*CrawlJobListRequest)(nil), "veidemann.api.CrawlJobListRequest")
 	proto.RegisterType((*CrawlJobListReply)(nil), "veidemann.api.CrawlJobListReply")
 	proto.RegisterType((*CrawlConfigListReply)(nil), "veidemann.api.CrawlConfigListReply")
 	proto.RegisterType((*CrawlScheduleConfigListReply)(nil), "veidemann.api.CrawlScheduleConfigListReply")
 	proto.RegisterType((*PolitenessConfigListReply)(nil), "veidemann.api.PolitenessConfigListReply")
 	proto.RegisterType((*BrowserConfigListReply)(nil), "veidemann.api.BrowserConfigListReply")
-	proto.RegisterType((*BrowserScriptListRequest)(nil), "veidemann.api.BrowserScriptListRequest")
 	proto.RegisterType((*BrowserScriptListReply)(nil), "veidemann.api.BrowserScriptListReply")
 	proto.RegisterType((*CrawlHostGroupConfigListReply)(nil), "veidemann.api.CrawlHostGroupConfigListReply")
 	proto.RegisterType((*RunCrawlRequest)(nil), "veidemann.api.RunCrawlRequest")
@@ -1283,37 +769,59 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for Controller service
 
 type ControllerClient interface {
-	// List a set of entities
+	// Get a crawl entity by ID
+	GetCrawlEntity(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlEntity, error)
+	// List a set of crawl entities
 	ListCrawlEntities(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlEntityListReply, error)
+	// Save a crawl entity
 	SaveEntity(ctx context.Context, in *CrawlEntity, opts ...grpc.CallOption) (*CrawlEntity, error)
+	// Delete a crawl entity
 	DeleteEntity(ctx context.Context, in *CrawlEntity, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	// Get a seed by ID
+	GetSeed(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Seed, error)
 	// List a set of seeds
 	ListSeeds(ctx context.Context, in *SeedListRequest, opts ...grpc.CallOption) (*SeedListReply, error)
 	SaveSeed(ctx context.Context, in *Seed, opts ...grpc.CallOption) (*Seed, error)
 	DeleteSeed(ctx context.Context, in *Seed, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	// Get a crawl job by ID
+	GetCrawlJob(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlJob, error)
 	// List a set of crawl jobs
-	ListCrawlJobs(ctx context.Context, in *CrawlJobListRequest, opts ...grpc.CallOption) (*CrawlJobListReply, error)
+	ListCrawlJobs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlJobListReply, error)
 	SaveCrawlJob(ctx context.Context, in *CrawlJob, opts ...grpc.CallOption) (*CrawlJob, error)
 	DeleteCrawlJob(ctx context.Context, in *CrawlJob, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	// Get a crawl config by ID
+	GetCrawlConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlConfig, error)
 	// List a set of crawl configs
 	ListCrawlConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlConfigListReply, error)
 	SaveCrawlConfig(ctx context.Context, in *CrawlConfig, opts ...grpc.CallOption) (*CrawlConfig, error)
 	DeleteCrawlConfig(ctx context.Context, in *CrawlConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	// Get a crawl schedule config by ID
+	GetCrawlScheduleConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlScheduleConfig, error)
 	// List a set of crawl schedule configs
 	ListCrawlScheduleConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlScheduleConfigListReply, error)
 	SaveCrawlScheduleConfig(ctx context.Context, in *CrawlScheduleConfig, opts ...grpc.CallOption) (*CrawlScheduleConfig, error)
 	DeleteCrawlScheduleConfig(ctx context.Context, in *CrawlScheduleConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	// Get a politeness config by ID
+	GetPolitenessConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*PolitenessConfig, error)
 	// List a set of politeness configs
 	ListPolitenessConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*PolitenessConfigListReply, error)
 	SavePolitenessConfig(ctx context.Context, in *PolitenessConfig, opts ...grpc.CallOption) (*PolitenessConfig, error)
 	DeletePolitenessConfig(ctx context.Context, in *PolitenessConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	// Get a browser config by ID
+	GetBrowserConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*BrowserConfig, error)
 	// List a set of browser configs
 	ListBrowserConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*BrowserConfigListReply, error)
 	SaveBrowserConfig(ctx context.Context, in *BrowserConfig, opts ...grpc.CallOption) (*BrowserConfig, error)
 	DeleteBrowserConfig(ctx context.Context, in *BrowserConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
-	ListBrowserScripts(ctx context.Context, in *BrowserScriptListRequest, opts ...grpc.CallOption) (*BrowserScriptListReply, error)
+	// Get a browser script by ID
+	GetBrowserScript(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*BrowserScript, error)
+	// List a set of browser scripts
+	ListBrowserScripts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*BrowserScriptListReply, error)
 	SaveBrowserScript(ctx context.Context, in *BrowserScript, opts ...grpc.CallOption) (*BrowserScript, error)
 	DeleteBrowserScript(ctx context.Context, in *BrowserScript, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	// Get a crawl host group config by ID
+	GetCrawlHostGroupConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlHostGroupConfig, error)
+	// List a set of crawl host group configs
 	ListCrawlHostGroupConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlHostGroupConfigListReply, error)
 	SaveCrawlHostGroupConfig(ctx context.Context, in *CrawlHostGroupConfig, opts ...grpc.CallOption) (*CrawlHostGroupConfig, error)
 	DeleteCrawlHostGroupConfig(ctx context.Context, in *CrawlHostGroupConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
@@ -1325,6 +833,7 @@ type ControllerClient interface {
 	GetRolesForActiveUser(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*RoleList, error)
 	RunCrawl(ctx context.Context, in *RunCrawlRequest, opts ...grpc.CallOption) (*RunCrawlReply, error)
 	AbortCrawl(ctx context.Context, in *AbortCrawlRequest, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	// Get the configured OpenID connect issuer address
 	GetOpenIdConnectIssuer(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*OpenIdConnectIssuerReply, error)
 }
 
@@ -1334,6 +843,15 @@ type controllerClient struct {
 
 func NewControllerClient(cc *grpc.ClientConn) ControllerClient {
 	return &controllerClient{cc}
+}
+
+func (c *controllerClient) GetCrawlEntity(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlEntity, error) {
+	out := new(CrawlEntity)
+	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlEntity", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *controllerClient) ListCrawlEntities(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlEntityListReply, error) {
@@ -1357,6 +875,15 @@ func (c *controllerClient) SaveEntity(ctx context.Context, in *CrawlEntity, opts
 func (c *controllerClient) DeleteEntity(ctx context.Context, in *CrawlEntity, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
 	out := new(google_protobuf1.Empty)
 	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteEntity", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetSeed(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Seed, error) {
+	out := new(Seed)
+	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetSeed", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1390,7 +917,16 @@ func (c *controllerClient) DeleteSeed(ctx context.Context, in *Seed, opts ...grp
 	return out, nil
 }
 
-func (c *controllerClient) ListCrawlJobs(ctx context.Context, in *CrawlJobListRequest, opts ...grpc.CallOption) (*CrawlJobListReply, error) {
+func (c *controllerClient) GetCrawlJob(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlJob, error) {
+	out := new(CrawlJob)
+	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlJob", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListCrawlJobs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlJobListReply, error) {
 	out := new(CrawlJobListReply)
 	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlJobs", in, out, c.cc, opts...)
 	if err != nil {
@@ -1411,6 +947,15 @@ func (c *controllerClient) SaveCrawlJob(ctx context.Context, in *CrawlJob, opts 
 func (c *controllerClient) DeleteCrawlJob(ctx context.Context, in *CrawlJob, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
 	out := new(google_protobuf1.Empty)
 	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlJob", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetCrawlConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlConfig, error) {
+	out := new(CrawlConfig)
+	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlConfig", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1444,6 +989,15 @@ func (c *controllerClient) DeleteCrawlConfig(ctx context.Context, in *CrawlConfi
 	return out, nil
 }
 
+func (c *controllerClient) GetCrawlScheduleConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlScheduleConfig, error) {
+	out := new(CrawlScheduleConfig)
+	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlScheduleConfig", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controllerClient) ListCrawlScheduleConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlScheduleConfigListReply, error) {
 	out := new(CrawlScheduleConfigListReply)
 	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlScheduleConfigs", in, out, c.cc, opts...)
@@ -1465,6 +1019,15 @@ func (c *controllerClient) SaveCrawlScheduleConfig(ctx context.Context, in *Craw
 func (c *controllerClient) DeleteCrawlScheduleConfig(ctx context.Context, in *CrawlScheduleConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
 	out := new(google_protobuf1.Empty)
 	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlScheduleConfig", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetPolitenessConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*PolitenessConfig, error) {
+	out := new(PolitenessConfig)
+	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetPolitenessConfig", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1498,6 +1061,15 @@ func (c *controllerClient) DeletePolitenessConfig(ctx context.Context, in *Polit
 	return out, nil
 }
 
+func (c *controllerClient) GetBrowserConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*BrowserConfig, error) {
+	out := new(BrowserConfig)
+	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetBrowserConfig", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controllerClient) ListBrowserConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*BrowserConfigListReply, error) {
 	out := new(BrowserConfigListReply)
 	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListBrowserConfigs", in, out, c.cc, opts...)
@@ -1525,7 +1097,16 @@ func (c *controllerClient) DeleteBrowserConfig(ctx context.Context, in *BrowserC
 	return out, nil
 }
 
-func (c *controllerClient) ListBrowserScripts(ctx context.Context, in *BrowserScriptListRequest, opts ...grpc.CallOption) (*BrowserScriptListReply, error) {
+func (c *controllerClient) GetBrowserScript(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*BrowserScript, error) {
+	out := new(BrowserScript)
+	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetBrowserScript", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) ListBrowserScripts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*BrowserScriptListReply, error) {
 	out := new(BrowserScriptListReply)
 	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListBrowserScripts", in, out, c.cc, opts...)
 	if err != nil {
@@ -1546,6 +1127,15 @@ func (c *controllerClient) SaveBrowserScript(ctx context.Context, in *BrowserScr
 func (c *controllerClient) DeleteBrowserScript(ctx context.Context, in *BrowserScript, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
 	out := new(google_protobuf1.Empty)
 	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteBrowserScript", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controllerClient) GetCrawlHostGroupConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlHostGroupConfig, error) {
+	out := new(CrawlHostGroupConfig)
+	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlHostGroupConfig", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1663,37 +1253,59 @@ func (c *controllerClient) GetOpenIdConnectIssuer(ctx context.Context, in *googl
 // Server API for Controller service
 
 type ControllerServer interface {
-	// List a set of entities
+	// Get a crawl entity by ID
+	GetCrawlEntity(context.Context, *GetRequest) (*CrawlEntity, error)
+	// List a set of crawl entities
 	ListCrawlEntities(context.Context, *ListRequest) (*CrawlEntityListReply, error)
+	// Save a crawl entity
 	SaveEntity(context.Context, *CrawlEntity) (*CrawlEntity, error)
+	// Delete a crawl entity
 	DeleteEntity(context.Context, *CrawlEntity) (*google_protobuf1.Empty, error)
+	// Get a seed by ID
+	GetSeed(context.Context, *GetRequest) (*Seed, error)
 	// List a set of seeds
 	ListSeeds(context.Context, *SeedListRequest) (*SeedListReply, error)
 	SaveSeed(context.Context, *Seed) (*Seed, error)
 	DeleteSeed(context.Context, *Seed) (*google_protobuf1.Empty, error)
+	// Get a crawl job by ID
+	GetCrawlJob(context.Context, *GetRequest) (*CrawlJob, error)
 	// List a set of crawl jobs
-	ListCrawlJobs(context.Context, *CrawlJobListRequest) (*CrawlJobListReply, error)
+	ListCrawlJobs(context.Context, *ListRequest) (*CrawlJobListReply, error)
 	SaveCrawlJob(context.Context, *CrawlJob) (*CrawlJob, error)
 	DeleteCrawlJob(context.Context, *CrawlJob) (*google_protobuf1.Empty, error)
+	// Get a crawl config by ID
+	GetCrawlConfig(context.Context, *GetRequest) (*CrawlConfig, error)
 	// List a set of crawl configs
 	ListCrawlConfigs(context.Context, *ListRequest) (*CrawlConfigListReply, error)
 	SaveCrawlConfig(context.Context, *CrawlConfig) (*CrawlConfig, error)
 	DeleteCrawlConfig(context.Context, *CrawlConfig) (*google_protobuf1.Empty, error)
+	// Get a crawl schedule config by ID
+	GetCrawlScheduleConfig(context.Context, *GetRequest) (*CrawlScheduleConfig, error)
 	// List a set of crawl schedule configs
 	ListCrawlScheduleConfigs(context.Context, *ListRequest) (*CrawlScheduleConfigListReply, error)
 	SaveCrawlScheduleConfig(context.Context, *CrawlScheduleConfig) (*CrawlScheduleConfig, error)
 	DeleteCrawlScheduleConfig(context.Context, *CrawlScheduleConfig) (*google_protobuf1.Empty, error)
+	// Get a politeness config by ID
+	GetPolitenessConfig(context.Context, *GetRequest) (*PolitenessConfig, error)
 	// List a set of politeness configs
 	ListPolitenessConfigs(context.Context, *ListRequest) (*PolitenessConfigListReply, error)
 	SavePolitenessConfig(context.Context, *PolitenessConfig) (*PolitenessConfig, error)
 	DeletePolitenessConfig(context.Context, *PolitenessConfig) (*google_protobuf1.Empty, error)
+	// Get a browser config by ID
+	GetBrowserConfig(context.Context, *GetRequest) (*BrowserConfig, error)
 	// List a set of browser configs
 	ListBrowserConfigs(context.Context, *ListRequest) (*BrowserConfigListReply, error)
 	SaveBrowserConfig(context.Context, *BrowserConfig) (*BrowserConfig, error)
 	DeleteBrowserConfig(context.Context, *BrowserConfig) (*google_protobuf1.Empty, error)
-	ListBrowserScripts(context.Context, *BrowserScriptListRequest) (*BrowserScriptListReply, error)
+	// Get a browser script by ID
+	GetBrowserScript(context.Context, *GetRequest) (*BrowserScript, error)
+	// List a set of browser scripts
+	ListBrowserScripts(context.Context, *ListRequest) (*BrowserScriptListReply, error)
 	SaveBrowserScript(context.Context, *BrowserScript) (*BrowserScript, error)
 	DeleteBrowserScript(context.Context, *BrowserScript) (*google_protobuf1.Empty, error)
+	// Get a crawl host group config by ID
+	GetCrawlHostGroupConfig(context.Context, *GetRequest) (*CrawlHostGroupConfig, error)
+	// List a set of crawl host group configs
 	ListCrawlHostGroupConfigs(context.Context, *ListRequest) (*CrawlHostGroupConfigListReply, error)
 	SaveCrawlHostGroupConfig(context.Context, *CrawlHostGroupConfig) (*CrawlHostGroupConfig, error)
 	DeleteCrawlHostGroupConfig(context.Context, *CrawlHostGroupConfig) (*google_protobuf1.Empty, error)
@@ -1705,11 +1317,30 @@ type ControllerServer interface {
 	GetRolesForActiveUser(context.Context, *google_protobuf1.Empty) (*RoleList, error)
 	RunCrawl(context.Context, *RunCrawlRequest) (*RunCrawlReply, error)
 	AbortCrawl(context.Context, *AbortCrawlRequest) (*google_protobuf1.Empty, error)
+	// Get the configured OpenID connect issuer address
 	GetOpenIdConnectIssuer(context.Context, *google_protobuf1.Empty) (*OpenIdConnectIssuerReply, error)
 }
 
 func RegisterControllerServer(s *grpc.Server, srv ControllerServer) {
 	s.RegisterService(&_Controller_serviceDesc, srv)
+}
+
+func _Controller_GetCrawlEntity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetCrawlEntity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Controller/GetCrawlEntity",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetCrawlEntity(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Controller_ListCrawlEntities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -1762,6 +1393,24 @@ func _Controller_DeleteEntity_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).DeleteEntity(ctx, req.(*CrawlEntity))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetSeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetSeed(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Controller/GetSeed",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetSeed(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1820,8 +1469,26 @@ func _Controller_DeleteSeed_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_GetCrawlJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetCrawlJob(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Controller/GetCrawlJob",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetCrawlJob(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_ListCrawlJobs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CrawlJobListRequest)
+	in := new(ListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1833,7 +1500,7 @@ func _Controller_ListCrawlJobs_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/veidemann.api.Controller/ListCrawlJobs",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControllerServer).ListCrawlJobs(ctx, req.(*CrawlJobListRequest))
+		return srv.(ControllerServer).ListCrawlJobs(ctx, req.(*ListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1870,6 +1537,24 @@ func _Controller_DeleteCrawlJob_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).DeleteCrawlJob(ctx, req.(*CrawlJob))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetCrawlConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetCrawlConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Controller/GetCrawlConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetCrawlConfig(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1928,6 +1613,24 @@ func _Controller_DeleteCrawlConfig_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_GetCrawlScheduleConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetCrawlScheduleConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Controller/GetCrawlScheduleConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetCrawlScheduleConfig(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_ListCrawlScheduleConfigs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListRequest)
 	if err := dec(in); err != nil {
@@ -1978,6 +1681,24 @@ func _Controller_DeleteCrawlScheduleConfig_Handler(srv interface{}, ctx context.
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).DeleteCrawlScheduleConfig(ctx, req.(*CrawlScheduleConfig))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetPolitenessConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetPolitenessConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Controller/GetPolitenessConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetPolitenessConfig(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2036,6 +1757,24 @@ func _Controller_DeletePolitenessConfig_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_GetBrowserConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetBrowserConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Controller/GetBrowserConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetBrowserConfig(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_ListBrowserConfigs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListRequest)
 	if err := dec(in); err != nil {
@@ -2090,8 +1829,26 @@ func _Controller_DeleteBrowserConfig_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Controller_GetBrowserScript_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetBrowserScript(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Controller/GetBrowserScript",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetBrowserScript(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Controller_ListBrowserScripts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BrowserScriptListRequest)
+	in := new(ListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2103,7 +1860,7 @@ func _Controller_ListBrowserScripts_Handler(srv interface{}, ctx context.Context
 		FullMethod: "/veidemann.api.Controller/ListBrowserScripts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControllerServer).ListBrowserScripts(ctx, req.(*BrowserScriptListRequest))
+		return srv.(ControllerServer).ListBrowserScripts(ctx, req.(*ListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2140,6 +1897,24 @@ func _Controller_DeleteBrowserScript_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControllerServer).DeleteBrowserScript(ctx, req.(*BrowserScript))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Controller_GetCrawlHostGroupConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControllerServer).GetCrawlHostGroupConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Controller/GetCrawlHostGroupConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControllerServer).GetCrawlHostGroupConfig(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2365,6 +2140,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*ControllerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetCrawlEntity",
+			Handler:    _Controller_GetCrawlEntity_Handler,
+		},
+		{
 			MethodName: "ListCrawlEntities",
 			Handler:    _Controller_ListCrawlEntities_Handler,
 		},
@@ -2375,6 +2154,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteEntity",
 			Handler:    _Controller_DeleteEntity_Handler,
+		},
+		{
+			MethodName: "GetSeed",
+			Handler:    _Controller_GetSeed_Handler,
 		},
 		{
 			MethodName: "ListSeeds",
@@ -2389,6 +2172,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_DeleteSeed_Handler,
 		},
 		{
+			MethodName: "GetCrawlJob",
+			Handler:    _Controller_GetCrawlJob_Handler,
+		},
+		{
 			MethodName: "ListCrawlJobs",
 			Handler:    _Controller_ListCrawlJobs_Handler,
 		},
@@ -2399,6 +2186,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCrawlJob",
 			Handler:    _Controller_DeleteCrawlJob_Handler,
+		},
+		{
+			MethodName: "GetCrawlConfig",
+			Handler:    _Controller_GetCrawlConfig_Handler,
 		},
 		{
 			MethodName: "ListCrawlConfigs",
@@ -2413,6 +2204,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_DeleteCrawlConfig_Handler,
 		},
 		{
+			MethodName: "GetCrawlScheduleConfig",
+			Handler:    _Controller_GetCrawlScheduleConfig_Handler,
+		},
+		{
 			MethodName: "ListCrawlScheduleConfigs",
 			Handler:    _Controller_ListCrawlScheduleConfigs_Handler,
 		},
@@ -2423,6 +2218,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCrawlScheduleConfig",
 			Handler:    _Controller_DeleteCrawlScheduleConfig_Handler,
+		},
+		{
+			MethodName: "GetPolitenessConfig",
+			Handler:    _Controller_GetPolitenessConfig_Handler,
 		},
 		{
 			MethodName: "ListPolitenessConfigs",
@@ -2437,6 +2236,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_DeletePolitenessConfig_Handler,
 		},
 		{
+			MethodName: "GetBrowserConfig",
+			Handler:    _Controller_GetBrowserConfig_Handler,
+		},
+		{
 			MethodName: "ListBrowserConfigs",
 			Handler:    _Controller_ListBrowserConfigs_Handler,
 		},
@@ -2449,6 +2252,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Controller_DeleteBrowserConfig_Handler,
 		},
 		{
+			MethodName: "GetBrowserScript",
+			Handler:    _Controller_GetBrowserScript_Handler,
+		},
+		{
 			MethodName: "ListBrowserScripts",
 			Handler:    _Controller_ListBrowserScripts_Handler,
 		},
@@ -2459,6 +2266,10 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteBrowserScript",
 			Handler:    _Controller_DeleteBrowserScript_Handler,
+		},
+		{
+			MethodName: "GetCrawlHostGroupConfig",
+			Handler:    _Controller_GetCrawlHostGroupConfig_Handler,
 		},
 		{
 			MethodName: "ListCrawlHostGroupConfigs",
@@ -2516,87 +2327,123 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("controller.proto", fileDescriptor2) }
 
 var fileDescriptor2 = []byte{
-	// 1298 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x58, 0x4d, 0x73, 0xdb, 0x44,
-	0x18, 0x96, 0x9a, 0x38, 0x38, 0x6f, 0xec, 0xb8, 0xde, 0x24, 0xb6, 0xaa, 0xb6, 0x60, 0x54, 0xa0,
-	0xe6, 0xcb, 0x65, 0xd2, 0x69, 0x87, 0x4e, 0x4f, 0xb5, 0x9b, 0x26, 0x0e, 0xed, 0xb4, 0xc8, 0x53,
-	0x98, 0xb6, 0x07, 0x8f, 0x2d, 0xbd, 0x31, 0xea, 0x28, 0x5a, 0x55, 0x92, 0xd3, 0xa6, 0x37, 0x8e,
-	0x9c, 0x60, 0x86, 0x13, 0x27, 0x86, 0x19, 0xfe, 0x00, 0x47, 0xee, 0xfc, 0x1b, 0xfe, 0x04, 0xb3,
-	0xbb, 0x8e, 0x2d, 0xc9, 0x96, 0xac, 0x18, 0xc3, 0xcd, 0xda, 0xf7, 0x63, 0x9f, 0xe7, 0xd9, 0xd5,
-	0xee, 0x23, 0xc3, 0x45, 0x83, 0x3a, 0x81, 0x47, 0x6d, 0x1b, 0xbd, 0x86, 0xeb, 0xd1, 0x80, 0x92,
-	0xe2, 0x09, 0x5a, 0x26, 0x1e, 0xf7, 0x1c, 0xa7, 0xd1, 0x73, 0x2d, 0xb5, 0x60, 0x50, 0xe7, 0xc8,
-	0x1a, 0x88, 0xa0, 0x7a, 0x79, 0x40, 0xe9, 0xc0, 0xc6, 0x1b, 0xfc, 0xa9, 0x3f, 0x3c, 0xba, 0x81,
-	0xc7, 0x6e, 0x70, 0x2a, 0x82, 0xda, 0xef, 0x32, 0x6c, 0x3c, 0xb4, 0xfc, 0x40, 0xc7, 0x57, 0x43,
-	0xf4, 0x03, 0x72, 0x11, 0x2e, 0x58, 0xa6, 0x22, 0xd7, 0xe4, 0xfa, 0xfa, 0x81, 0xa4, 0x5f, 0xb0,
-	0x4c, 0xb2, 0x0d, 0xab, 0x4e, 0xef, 0x18, 0x95, 0x0b, 0xa3, 0x31, 0xfe, 0x44, 0x6e, 0x41, 0xde,
-	0x47, 0x1b, 0x8d, 0x80, 0x7a, 0xca, 0x4a, 0x4d, 0xae, 0x6f, 0xec, 0x56, 0x1b, 0x11, 0x10, 0x8d,
-	0xce, 0x28, 0x7c, 0x20, 0xe9, 0xe3, 0x54, 0x72, 0x19, 0xd6, 0xdd, 0xde, 0x00, 0xbb, 0xbe, 0xf5,
-	0x16, 0x95, 0xcd, 0x9a, 0x5c, 0xcf, 0xe9, 0x79, 0x36, 0xd0, 0xb1, 0xde, 0x22, 0x21, 0xb0, 0xca,
-	0x7e, 0x2b, 0x25, 0x3e, 0xce, 0x7f, 0x37, 0x73, 0xb0, 0xf2, 0xca, 0x3b, 0xd5, 0x7e, 0x94, 0x61,
-	0xbb, 0xe5, 0xf5, 0x5e, 0xdb, 0x7b, 0x4e, 0x60, 0x05, 0xa7, 0x02, 0xb1, 0x6b, 0x9f, 0x92, 0x2f,
-	0x20, 0x77, 0xd2, 0xb3, 0x87, 0xa8, 0xc8, 0xb5, 0x95, 0xfa, 0xc6, 0xae, 0x1a, 0x03, 0x11, 0xaa,
-	0xd1, 0x45, 0x22, 0xd9, 0x86, 0x9c, 0x41, 0x87, 0x4e, 0xc0, 0x09, 0xad, 0xe8, 0xe2, 0xe1, 0xdc,
-	0xc0, 0xb4, 0xbf, 0x65, 0x28, 0x75, 0x10, 0xcd, 0x45, 0xc4, 0xd3, 0xa0, 0x60, 0x30, 0x60, 0xdd,
-	0x97, 0xb4, 0xdf, 0xb5, 0x4c, 0x2e, 0x20, 0x8b, 0x02, 0x1f, 0x3d, 0xa4, 0xfd, 0xb6, 0x19, 0x11,
-	0x78, 0x35, 0xbb, 0xc0, 0x57, 0x61, 0x1d, 0x39, 0x5d, 0xd6, 0x37, 0x37, 0xea, 0x9b, 0x17, 0x43,
-	0x6d, 0x73, 0x61, 0xfd, 0xbf, 0x97, 0xa1, 0x38, 0x61, 0xcb, 0x84, 0xff, 0x38, 0x2a, 0xfc, 0xd6,
-	0x14, 0x38, 0x34, 0x97, 0xac, 0xf8, 0x5f, 0x32, 0x6c, 0xb5, 0x46, 0x02, 0xfd, 0x8f, 0x5b, 0xb6,
-	0x02, 0x6b, 0xf8, 0xc6, 0xed, 0x39, 0xa6, 0x52, 0xac, 0xc9, 0xf5, 0xbc, 0x3e, 0x7a, 0x5a, 0x58,
-	0xca, 0x1f, 0x64, 0x28, 0x47, 0x69, 0x30, 0x39, 0x3f, 0x8f, 0xca, 0x59, 0x9d, 0xb5, 0x8f, 0x0f,
-	0x69, 0x7f, 0xc9, 0x92, 0x8e, 0x5f, 0xab, 0x16, 0x3f, 0x30, 0xce, 0xf7, 0x5a, 0x89, 0x9a, 0x25,
-	0x23, 0xfa, 0x55, 0x86, 0x2b, 0xbc, 0x7b, 0xc7, 0xf8, 0x0e, 0xcd, 0xa1, 0x8d, 0x71, 0x64, 0x5f,
-	0x46, 0x91, 0x69, 0xb3, 0x90, 0x45, 0x6b, 0x97, 0x8c, 0xf0, 0x17, 0x19, 0x2e, 0x3d, 0xa1, 0xb6,
-	0x15, 0xa0, 0x83, 0xbe, 0x1f, 0x87, 0x77, 0x2b, 0x0a, 0xef, 0xbd, 0x18, 0xbc, 0x78, 0xe1, 0x92,
-	0xb1, 0xfd, 0x2c, 0x43, 0xa5, 0xe9, 0xd1, 0xd7, 0x3e, 0x7a, 0x71, 0x60, 0xbb, 0x51, 0x60, 0x57,
-	0x62, 0xc0, 0x22, 0x55, 0x4b, 0x46, 0xf5, 0x87, 0x0c, 0xca, 0xa8, 0x7f, 0xc7, 0xf0, 0x2c, 0x37,
-	0xf8, 0xb7, 0x6f, 0xef, 0xea, 0x7f, 0x7f, 0xe1, 0x84, 0x94, 0x0c, 0x63, 0xce, 0xae, 0xa4, 0xa8,
-	0x5a, 0xb2, 0x92, 0xbf, 0xc9, 0x70, 0x95, 0xef, 0xf0, 0x03, 0xea, 0x07, 0xfb, 0x1e, 0x1d, 0xba,
-	0xf1, 0x65, 0xbe, 0x13, 0x05, 0x77, 0x6d, 0xd6, 0xeb, 0x11, 0x2b, 0x5e, 0x32, 0xc6, 0x7b, 0x50,
-	0xd2, 0x87, 0x0e, 0x9f, 0xe8, 0x6c, 0x8d, 0x77, 0x60, 0x6d, 0x74, 0xd3, 0xf1, 0x1b, 0x49, 0xcf,
-	0xbd, 0xe4, 0x57, 0x5c, 0x15, 0xde, 0xf1, 0x11, 0x4d, 0x36, 0xbe, 0xc6, 0xc7, 0xd7, 0xd8, 0x63,
-	0xdb, 0xd4, 0xee, 0x42, 0x71, 0xd2, 0x82, 0xb1, 0xfa, 0x04, 0xca, 0x3c, 0x13, 0xdf, 0xa0, 0x31,
-	0x0c, 0x2c, 0xea, 0x74, 0xf9, 0x9e, 0x59, 0xa9, 0xaf, 0xeb, 0x25, 0x16, 0xd8, 0x3b, 0x1b, 0x6f,
-	0x9b, 0xda, 0x6d, 0x28, 0xdf, 0xeb, 0x53, 0x2f, 0x88, 0x20, 0x78, 0x1f, 0x0a, 0xb1, 0x5a, 0x36,
-	0xdf, 0x06, 0x86, 0xea, 0x6e, 0x42, 0x5e, 0xa7, 0x36, 0x32, 0x29, 0xc9, 0x75, 0x58, 0xf5, 0xa8,
-	0x2d, 0x44, 0xdc, 0x9c, 0xba, 0xdb, 0x58, 0x9a, 0xce, 0x13, 0xb4, 0xe7, 0x50, 0x65, 0x4f, 0x8f,
-	0x7a, 0xae, 0x6b, 0x39, 0x03, 0x3f, 0xbc, 0xb1, 0x37, 0x27, 0x1b, 0x9b, 0x6f, 0xeb, 0x73, 0x0b,
-	0xf9, 0x93, 0x0c, 0x3b, 0xd3, 0xcd, 0x33, 0x9c, 0xce, 0xa1, 0xa2, 0x25, 0xaf, 0xed, 0x63, 0x50,
-	0x1e, 0xbb, 0xe8, 0xb4, 0xcd, 0x16, 0x75, 0x1c, 0x34, 0x82, 0xb6, 0xef, 0x0f, 0xd1, 0x13, 0xa0,
-	0x6e, 0x42, 0x85, 0xba, 0xc8, 0xd4, 0xed, 0x1a, 0x22, 0xda, 0xb5, 0x78, 0x78, 0xa4, 0xc1, 0x16,
-	0x9d, 0xae, 0xdc, 0xfd, 0xb3, 0x0a, 0xd0, 0x1a, 0xbb, 0x59, 0xf2, 0x0d, 0x94, 0x19, 0xcb, 0x89,
-	0x6b, 0xb3, 0xd0, 0x27, 0x71, 0x7a, 0x21, 0x91, 0xd5, 0x6b, 0xc9, 0x7e, 0x6f, 0x2c, 0x97, 0x26,
-	0x91, 0x07, 0x00, 0x9d, 0xde, 0x09, 0x8a, 0x00, 0x49, 0x31, 0x89, 0x6a, 0x4a, 0x4c, 0x93, 0xc8,
-	0x7d, 0x28, 0xdc, 0x47, 0x1b, 0x83, 0x2c, 0x9d, 0x2a, 0x0d, 0xe1, 0xbb, 0x1b, 0x67, 0xbe, 0xbb,
-	0xb1, 0xc7, 0x7c, 0xb7, 0x26, 0x91, 0xaf, 0x60, 0x9d, 0x81, 0x63, 0x16, 0xc9, 0x27, 0xef, 0xce,
-	0x30, 0x4e, 0x61, 0x86, 0x57, 0x12, 0xe3, 0x82, 0xda, 0x6d, 0xc8, 0x33, 0x6a, 0x6c, 0x98, 0xcc,
-	0x32, 0x61, 0xea, 0xac, 0x41, 0x4d, 0x22, 0x77, 0x01, 0x04, 0x95, 0xe4, 0xca, 0x64, 0x06, 0xdf,
-	0x42, 0x71, 0xbc, 0x4e, 0x87, 0xb4, 0xef, 0x13, 0x2d, 0xc1, 0xaf, 0x84, 0x99, 0xd4, 0x52, 0x73,
-	0x04, 0x9b, 0x26, 0x14, 0x18, 0x9b, 0xb3, 0x10, 0x49, 0xf2, 0x41, 0x6a, 0x52, 0x40, 0x93, 0x48,
-	0x0b, 0x36, 0x05, 0xb3, 0xf9, 0x5d, 0x92, 0x19, 0x3e, 0x85, 0x8b, 0x63, 0x86, 0xe2, 0x98, 0x5c,
-	0x60, 0x23, 0xc6, 0x0e, 0x67, 0xbe, 0xf4, 0xa5, 0x31, 0x3f, 0x11, 0x25, 0x29, 0xde, 0x4a, 0x4d,
-	0x89, 0x69, 0x12, 0x69, 0x43, 0x39, 0x44, 0x34, 0x43, 0xbb, 0x64, 0xba, 0x08, 0xca, 0x98, 0x6e,
-	0xd4, 0x3d, 0xa5, 0xd3, 0xfe, 0x74, 0xbe, 0xfd, 0x0a, 0xd3, 0x37, 0xa0, 0x3a, 0xa6, 0x1f, 0xcd,
-	0x22, 0x19, 0x8c, 0x9c, 0x9a, 0x21, 0x47, 0x93, 0xc8, 0x33, 0xb8, 0x14, 0x92, 0x65, 0x81, 0x69,
-	0x92, 0x65, 0xea, 0xc2, 0x0e, 0xa3, 0x13, 0x77, 0x71, 0xe9, 0x1a, 0xd5, 0xe7, 0x78, 0xc0, 0xb0,
-	0x40, 0xcf, 0x61, 0x9b, 0x09, 0x14, 0x4f, 0x21, 0xf3, 0x7c, 0xa4, 0x3a, 0x2f, 0x41, 0x93, 0x48,
-	0x07, 0x2a, 0x42, 0x97, 0xf3, 0x77, 0x4f, 0x56, 0xe4, 0x19, 0x10, 0x86, 0x3f, 0x62, 0x1f, 0xd3,
-	0xe5, 0xf8, 0x30, 0xcd, 0x79, 0x86, 0xb5, 0xf8, 0x1a, 0xca, 0x4c, 0x8b, 0x48, 0x9c, 0xa4, 0xfa,
-	0x56, 0x35, 0x35, 0xaa, 0x49, 0xe4, 0x11, 0x6c, 0x09, 0x09, 0xce, 0xd3, 0x34, 0x99, 0xfc, 0x51,
-	0x84, 0xbc, 0x70, 0x7c, 0x3e, 0xb9, 0x9e, 0x66, 0x08, 0x33, 0x28, 0x11, 0xf3, 0x9b, 0x53, 0x4a,
-	0x88, 0x38, 0x49, 0xf5, 0x9d, 0x6a, 0x6a, 0x74, 0x86, 0x12, 0x99, 0x9a, 0x26, 0x2b, 0x31, 0x80,
-	0x4b, 0xe3, 0xf3, 0x23, 0x66, 0x2f, 0xd3, 0x77, 0xc3, 0x67, 0x19, 0x0c, 0x6a, 0x58, 0x8a, 0x23,
-	0x50, 0xc6, 0x27, 0x48, 0x2c, 0x8d, 0x64, 0x31, 0xbb, 0x6a, 0x96, 0x24, 0x4d, 0x22, 0x2f, 0x40,
-	0x0d, 0x1d, 0x22, 0x0b, 0xcd, 0x94, 0xac, 0x56, 0x13, 0x0a, 0xfb, 0x18, 0x3c, 0xa4, 0x83, 0x51,
-	0xbb, 0x84, 0x4c, 0x55, 0x89, 0x0b, 0x47, 0x07, 0x0f, 0xf1, 0x04, 0x6d, 0x5f, 0x93, 0xc8, 0x1e,
-	0x14, 0x99, 0x10, 0x93, 0x26, 0x89, 0xc9, 0xa9, 0x6d, 0xfa, 0xe2, 0x9e, 0x0b, 0xfb, 0x4c, 0xf2,
-	0x51, 0xb2, 0x9f, 0x0c, 0x3b, 0x5c, 0xf5, 0x83, 0xb9, 0x79, 0x91, 0x4b, 0x2f, 0x14, 0x26, 0x29,
-	0x96, 0x55, 0x4d, 0x89, 0x85, 0x2f, 0xbd, 0xac, 0xed, 0x92, 0x97, 0xe1, 0x10, 0x76, 0xf6, 0x91,
-	0x53, 0xf7, 0x1f, 0x50, 0xef, 0x9e, 0x11, 0x58, 0x27, 0xf8, 0xd4, 0x47, 0x2f, 0x71, 0x3d, 0xaa,
-	0x33, 0xa6, 0x61, 0x44, 0x79, 0xaf, 0xfc, 0xd9, 0x27, 0xcb, 0x94, 0xa5, 0x8b, 0x7d, 0x0e, 0x4d,
-	0xbd, 0x9b, 0x91, 0x6f, 0x1d, 0x4d, 0x22, 0x07, 0x00, 0x93, 0x2f, 0x18, 0x12, 0xb7, 0x4d, 0x53,
-	0x1f, 0x37, 0x29, 0x0c, 0x5f, 0x40, 0x65, 0x1f, 0x83, 0x19, 0x96, 0x3d, 0x91, 0x62, 0xfc, 0xf0,
-	0x4a, 0xb2, 0xfb, 0x9a, 0xd4, 0xbc, 0x03, 0x55, 0x87, 0x36, 0x9c, 0x7e, 0xc3, 0x71, 0x7a, 0xd1,
-	0xaa, 0x66, 0x69, 0xe2, 0xe9, 0x9f, 0xb0, 0xfe, 0xcf, 0x27, 0x7f, 0x50, 0x77, 0x7b, 0xae, 0xd5,
-	0x5f, 0xe3, 0xb3, 0xde, 0xfc, 0x27, 0x00, 0x00, 0xff, 0xff, 0x6e, 0x8a, 0x61, 0xfe, 0xca, 0x16,
-	0x00, 0x00,
+	// 1879 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x5a, 0x5b, 0x6f, 0xdb, 0x46,
+	0x16, 0x06, 0x7d, 0x8b, 0x7d, 0x7c, 0x1f, 0x5f, 0x24, 0xd3, 0x4e, 0xa2, 0x8c, 0x63, 0xc7, 0x51,
+	0x6c, 0x29, 0xb0, 0x91, 0xc5, 0x6e, 0x82, 0x7d, 0x70, 0xbc, 0x59, 0xad, 0x8d, 0x04, 0x09, 0x24,
+	0x24, 0xc0, 0x7a, 0x81, 0xd5, 0x52, 0xd2, 0x58, 0xa6, 0x97, 0xe6, 0x30, 0x24, 0x65, 0x6f, 0xb2,
+	0xbb, 0x01, 0xda, 0x22, 0x08, 0x92, 0x87, 0xde, 0xd2, 0x97, 0xf6, 0xa1, 0x45, 0x7f, 0x40, 0xff,
+	0x41, 0x5f, 0xfa, 0xde, 0xb7, 0xfe, 0x84, 0xf6, 0x87, 0x14, 0x33, 0xa4, 0x44, 0xf1, 0x36, 0xa4,
+	0x0c, 0xe5, 0x29, 0x16, 0x67, 0xe6, 0x7c, 0xdf, 0xf9, 0xce, 0xc7, 0xe1, 0xcc, 0x41, 0x60, 0xa6,
+	0x4e, 0x75, 0xdb, 0xa4, 0x9a, 0x46, 0xcc, 0x82, 0x61, 0x52, 0x9b, 0xa2, 0xc9, 0x33, 0xa2, 0x36,
+	0xc8, 0xa9, 0xa2, 0xeb, 0x05, 0xc5, 0x50, 0xe5, 0x89, 0x3a, 0xd5, 0x8f, 0xd4, 0xa6, 0x33, 0x28,
+	0x2f, 0x37, 0x29, 0x6d, 0x6a, 0xa4, 0xc8, 0x7f, 0xd5, 0x5a, 0x47, 0x45, 0x72, 0x6a, 0xd8, 0x2f,
+	0xdc, 0xc1, 0x15, 0x77, 0x50, 0x31, 0xd4, 0xa2, 0xa2, 0xeb, 0xd4, 0x56, 0x6c, 0x95, 0xea, 0x96,
+	0x3b, 0xba, 0xc9, 0xff, 0xa9, 0x6f, 0x35, 0x89, 0xbe, 0x65, 0x9d, 0x2b, 0xcd, 0x26, 0x31, 0x8b,
+	0xd4, 0xe0, 0x33, 0xc2, 0xb3, 0xf1, 0x0a, 0x40, 0x89, 0xd8, 0x65, 0xf2, 0xbc, 0x45, 0x2c, 0x1b,
+	0x4d, 0xc1, 0x80, 0xda, 0xc8, 0x4a, 0x39, 0x69, 0x63, 0xac, 0x3c, 0xa0, 0x36, 0xf0, 0x5b, 0x09,
+	0xc6, 0x1f, 0xaa, 0x56, 0x68, 0x7c, 0xd0, 0x19, 0x47, 0x08, 0x86, 0x74, 0xe5, 0x94, 0x64, 0x07,
+	0xf8, 0x0a, 0xfe, 0x37, 0x5a, 0x83, 0x29, 0x4d, 0xa9, 0x11, 0xad, 0x6a, 0x11, 0x8d, 0xd4, 0x6d,
+	0x6a, 0x66, 0x07, 0xf9, 0xfc, 0x49, 0xfe, 0xb4, 0xe2, 0x3e, 0x44, 0xcb, 0x30, 0x66, 0x28, 0x4d,
+	0x52, 0xb5, 0xd4, 0x97, 0x24, 0x3b, 0x95, 0x93, 0x36, 0x86, 0xcb, 0xa3, 0xec, 0x41, 0x45, 0x7d,
+	0x49, 0x58, 0x5c, 0xf6, 0x77, 0x76, 0x9a, 0x3f, 0xe7, 0x7f, 0xe3, 0xcf, 0x24, 0x98, 0xdf, 0x33,
+	0x95, 0x73, 0xed, 0x81, 0x6e, 0xab, 0xf6, 0x0b, 0x87, 0x96, 0xa1, 0xbd, 0x40, 0xb7, 0x61, 0xf8,
+	0x4c, 0xd1, 0x5a, 0x84, 0xf3, 0x1a, 0xdf, 0x96, 0x0b, 0x3e, 0x61, 0x0b, 0x5d, 0x6b, 0xca, 0xce,
+	0x44, 0x34, 0x0f, 0xc3, 0x75, 0xda, 0xd2, 0x6d, 0xce, 0x7b, 0xb0, 0xec, 0xfc, 0xe8, 0x9d, 0xd1,
+	0xcf, 0x12, 0x4c, 0x57, 0x08, 0x69, 0x7c, 0x20, 0x85, 0x72, 0x30, 0x51, 0x67, 0xdc, 0xab, 0x27,
+	0xb4, 0x56, 0x55, 0x1b, 0xd9, 0x21, 0x1e, 0x02, 0xf8, 0xb3, 0x03, 0x5a, 0xdb, 0x6f, 0x30, 0xc6,
+	0x84, 0x27, 0xc6, 0x86, 0x87, 0xf9, 0xf0, 0xa8, 0xf3, 0xc0, 0x19, 0xec, 0x2d, 0x9d, 0x8f, 0x24,
+	0x98, 0xf4, 0xd2, 0x61, 0xca, 0xde, 0xf4, 0x2b, 0x3b, 0x17, 0x50, 0x96, 0x4d, 0xee, 0xb3, 0xa4,
+	0x6f, 0x25, 0x98, 0xdd, 0x73, 0x13, 0xf4, 0x78, 0x6c, 0xf9, 0x79, 0x64, 0xa2, 0x2a, 0x7c, 0x40,
+	0x6b, 0x7d, 0xe6, 0xd2, 0x31, 0xdc, 0x1e, 0x7f, 0x33, 0x7b, 0x33, 0x9c, 0xb3, 0xa6, 0xcf, 0x8c,
+	0xbe, 0x93, 0x60, 0x85, 0x47, 0xaf, 0xd4, 0x8f, 0x49, 0xa3, 0xa5, 0x91, 0x20, 0xb3, 0x3f, 0xfa,
+	0x99, 0xe1, 0x28, 0x66, 0xfe, 0xb5, 0x7d, 0x66, 0xf8, 0xb5, 0x04, 0x4b, 0x4f, 0xa8, 0xa6, 0xda,
+	0x44, 0x27, 0x96, 0x15, 0xa4, 0x77, 0xc7, 0x4f, 0xef, 0x6a, 0x80, 0x5e, 0x70, 0x61, 0x9f, 0xb9,
+	0xbd, 0x97, 0x60, 0xf1, 0xbe, 0x49, 0xcf, 0x2d, 0x62, 0x06, 0x89, 0x6d, 0xfb, 0x89, 0xad, 0x04,
+	0x88, 0xf9, 0x56, 0x7d, 0x38, 0x56, 0x95, 0xba, 0xa9, 0x1a, 0x76, 0xaf, 0xac, 0x9c, 0x55, 0x7d,
+	0x66, 0xf5, 0xbd, 0x04, 0x97, 0xb9, 0x5b, 0xfe, 0x46, 0x2d, 0xbb, 0x64, 0xd2, 0x96, 0x11, 0x94,
+	0xec, 0x4f, 0x7e, 0x72, 0xab, 0x51, 0x56, 0x0b, 0x2c, 0xee, 0x33, 0xc7, 0x5d, 0x98, 0x2e, 0xb7,
+	0x74, 0x0e, 0xd4, 0xde, 0x7d, 0x17, 0x60, 0xc4, 0xdd, 0x2c, 0x9d, 0xdd, 0x70, 0xf8, 0x84, 0xef,
+	0x93, 0x19, 0xb8, 0x64, 0x11, 0xd2, 0x60, 0xcf, 0x47, 0xf8, 0xf3, 0x11, 0xf6, 0x73, 0xbf, 0x81,
+	0xef, 0xc1, 0xa4, 0x17, 0x82, 0x65, 0x95, 0x87, 0x59, 0x3e, 0x93, 0xfc, 0x87, 0xd4, 0x5b, 0xec,
+	0x3b, 0x59, 0xed, 0xec, 0xe6, 0xd3, 0x6c, 0xe0, 0x41, 0xfb, 0xf9, 0x7e, 0x03, 0xff, 0x01, 0x66,
+	0x77, 0x6b, 0xd4, 0xb4, 0x7d, 0x0c, 0xae, 0xc1, 0x44, 0x60, 0x2d, 0xc3, 0x1b, 0x27, 0x5d, 0xeb,
+	0x76, 0x60, 0xb4, 0x4c, 0x35, 0xc2, 0xa4, 0x44, 0x37, 0x60, 0xc8, 0xa4, 0x9a, 0x23, 0xe2, 0x54,
+	0x68, 0x83, 0x65, 0xd3, 0xca, 0x7c, 0x02, 0x3e, 0x84, 0x0c, 0xfb, 0xf5, 0x48, 0x31, 0x0c, 0x55,
+	0x6f, 0x5a, 0x51, 0x9f, 0x1c, 0xf7, 0xa3, 0xdd, 0xbb, 0x90, 0x9f, 0x4b, 0xb0, 0x10, 0x0e, 0x9e,
+	0x62, 0xa7, 0xeb, 0x5a, 0xd4, 0xe7, 0xda, 0x3e, 0x86, 0xec, 0x63, 0x83, 0xe8, 0xfb, 0x8d, 0x3d,
+	0xaa, 0xeb, 0xa4, 0x6e, 0xef, 0x5b, 0x56, 0x8b, 0x98, 0x0e, 0xa9, 0x1d, 0x58, 0xa4, 0x06, 0x61,
+	0xea, 0x56, 0xeb, 0xce, 0x68, 0x55, 0xe5, 0xc3, 0xae, 0x06, 0x73, 0x34, 0xbc, 0x72, 0xfb, 0xd7,
+	0x4d, 0x80, 0xbd, 0xce, 0x11, 0x0c, 0xfd, 0x1b, 0xa6, 0x4a, 0xc4, 0xee, 0x3a, 0x1a, 0xa0, 0xa5,
+	0x40, 0x6e, 0xde, 0xa9, 0x48, 0x16, 0x9c, 0x28, 0x30, 0xfe, 0xf8, 0x97, 0xdf, 0xde, 0x0f, 0xac,
+	0x20, 0x99, 0x9f, 0xc6, 0xdc, 0x43, 0x5e, 0x91, 0x7f, 0x84, 0x55, 0x62, 0x15, 0xff, 0xab, 0x36,
+	0xfe, 0x8f, 0x2c, 0x98, 0x65, 0x92, 0x7a, 0xcb, 0x54, 0x62, 0xa1, 0x60, 0xd0, 0xae, 0x8a, 0xca,
+	0xab, 0xf1, 0x80, 0x9d, 0xda, 0xe0, 0xcb, 0x1c, 0x39, 0x83, 0x16, 0x22, 0x91, 0xd1, 0x1b, 0x09,
+	0xa0, 0xa2, 0x9c, 0x11, 0x37, 0x3d, 0x41, 0x0e, 0xc2, 0xfc, 0x76, 0x39, 0xca, 0x3d, 0x39, 0x1a,
+	0xe5, 0xae, 0x94, 0x3f, 0xbc, 0x8a, 0x05, 0xb9, 0xdf, 0x95, 0xf2, 0xe8, 0x08, 0x26, 0xfe, 0x42,
+	0x34, 0x62, 0xa7, 0xa1, 0xb2, 0x58, 0x70, 0xce, 0xb6, 0x85, 0xf6, 0xc1, 0xb7, 0xf0, 0x80, 0x1d,
+	0x7c, 0xdb, 0x32, 0xe7, 0x45, 0x32, 0x1f, 0xc2, 0xa5, 0x12, 0xb1, 0xd9, 0xa1, 0x44, 0x54, 0xcc,
+	0xa8, 0x43, 0x0c, 0xbe, 0xca, 0xc3, 0x2f, 0xa1, 0x8c, 0x2f, 0x3c, 0x7b, 0xe1, 0xdd, 0xd8, 0x04,
+	0xc6, 0x98, 0xf2, 0x6c, 0xb2, 0x85, 0xae, 0x44, 0x84, 0xe8, 0x2e, 0xdf, 0x4a, 0xec, 0x38, 0xab,
+	0x9b, 0xcc, 0xb1, 0xe6, 0x11, 0x0a, 0x63, 0xa1, 0xe7, 0x30, 0xca, 0x6a, 0xc6, 0x73, 0x88, 0x22,
+	0x1a, 0xcd, 0xfe, 0x1e, 0x8f, 0x78, 0x47, 0x8e, 0x88, 0xc8, 0x0a, 0xb4, 0x82, 0xe3, 0xd2, 0x62,
+	0xd5, 0x39, 0x04, 0x70, 0xaa, 0x13, 0x0f, 0x1a, 0x57, 0x14, 0x57, 0xb5, 0x7c, 0xac, 0x6a, 0x47,
+	0x30, 0xde, 0x7e, 0xcb, 0x0e, 0x68, 0x4d, 0x54, 0x95, 0xb8, 0x23, 0x1d, 0x5e, 0xe5, 0x18, 0x97,
+	0xd1, 0xb2, 0x0f, 0x83, 0x9f, 0x81, 0x4f, 0x68, 0xcd, 0xc5, 0x39, 0x85, 0xc9, 0xce, 0x0b, 0x76,
+	0x40, 0x6b, 0xe2, 0x97, 0x2b, 0x17, 0x03, 0xe5, 0x55, 0xe8, 0x0a, 0xc7, 0xcc, 0xa2, 0xc5, 0x68,
+	0x4c, 0xf4, 0x5a, 0x82, 0x09, 0x56, 0xa6, 0x4e, 0x62, 0x71, 0xec, 0xe3, 0xd3, 0xda, 0xe3, 0x10,
+	0x7f, 0x96, 0x63, 0x20, 0x58, 0xd9, 0x72, 0x58, 0x94, 0xb3, 0xf3, 0x62, 0x4d, 0x39, 0xa5, 0x4b,
+	0x26, 0x12, 0x57, 0x42, 0x57, 0xde, 0xbc, 0x50, 0x5e, 0xea, 0x6d, 0x96, 0xce, 0x87, 0xbc, 0xe7,
+	0xcd, 0xd2, 0x59, 0x86, 0xd7, 0x39, 0x5a, 0x0e, 0x5d, 0x09, 0xa3, 0x39, 0xb7, 0x5f, 0x17, 0xf0,
+	0x0c, 0x66, 0x3a, 0xf5, 0x74, 0x96, 0x5e, 0x60, 0xbf, 0x0c, 0x1c, 0x58, 0xf0, 0x35, 0x0e, 0xbe,
+	0x8c, 0x96, 0x62, 0xc1, 0xd1, 0x57, 0xec, 0x42, 0xd7, 0x2e, 0xac, 0x9b, 0xaa, 0x20, 0x1f, 0x61,
+	0xae, 0xfb, 0x1c, 0x6e, 0x4f, 0x8e, 0x87, 0x63, 0x45, 0x5e, 0xc5, 0x09, 0x5a, 0xb0, 0x3a, 0x53,
+	0x98, 0xed, 0xaa, 0x73, 0x0a, 0x5e, 0x71, 0xd5, 0x76, 0xf5, 0xcf, 0x27, 0xe9, 0xff, 0x46, 0x82,
+	0xc5, 0x76, 0xc5, 0xfd, 0xd7, 0x05, 0x51, 0xe5, 0x53, 0xdc, 0x36, 0x70, 0x81, 0x33, 0xd8, 0x40,
+	0xeb, 0x61, 0x06, 0x96, 0x3b, 0xd3, 0xc7, 0xe4, 0x53, 0x09, 0xb2, 0x1d, 0x2b, 0xf8, 0x63, 0x89,
+	0x2d, 0x71, 0x2b, 0x99, 0x8c, 0x67, 0x8d, 0x9b, 0x9c, 0xd5, 0x2a, 0xba, 0x96, 0xc8, 0x0a, 0xfd,
+	0x28, 0x41, 0xa6, 0x63, 0x91, 0x80, 0x36, 0x29, 0x04, 0x48, 0x25, 0xd2, 0xdf, 0x39, 0x9d, 0x8a,
+	0x9c, 0x4c, 0x87, 0x59, 0xe8, 0x16, 0x4e, 0x29, 0x26, 0xb3, 0xd2, 0x1b, 0x09, 0x96, 0xba, 0xbc,
+	0x74, 0x81, 0x04, 0xe2, 0xbc, 0xe5, 0x56, 0x36, 0x9f, 0xb6, 0xb2, 0xaf, 0x60, 0xae, 0x44, 0xec,
+	0xe0, 0x95, 0x4f, 0xe4, 0xaf, 0xa4, 0xeb, 0x22, 0xbe, 0xc5, 0x29, 0xac, 0xa1, 0x55, 0x1f, 0x05,
+	0xa3, 0x33, 0xcd, 0x87, 0xff, 0x5a, 0x82, 0x05, 0xe6, 0x80, 0x60, 0x14, 0xb1, 0xad, 0x36, 0x12,
+	0x38, 0x78, 0x9e, 0x8a, 0xde, 0xeb, 0x42, 0x64, 0xd0, 0x0f, 0x12, 0xcc, 0x33, 0x43, 0x85, 0x94,
+	0x48, 0x4a, 0x37, 0x59, 0x8f, 0x0a, 0xa7, 0xf0, 0x48, 0x4e, 0xa0, 0xc0, 0x4c, 0xb4, 0x81, 0xd3,
+	0x88, 0xc6, 0x1c, 0xf4, 0x0a, 0x16, 0x1d, 0x03, 0xf5, 0x4e, 0x38, 0xce, 0x3a, 0x6e, 0xdd, 0xf2,
+	0xa9, 0xea, 0xd6, 0x82, 0x99, 0x12, 0xb1, 0x7d, 0x37, 0x72, 0x91, 0x69, 0x84, 0x57, 0x79, 0xbc,
+	0xc1, 0x91, 0x31, 0xca, 0xf9, 0x90, 0x6b, 0xce, 0x1c, 0x1f, 0xec, 0xff, 0x00, 0xb1, 0xda, 0xfa,
+	0x96, 0x8b, 0xad, 0xb2, 0x26, 0x42, 0xf6, 0x7c, 0x12, 0x7d, 0xc0, 0xf1, 0x53, 0x40, 0xdf, 0x4a,
+	0x30, 0xcb, 0x4c, 0xe2, 0x4f, 0x5b, 0x98, 0x5b, 0x42, 0xe6, 0x8f, 0x38, 0x6c, 0x49, 0x16, 0xc1,
+	0x32, 0x63, 0xac, 0xe1, 0x44, 0x6d, 0x98, 0x2b, 0x5a, 0x30, 0xe7, 0xb8, 0xa2, 0x17, 0x86, 0x71,
+	0x7e, 0x70, 0xab, 0x92, 0x4f, 0xae, 0x8a, 0xcf, 0x0c, 0x4e, 0x23, 0xe4, 0x02, 0x66, 0x70, 0x16,
+	0x8a, 0xcd, 0x60, 0xf1, 0x39, 0x91, 0x66, 0x70, 0x96, 0x5f, 0xc8, 0x0c, 0x81, 0x8e, 0x8f, 0xd8,
+	0x0c, 0x2e, 0x85, 0xa0, 0x19, 0xdc, 0xb4, 0x85, 0xb9, 0x25, 0x64, 0x2e, 0x34, 0x83, 0x0b, 0x2b,
+	0x30, 0x43, 0xb7, 0x36, 0x51, 0x66, 0x48, 0xc5, 0xf0, 0x42, 0x66, 0xf0, 0x55, 0xe5, 0x9d, 0x04,
+	0x99, 0xf6, 0xa9, 0x25, 0xd0, 0x79, 0x12, 0x99, 0x22, 0x4d, 0xe7, 0x0a, 0x17, 0x39, 0x8b, 0x9b,
+	0xe8, 0x46, 0xf8, 0xeb, 0x76, 0x4c, 0x2d, 0xbb, 0xc9, 0xa6, 0xfa, 0x9c, 0xf9, 0x85, 0x04, 0x4b,
+	0x9d, 0x83, 0x4b, 0x20, 0x9a, 0xd8, 0x2a, 0x9b, 0x29, 0xf8, 0x78, 0x8e, 0xc9, 0x73, 0x62, 0xd7,
+	0x11, 0x4e, 0x26, 0x86, 0x7e, 0x92, 0x20, 0xdb, 0x39, 0xbb, 0x04, 0x15, 0x4a, 0x23, 0x43, 0x3a,
+	0xad, 0xfe, 0xc1, 0x29, 0x3d, 0x95, 0x53, 0x50, 0x62, 0xa6, 0xda, 0xc4, 0x69, 0x45, 0x65, 0xde,
+	0x7a, 0x27, 0x81, 0xdc, 0x75, 0x80, 0xb9, 0x50, 0x16, 0x71, 0x56, 0x73, 0x8b, 0x9c, 0x4f, 0x5d,
+	0xe4, 0x7f, 0xc1, 0x44, 0x89, 0xd8, 0x0f, 0x69, 0xd3, 0x45, 0x8f, 0x09, 0x2c, 0x67, 0x83, 0xe5,
+	0xa6, 0xcd, 0x87, 0xe4, 0x8c, 0x68, 0x56, 0xcc, 0x55, 0x53, 0xa3, 0x4d, 0x07, 0x07, 0x1d, 0xc1,
+	0x24, 0xab, 0x98, 0x07, 0x11, 0x1b, 0x4a, 0x00, 0xe2, 0xde, 0x7c, 0x70, 0x0c, 0x08, 0x93, 0xf5,
+	0x13, 0xc9, 0xb9, 0x72, 0x75, 0xb7, 0x01, 0xd1, 0x7a, 0x7c, 0xbb, 0xaf, 0xbb, 0x01, 0x29, 0x5f,
+	0x4f, 0x9c, 0x17, 0x7f, 0xff, 0x32, 0xa9, 0x46, 0x4e, 0xdb, 0x80, 0xed, 0xfb, 0x57, 0x57, 0x00,
+	0x24, 0xe8, 0x39, 0xca, 0x82, 0xb1, 0x98, 0xfb, 0x57, 0x37, 0x5c, 0xd4, 0xfd, 0xab, 0x7b, 0x3c,
+	0x7c, 0xff, 0x4a, 0xcb, 0xab, 0xb7, 0xfb, 0x57, 0x08, 0x13, 0x9d, 0xc0, 0x02, 0xdb, 0xa0, 0xa8,
+	0x46, 0xac, 0xbf, 0x52, 0x73, 0xb7, 0x6e, 0xab, 0x67, 0xe4, 0xa9, 0x45, 0xcc, 0x58, 0x83, 0x65,
+	0x22, 0xc8, 0x30, 0xe5, 0x71, 0x8e, 0x23, 0xca, 0x28, 0xeb, 0x43, 0x54, 0x78, 0x44, 0x86, 0x6b,
+	0xa1, 0x13, 0x18, 0x6d, 0xb7, 0xc0, 0x43, 0x8d, 0xad, 0x40, 0x7b, 0x3d, 0xf4, 0x15, 0xf1, 0xf5,
+	0xce, 0xdb, 0x58, 0xd8, 0xdf, 0x2a, 0x34, 0x5b, 0x3a, 0x7f, 0x83, 0x98, 0x90, 0x27, 0x00, 0x5e,
+	0xc7, 0x1c, 0x05, 0x1b, 0x31, 0xa1, 0x66, 0x7a, 0x52, 0x37, 0x30, 0xd0, 0xd7, 0x52, 0xd8, 0xfa,
+	0x0e, 0x96, 0xc5, 0xaf, 0xb0, 0x11, 0x4d, 0xe4, 0x58, 0x11, 0x6f, 0x04, 0xf8, 0xc4, 0x35, 0xa0,
+	0x71, 0x96, 0xc3, 0x23, 0x34, 0xe3, 0x83, 0x57, 0x1b, 0xc6, 0xfd, 0x6f, 0xa4, 0x2f, 0x77, 0xff,
+	0x89, 0x9e, 0x41, 0xf6, 0x59, 0x3b, 0x52, 0xce, 0x6b, 0x3a, 0xe7, 0x76, 0x9f, 0xec, 0xe3, 0x1d,
+	0x18, 0xeb, 0x8c, 0xa1, 0xf5, 0x63, 0xdb, 0x36, 0xac, 0xbb, 0xc5, 0x62, 0x53, 0xb5, 0x8f, 0x5b,
+	0xb5, 0x42, 0x9d, 0x9e, 0x16, 0x75, 0x4d, 0x3f, 0x57, 0x8a, 0x1d, 0x26, 0x5b, 0x8a, 0xa1, 0x6e,
+	0x0f, 0xdf, 0x2e, 0x6c, 0x17, 0x6e, 0xe7, 0x87, 0xa4, 0x81, 0xc1, 0x21, 0xc8, 0xe8, 0xb4, 0xa0,
+	0xd7, 0x0a, 0xba, 0xae, 0xf8, 0xf9, 0xde, 0x9f, 0xf6, 0xa0, 0x9e, 0xb0, 0xcc, 0x0e, 0xbd, 0xff,
+	0x61, 0x50, 0x55, 0x0c, 0xb5, 0x36, 0xc2, 0xf3, 0xdd, 0xf9, 0x3d, 0x00, 0x00, 0xff, 0xff, 0x88,
+	0x1b, 0x94, 0x5b, 0x8b, 0x20, 0x00, 0x00,
 }

@@ -53,30 +53,17 @@ var getCmd = &cobra.Command{
 			client, conn := util.NewControllerClient()
 			defer conn.Close()
 
-			var selector *api.Selector
-			var id string
+			var selector []string
+			var ids []string
 
 			if len(args) == 2 {
-				id = args[1]
-				fmt.Println("ID: ", id)
-			}
-
-			if label != "" {
-				selector = util.CreateSelector(label)
+				ids = args[1:]
+				fmt.Println("ID: ", ids)
 			}
 
 			switch args[0] {
 			case "entity":
-				request := api.ListRequest{}
-				if id != "" {
-					request.Qry = &api.ListRequest_Id{id}
-				} else if name != "" {
-					request.Qry = &api.ListRequest_Name{name}
-				} else if selector != nil {
-					request.Qry = &api.ListRequest_Selector{selector}
-				}
-				request.Page = page
-				request.PageSize = pageSize
+				request := util.CreateListRequest(ids, name, label, pageSize, page)
 
 				r, err := client.ListCrawlEntities(context.Background(), &request)
 				if err != nil {
@@ -88,13 +75,12 @@ var getCmd = &cobra.Command{
 				}
 			case "seed":
 				request := api.SeedListRequest{}
-				if id != "" {
-					request.Qry = &api.SeedListRequest_Id{id}
-				} else if name != "" {
-					request.Qry = &api.SeedListRequest_Name{name}
-				} else if selector != nil {
-					request.Qry = &api.SeedListRequest_Selector{selector}
-				}
+
+				selector = util.CreateSelector(label)
+
+				request.Id = ids
+				request.Name = name
+				request.LabelSelector = selector
 				request.Page = page
 				request.PageSize = pageSize
 
@@ -107,16 +93,7 @@ var getCmd = &cobra.Command{
 					os.Exit(1)
 				}
 			case "job":
-				request := api.CrawlJobListRequest{}
-				if id != "" {
-					request.Qry = &api.CrawlJobListRequest_Id{id}
-				} else if name != "" {
-					request.Qry = &api.CrawlJobListRequest_Name{name}
-				} else if selector != nil {
-					request.Qry = &api.CrawlJobListRequest_Selector{selector}
-				}
-				request.Page = page
-				request.PageSize = pageSize
+				request := util.CreateListRequest(ids, name, label, pageSize, page)
 
 				r, err := client.ListCrawlJobs(context.Background(), &request)
 				if err != nil {
@@ -127,16 +104,7 @@ var getCmd = &cobra.Command{
 					os.Exit(1)
 				}
 			case "crawlconfig":
-				request := api.ListRequest{}
-				if id != "" {
-					request.Qry = &api.ListRequest_Id{id}
-				} else if name != "" {
-					request.Qry = &api.ListRequest_Name{name}
-				} else if selector != nil {
-					request.Qry = &api.ListRequest_Selector{selector}
-				}
-				request.Page = page
-				request.PageSize = pageSize
+				request := util.CreateListRequest(ids, name, label, pageSize, page)
 
 				r, err := client.ListCrawlConfigs(context.Background(), &request)
 				if err != nil {
@@ -147,16 +115,7 @@ var getCmd = &cobra.Command{
 					os.Exit(1)
 				}
 			case "schedule":
-				request := api.ListRequest{}
-				if id != "" {
-					request.Qry = &api.ListRequest_Id{id}
-				} else if name != "" {
-					request.Qry = &api.ListRequest_Name{name}
-				} else if selector != nil {
-					request.Qry = &api.ListRequest_Selector{selector}
-				}
-				request.Page = page
-				request.PageSize = pageSize
+				request := util.CreateListRequest(ids, name, label, pageSize, page)
 
 				r, err := client.ListCrawlScheduleConfigs(context.Background(), &request)
 				if err != nil {
@@ -167,16 +126,7 @@ var getCmd = &cobra.Command{
 					os.Exit(1)
 				}
 			case "browser":
-				request := api.ListRequest{}
-				if id != "" {
-					request.Qry = &api.ListRequest_Id{id}
-				} else if name != "" {
-					request.Qry = &api.ListRequest_Name{name}
-				} else if selector != nil {
-					request.Qry = &api.ListRequest_Selector{selector}
-				}
-				request.Page = page
-				request.PageSize = pageSize
+				request := util.CreateListRequest(ids, name, label, pageSize, page)
 
 				r, err := client.ListBrowserConfigs(context.Background(), &request)
 				if err != nil {
@@ -187,16 +137,7 @@ var getCmd = &cobra.Command{
 					os.Exit(1)
 				}
 			case "politeness":
-				request := api.ListRequest{}
-				if id != "" {
-					request.Qry = &api.ListRequest_Id{id}
-				} else if name != "" {
-					request.Qry = &api.ListRequest_Name{name}
-				} else if selector != nil {
-					request.Qry = &api.ListRequest_Selector{selector}
-				}
-				request.Page = page
-				request.PageSize = pageSize
+				request := util.CreateListRequest(ids, name, label, pageSize, page)
 
 				r, err := client.ListPolitenessConfigs(context.Background(), &request)
 				if err != nil {
@@ -207,16 +148,7 @@ var getCmd = &cobra.Command{
 					os.Exit(1)
 				}
 			case "script":
-				request := api.BrowserScriptListRequest{}
-				if id != "" {
-					request.Qry = &api.BrowserScriptListRequest_Id{id}
-				} else if name != "" {
-					request.Qry = &api.BrowserScriptListRequest_Name{name}
-				} else if selector != nil {
-					request.Qry = &api.BrowserScriptListRequest_Selector{selector}
-				}
-				request.Page = page
-				request.PageSize = pageSize
+				request := util.CreateListRequest(ids, name, label, pageSize, page)
 
 				r, err := client.ListBrowserScripts(context.Background(), &request)
 				if err != nil {
@@ -227,16 +159,7 @@ var getCmd = &cobra.Command{
 					os.Exit(1)
 				}
 			case "group":
-				request := api.ListRequest{}
-				if id != "" {
-					request.Qry = &api.ListRequest_Id{id}
-				} else if name != "" {
-					request.Qry = &api.ListRequest_Name{name}
-				} else if selector != nil {
-					request.Qry = &api.ListRequest_Selector{selector}
-				}
-				request.Page = page
-				request.PageSize = pageSize
+				request := util.CreateListRequest(ids, name, label, pageSize, page)
 
 				r, err := client.ListCrawlHostGroupConfigs(context.Background(), &request)
 				if err != nil {
@@ -305,8 +228,8 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	getCmd.PersistentFlags().StringVarP(&label, "label", "l", "", "List objects by label (<type>=<value> | <value>)")
-	getCmd.PersistentFlags().StringVarP(&name, "name", "n", "", "List objects by name")
+	getCmd.PersistentFlags().StringVarP(&label, "label", "l", "", "List objects by label (<type>:<value> | <value>)")
+	getCmd.PersistentFlags().StringVarP(&name, "name", "n", "", "List objects by name (accepts regular expressions)")
 	getCmd.PersistentFlags().StringVarP(&format, "format", "f", "table", "Output format (table|json|yaml)")
 	getCmd.PersistentFlags().StringVarP(&file, "output", "o", "", "File name to write to")
 	getCmd.PersistentFlags().Int32VarP(&pageSize, "pagesize", "s", 10, "Number of objects to get")
