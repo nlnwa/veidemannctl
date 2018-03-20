@@ -131,7 +131,7 @@ func screenshotTemplate() (*asset, error) {
 	return a, nil
 }
 
-var _version = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x32\x33\x33\x4c\x36\x4d\xb5\x34\x35\xb0\x34\x34\x34\x4c\x34\x4b\xb5\x4c\xb3\x30\x4b\x49\xb2\x30\xb7\x34\x4f\x35\x30\x36\x32\x31\x4c\x36\x34\x48\x4b\x31\x4b\x36\xd6\x4d\xc9\x2c\x2a\xa9\xe4\x02\x04\x00\x00\xff\xff\x24\x81\x9b\xee\x2f\x00\x00\x00")
+var _version = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x2a\x33\xd0\x33\xd4\x33\xd6\x4d\xc9\x2c\x2a\xa9\xe4\x02\x04\x00\x00\xff\xff\xb1\x10\x2d\x36\x0d\x00\x00\x00")
 
 func versionBytes() ([]byte, error) {
 	return bindataRead(
@@ -146,7 +146,7 @@ func version() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "version", size: 47, mode: os.FileMode(436), modTime: time.Unix(1519832224, 0)}
+	info := bindataFileInfo{name: "version", size: 13, mode: os.FileMode(436), modTime: time.Unix(1521551676, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -203,10 +203,10 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"crawllog.template":   crawllogTemplate,
-	"pagelog.template":    pagelogTemplate,
+	"crawllog.template": crawllogTemplate,
+	"pagelog.template": pagelogTemplate,
 	"screenshot.template": screenshotTemplate,
-	"version":             version,
+	"version": version,
 }
 
 // AssetDir returns the file names below a certain
@@ -248,12 +248,11 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
-	"crawllog.template":   &bintree{crawllogTemplate, map[string]*bintree{}},
-	"pagelog.template":    &bintree{pagelogTemplate, map[string]*bintree{}},
+	"crawllog.template": &bintree{crawllogTemplate, map[string]*bintree{}},
+	"pagelog.template": &bintree{pagelogTemplate, map[string]*bintree{}},
 	"screenshot.template": &bintree{screenshotTemplate, map[string]*bintree{}},
-	"version":             &bintree{version, map[string]*bintree{}},
+	"version": &bintree{version, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
@@ -302,3 +301,4 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+

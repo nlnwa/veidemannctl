@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-API_VERSION=0.1.3
+API_VERSION=0.1.4
 
 rm -rf protobuf veidemann_api
 mkdir protobuf veidemann_api

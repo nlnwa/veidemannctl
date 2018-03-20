@@ -35,7 +35,7 @@ var statusCmd = &cobra.Command{
 		client, conn := util.NewStatusClient()
 		defer conn.Close()
 
-		request := api.ExecutionsRequest{PageSize: 50}
+		request := api.RunningExecutionsRequest{PageSize: 50}
 
 		stream, err := client.GetRunningExecutions(context.Background(), &request)
 		if err != nil {

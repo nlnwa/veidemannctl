@@ -29,12 +29,12 @@ var abortCmd = &cobra.Command{
 	Long:  `Abort one or more crawl executions.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			client, conn := util.NewControllerClient()
+			client, conn := util.NewStatusClient()
 			defer conn.Close()
 
 			for _, arg := range args {
-				request := api.AbortCrawlRequest{ExecutionId: arg}
-				_, err := client.AbortCrawl(context.Background(), &request)
+				request := api.ExecutionId{Id: arg}
+				_, err := client.AbortExecution(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not abort execution '%v': %v", arg, err)
 				}

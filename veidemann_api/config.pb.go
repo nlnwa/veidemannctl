@@ -52,7 +52,6 @@ It has these top-level messages:
 	CrawlHostGroupConfigListReply
 	RunCrawlRequest
 	RunCrawlReply
-	AbortCrawlRequest
 	RoleList
 	RoleMappingsListRequest
 	RoleMappingsListReply
@@ -64,12 +63,13 @@ It has these top-level messages:
 	HarvestPageReply
 	CleanupExecutionRequest
 	CrawlExecutionStatus
+	JobExecutionStatus
 	CrawlLog
 	PageLog
 	CrawledContent
 	ExtractedText
 	CrawlHostGroup
-	FetchError
+	Error
 	QueuedUri
 	Cookie
 	Screenshot
@@ -82,9 +82,15 @@ It has these top-level messages:
 	ScreenshotListReply
 	IsAllowedRequest
 	IsAllowedReply
-	ExecutionsRequest
-	ExecutionsListReply
+	RunningExecutionsRequest
+	RunningExecutionsListReply
 	StatusDetail
+	ExecutionId
+	ListExecutionsRequest
+	ListJobExecutionsRequest
+	ExecutionsListReply
+	JobExecutionsListReply
+	AbortCrawlRequest
 */
 package veidemann_api
 
