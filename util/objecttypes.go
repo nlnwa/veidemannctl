@@ -27,8 +27,8 @@ var objectTypes = []struct {
 }{
 	{reflect.TypeOf(&api.CrawlEntity{}), "entity", []string{"Id", "Meta.Name", "Meta.Description"}},
 	{reflect.TypeOf(&api.Seed{}), "seed", []string{"Id", "Meta.Name", "EntityId", "Scope.SurtPrefix", "JobId", "Disabled"}},
-	{reflect.TypeOf(&api.CrawlJob{}), "job", []string{"Id", "Meta.Name", "Meta.Description", "ScheduleConfigOrId.ScheduleId", "Limits", "CrawlConfigOrId.CrawlConfigId", "Disabled"}},
-	{reflect.TypeOf(&api.CrawlConfig{}), "crawlconfig", []string{"Id", "Meta.Name", "Meta.Description", "BrowserConfigOrId.BrowserConfigId", "PolitenessOrId.PolitenessId", "Extra"}},
+	{reflect.TypeOf(&api.CrawlJob{}), "job", []string{"Id", "Meta.Name", "Meta.Description", "ScheduleId", "Limits", "CrawlConfigId", "Disabled"}},
+	{reflect.TypeOf(&api.CrawlConfig{}), "crawlconfig", []string{"Id", "Meta.Name", "Meta.Description", "BrowserConfigId", "PolitenessId", "Extra"}},
 	{reflect.TypeOf(&api.CrawlScheduleConfig{}), "schedule", []string{"Id", "Meta.Name", "Meta.Description", "CronExpression", "ValidFrom", "ValidTo"}},
 	{reflect.TypeOf(&api.BrowserConfig{}), "browser", []string{"Id", "Meta.Name", "Meta.Description", "UserAgent", "WindowWidth", "WindowHeight", "PageLoadTimeoutMs", "SleepAfterPageloadMs"}},
 	{reflect.TypeOf(&api.PolitenessConfig{}), "politeness", []string{"Id", "Meta.Name", "Meta.Description", "RobotsPolicy", "MinTimeBetweenPageLoadMs", "MaxTimeBetweenPageLoadMs", "DelayFactor", "MaxRetries", "RetryDelaySeconds", "CrawlHostGroupSelector"}},

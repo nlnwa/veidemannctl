@@ -7,6 +7,8 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
+import _ "google.golang.org/genproto/googleapis/api/annotations"
+import _ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options"
 
 import (
 	context "golang.org/x/net/context"
@@ -18,64 +20,64 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
-type ExecutionsRequest struct {
+type RunningExecutionsRequest struct {
 	PageSize int32 `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
 	Page     int32 `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
 }
 
-func (m *ExecutionsRequest) Reset()                    { *m = ExecutionsRequest{} }
-func (m *ExecutionsRequest) String() string            { return proto.CompactTextString(m) }
-func (*ExecutionsRequest) ProtoMessage()               {}
-func (*ExecutionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{0} }
+func (m *RunningExecutionsRequest) Reset()                    { *m = RunningExecutionsRequest{} }
+func (m *RunningExecutionsRequest) String() string            { return proto.CompactTextString(m) }
+func (*RunningExecutionsRequest) ProtoMessage()               {}
+func (*RunningExecutionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{0} }
 
-func (m *ExecutionsRequest) GetPageSize() int32 {
+func (m *RunningExecutionsRequest) GetPageSize() int32 {
 	if m != nil {
 		return m.PageSize
 	}
 	return 0
 }
 
-func (m *ExecutionsRequest) GetPage() int32 {
+func (m *RunningExecutionsRequest) GetPage() int32 {
 	if m != nil {
 		return m.Page
 	}
 	return 0
 }
 
-type ExecutionsListReply struct {
+type RunningExecutionsListReply struct {
 	Value    []*StatusDetail `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
 	Count    int64           `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
 	PageSize int32           `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
 	Page     int32           `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
 }
 
-func (m *ExecutionsListReply) Reset()                    { *m = ExecutionsListReply{} }
-func (m *ExecutionsListReply) String() string            { return proto.CompactTextString(m) }
-func (*ExecutionsListReply) ProtoMessage()               {}
-func (*ExecutionsListReply) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{1} }
+func (m *RunningExecutionsListReply) Reset()                    { *m = RunningExecutionsListReply{} }
+func (m *RunningExecutionsListReply) String() string            { return proto.CompactTextString(m) }
+func (*RunningExecutionsListReply) ProtoMessage()               {}
+func (*RunningExecutionsListReply) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{1} }
 
-func (m *ExecutionsListReply) GetValue() []*StatusDetail {
+func (m *RunningExecutionsListReply) GetValue() []*StatusDetail {
 	if m != nil {
 		return m.Value
 	}
 	return nil
 }
 
-func (m *ExecutionsListReply) GetCount() int64 {
+func (m *RunningExecutionsListReply) GetCount() int64 {
 	if m != nil {
 		return m.Count
 	}
 	return 0
 }
 
-func (m *ExecutionsListReply) GetPageSize() int32 {
+func (m *RunningExecutionsListReply) GetPageSize() int32 {
 	if m != nil {
 		return m.PageSize
 	}
 	return 0
 }
 
-func (m *ExecutionsListReply) GetPage() int32 {
+func (m *RunningExecutionsListReply) GetPage() int32 {
 	if m != nil {
 		return m.Page
 	}
@@ -210,10 +212,253 @@ func (m *StatusDetail) GetCurrentUri() string {
 	return ""
 }
 
+// Request for getting an execution by id
+type ExecutionId struct {
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+}
+
+func (m *ExecutionId) Reset()                    { *m = ExecutionId{} }
+func (m *ExecutionId) String() string            { return proto.CompactTextString(m) }
+func (*ExecutionId) ProtoMessage()               {}
+func (*ExecutionId) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{3} }
+
+func (m *ExecutionId) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+// Specification of wich executions to get.
+type ListExecutionsRequest struct {
+	// Select executions by id
+	Id []string `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
+	// Select executions by state
+	State []string `protobuf:"bytes,2,rep,name=state" json:"state,omitempty"`
+	// Select executions by seed
+	SeedId string `protobuf:"bytes,3,opt,name=seed_id,json=seedId" json:"seed_id,omitempty"`
+	// Select executions by crawl job
+	JobId string `protobuf:"bytes,4,opt,name=job_id,json=jobId" json:"job_id,omitempty"`
+	// Select executions by job execution
+	JobExecutionId string `protobuf:"bytes,5,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
+	PageSize       int32  `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page           int32  `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+}
+
+func (m *ListExecutionsRequest) Reset()                    { *m = ListExecutionsRequest{} }
+func (m *ListExecutionsRequest) String() string            { return proto.CompactTextString(m) }
+func (*ListExecutionsRequest) ProtoMessage()               {}
+func (*ListExecutionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{4} }
+
+func (m *ListExecutionsRequest) GetId() []string {
+	if m != nil {
+		return m.Id
+	}
+	return nil
+}
+
+func (m *ListExecutionsRequest) GetState() []string {
+	if m != nil {
+		return m.State
+	}
+	return nil
+}
+
+func (m *ListExecutionsRequest) GetSeedId() string {
+	if m != nil {
+		return m.SeedId
+	}
+	return ""
+}
+
+func (m *ListExecutionsRequest) GetJobId() string {
+	if m != nil {
+		return m.JobId
+	}
+	return ""
+}
+
+func (m *ListExecutionsRequest) GetJobExecutionId() string {
+	if m != nil {
+		return m.JobExecutionId
+	}
+	return ""
+}
+
+func (m *ListExecutionsRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *ListExecutionsRequest) GetPage() int32 {
+	if m != nil {
+		return m.Page
+	}
+	return 0
+}
+
+// Specification of wich executions to get.
+type ListJobExecutionsRequest struct {
+	// Select job executions by id
+	Id []string `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
+	// Select job executions by state
+	State []string `protobuf:"bytes,2,rep,name=state" json:"state,omitempty"`
+	// Select executions by crawl job
+	JobId    string `protobuf:"bytes,4,opt,name=job_id,json=jobId" json:"job_id,omitempty"`
+	PageSize int32  `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page     int32  `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+}
+
+func (m *ListJobExecutionsRequest) Reset()                    { *m = ListJobExecutionsRequest{} }
+func (m *ListJobExecutionsRequest) String() string            { return proto.CompactTextString(m) }
+func (*ListJobExecutionsRequest) ProtoMessage()               {}
+func (*ListJobExecutionsRequest) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{5} }
+
+func (m *ListJobExecutionsRequest) GetId() []string {
+	if m != nil {
+		return m.Id
+	}
+	return nil
+}
+
+func (m *ListJobExecutionsRequest) GetState() []string {
+	if m != nil {
+		return m.State
+	}
+	return nil
+}
+
+func (m *ListJobExecutionsRequest) GetJobId() string {
+	if m != nil {
+		return m.JobId
+	}
+	return ""
+}
+
+func (m *ListJobExecutionsRequest) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *ListJobExecutionsRequest) GetPage() int32 {
+	if m != nil {
+		return m.Page
+	}
+	return 0
+}
+
+// A list of crawl executions
+type ExecutionsListReply struct {
+	Value    []*CrawlExecutionStatus `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count    int64                   `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize int32                   `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page     int32                   `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+}
+
+func (m *ExecutionsListReply) Reset()                    { *m = ExecutionsListReply{} }
+func (m *ExecutionsListReply) String() string            { return proto.CompactTextString(m) }
+func (*ExecutionsListReply) ProtoMessage()               {}
+func (*ExecutionsListReply) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{6} }
+
+func (m *ExecutionsListReply) GetValue() []*CrawlExecutionStatus {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+func (m *ExecutionsListReply) GetCount() int64 {
+	if m != nil {
+		return m.Count
+	}
+	return 0
+}
+
+func (m *ExecutionsListReply) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *ExecutionsListReply) GetPage() int32 {
+	if m != nil {
+		return m.Page
+	}
+	return 0
+}
+
+// A list of job executions
+type JobExecutionsListReply struct {
+	Value    []*JobExecutionStatus `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count    int64                 `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize int32                 `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page     int32                 `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+}
+
+func (m *JobExecutionsListReply) Reset()                    { *m = JobExecutionsListReply{} }
+func (m *JobExecutionsListReply) String() string            { return proto.CompactTextString(m) }
+func (*JobExecutionsListReply) ProtoMessage()               {}
+func (*JobExecutionsListReply) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{7} }
+
+func (m *JobExecutionsListReply) GetValue() []*JobExecutionStatus {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+func (m *JobExecutionsListReply) GetCount() int64 {
+	if m != nil {
+		return m.Count
+	}
+	return 0
+}
+
+func (m *JobExecutionsListReply) GetPageSize() int32 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *JobExecutionsListReply) GetPage() int32 {
+	if m != nil {
+		return m.Page
+	}
+	return 0
+}
+
+type AbortCrawlRequest struct {
+	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+}
+
+func (m *AbortCrawlRequest) Reset()                    { *m = AbortCrawlRequest{} }
+func (m *AbortCrawlRequest) String() string            { return proto.CompactTextString(m) }
+func (*AbortCrawlRequest) ProtoMessage()               {}
+func (*AbortCrawlRequest) Descriptor() ([]byte, []int) { return fileDescriptor9, []int{8} }
+
+func (m *AbortCrawlRequest) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
 func init() {
-	proto.RegisterType((*ExecutionsRequest)(nil), "veidemann.api.ExecutionsRequest")
-	proto.RegisterType((*ExecutionsListReply)(nil), "veidemann.api.ExecutionsListReply")
+	proto.RegisterType((*RunningExecutionsRequest)(nil), "veidemann.api.RunningExecutionsRequest")
+	proto.RegisterType((*RunningExecutionsListReply)(nil), "veidemann.api.RunningExecutionsListReply")
 	proto.RegisterType((*StatusDetail)(nil), "veidemann.api.StatusDetail")
+	proto.RegisterType((*ExecutionId)(nil), "veidemann.api.ExecutionId")
+	proto.RegisterType((*ListExecutionsRequest)(nil), "veidemann.api.ListExecutionsRequest")
+	proto.RegisterType((*ListJobExecutionsRequest)(nil), "veidemann.api.ListJobExecutionsRequest")
+	proto.RegisterType((*ExecutionsListReply)(nil), "veidemann.api.ExecutionsListReply")
+	proto.RegisterType((*JobExecutionsListReply)(nil), "veidemann.api.JobExecutionsListReply")
+	proto.RegisterType((*AbortCrawlRequest)(nil), "veidemann.api.AbortCrawlRequest")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -227,7 +472,20 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for Status service
 
 type StatusClient interface {
-	GetRunningExecutions(ctx context.Context, in *ExecutionsRequest, opts ...grpc.CallOption) (Status_GetRunningExecutionsClient, error)
+	// Get status of running crawls
+	GetRunningExecutions(ctx context.Context, in *RunningExecutionsRequest, opts ...grpc.CallOption) (Status_GetRunningExecutionsClient, error)
+	// Get a crawl execution by ID
+	GetExecution(ctx context.Context, in *ExecutionId, opts ...grpc.CallOption) (*CrawlExecutionStatus, error)
+	// List a set of crawl executions
+	ListExecutions(ctx context.Context, in *ListExecutionsRequest, opts ...grpc.CallOption) (*ExecutionsListReply, error)
+	// Abort a crawl execution
+	AbortExecution(ctx context.Context, in *ExecutionId, opts ...grpc.CallOption) (*CrawlExecutionStatus, error)
+	// Get a job execution by ID
+	GetJobExecution(ctx context.Context, in *ExecutionId, opts ...grpc.CallOption) (*JobExecutionStatus, error)
+	// List a set of job executions
+	ListJobExecutions(ctx context.Context, in *ListJobExecutionsRequest, opts ...grpc.CallOption) (*JobExecutionsListReply, error)
+	// Abort a job execution
+	AbortJobExecution(ctx context.Context, in *ExecutionId, opts ...grpc.CallOption) (*JobExecutionStatus, error)
 }
 
 type statusClient struct {
@@ -238,7 +496,7 @@ func NewStatusClient(cc *grpc.ClientConn) StatusClient {
 	return &statusClient{cc}
 }
 
-func (c *statusClient) GetRunningExecutions(ctx context.Context, in *ExecutionsRequest, opts ...grpc.CallOption) (Status_GetRunningExecutionsClient, error) {
+func (c *statusClient) GetRunningExecutions(ctx context.Context, in *RunningExecutionsRequest, opts ...grpc.CallOption) (Status_GetRunningExecutionsClient, error) {
 	stream, err := grpc.NewClientStream(ctx, &_Status_serviceDesc.Streams[0], c.cc, "/veidemann.api.Status/GetRunningExecutions", opts...)
 	if err != nil {
 		return nil, err
@@ -254,7 +512,7 @@ func (c *statusClient) GetRunningExecutions(ctx context.Context, in *ExecutionsR
 }
 
 type Status_GetRunningExecutionsClient interface {
-	Recv() (*ExecutionsListReply, error)
+	Recv() (*RunningExecutionsListReply, error)
 	grpc.ClientStream
 }
 
@@ -262,18 +520,85 @@ type statusGetRunningExecutionsClient struct {
 	grpc.ClientStream
 }
 
-func (x *statusGetRunningExecutionsClient) Recv() (*ExecutionsListReply, error) {
-	m := new(ExecutionsListReply)
+func (x *statusGetRunningExecutionsClient) Recv() (*RunningExecutionsListReply, error) {
+	m := new(RunningExecutionsListReply)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
+func (c *statusClient) GetExecution(ctx context.Context, in *ExecutionId, opts ...grpc.CallOption) (*CrawlExecutionStatus, error) {
+	out := new(CrawlExecutionStatus)
+	err := grpc.Invoke(ctx, "/veidemann.api.Status/GetExecution", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *statusClient) ListExecutions(ctx context.Context, in *ListExecutionsRequest, opts ...grpc.CallOption) (*ExecutionsListReply, error) {
+	out := new(ExecutionsListReply)
+	err := grpc.Invoke(ctx, "/veidemann.api.Status/ListExecutions", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *statusClient) AbortExecution(ctx context.Context, in *ExecutionId, opts ...grpc.CallOption) (*CrawlExecutionStatus, error) {
+	out := new(CrawlExecutionStatus)
+	err := grpc.Invoke(ctx, "/veidemann.api.Status/AbortExecution", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *statusClient) GetJobExecution(ctx context.Context, in *ExecutionId, opts ...grpc.CallOption) (*JobExecutionStatus, error) {
+	out := new(JobExecutionStatus)
+	err := grpc.Invoke(ctx, "/veidemann.api.Status/GetJobExecution", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *statusClient) ListJobExecutions(ctx context.Context, in *ListJobExecutionsRequest, opts ...grpc.CallOption) (*JobExecutionsListReply, error) {
+	out := new(JobExecutionsListReply)
+	err := grpc.Invoke(ctx, "/veidemann.api.Status/ListJobExecutions", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *statusClient) AbortJobExecution(ctx context.Context, in *ExecutionId, opts ...grpc.CallOption) (*JobExecutionStatus, error) {
+	out := new(JobExecutionStatus)
+	err := grpc.Invoke(ctx, "/veidemann.api.Status/AbortJobExecution", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Status service
 
 type StatusServer interface {
-	GetRunningExecutions(*ExecutionsRequest, Status_GetRunningExecutionsServer) error
+	// Get status of running crawls
+	GetRunningExecutions(*RunningExecutionsRequest, Status_GetRunningExecutionsServer) error
+	// Get a crawl execution by ID
+	GetExecution(context.Context, *ExecutionId) (*CrawlExecutionStatus, error)
+	// List a set of crawl executions
+	ListExecutions(context.Context, *ListExecutionsRequest) (*ExecutionsListReply, error)
+	// Abort a crawl execution
+	AbortExecution(context.Context, *ExecutionId) (*CrawlExecutionStatus, error)
+	// Get a job execution by ID
+	GetJobExecution(context.Context, *ExecutionId) (*JobExecutionStatus, error)
+	// List a set of job executions
+	ListJobExecutions(context.Context, *ListJobExecutionsRequest) (*JobExecutionsListReply, error)
+	// Abort a job execution
+	AbortJobExecution(context.Context, *ExecutionId) (*JobExecutionStatus, error)
 }
 
 func RegisterStatusServer(s *grpc.Server, srv StatusServer) {
@@ -281,7 +606,7 @@ func RegisterStatusServer(s *grpc.Server, srv StatusServer) {
 }
 
 func _Status_GetRunningExecutions_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(ExecutionsRequest)
+	m := new(RunningExecutionsRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
@@ -289,7 +614,7 @@ func _Status_GetRunningExecutions_Handler(srv interface{}, stream grpc.ServerStr
 }
 
 type Status_GetRunningExecutionsServer interface {
-	Send(*ExecutionsListReply) error
+	Send(*RunningExecutionsListReply) error
 	grpc.ServerStream
 }
 
@@ -297,14 +622,147 @@ type statusGetRunningExecutionsServer struct {
 	grpc.ServerStream
 }
 
-func (x *statusGetRunningExecutionsServer) Send(m *ExecutionsListReply) error {
+func (x *statusGetRunningExecutionsServer) Send(m *RunningExecutionsListReply) error {
 	return x.ServerStream.SendMsg(m)
+}
+
+func _Status_GetExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExecutionId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatusServer).GetExecution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Status/GetExecution",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatusServer).GetExecution(ctx, req.(*ExecutionId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Status_ListExecutions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListExecutionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatusServer).ListExecutions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Status/ListExecutions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatusServer).ListExecutions(ctx, req.(*ListExecutionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Status_AbortExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExecutionId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatusServer).AbortExecution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Status/AbortExecution",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatusServer).AbortExecution(ctx, req.(*ExecutionId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Status_GetJobExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExecutionId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatusServer).GetJobExecution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Status/GetJobExecution",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatusServer).GetJobExecution(ctx, req.(*ExecutionId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Status_ListJobExecutions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListJobExecutionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatusServer).ListJobExecutions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Status/ListJobExecutions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatusServer).ListJobExecutions(ctx, req.(*ListJobExecutionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Status_AbortJobExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExecutionId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatusServer).AbortJobExecution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/veidemann.api.Status/AbortJobExecution",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatusServer).AbortJobExecution(ctx, req.(*ExecutionId))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 var _Status_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "veidemann.api.Status",
 	HandlerType: (*StatusServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetExecution",
+			Handler:    _Status_GetExecution_Handler,
+		},
+		{
+			MethodName: "ListExecutions",
+			Handler:    _Status_ListExecutions_Handler,
+		},
+		{
+			MethodName: "AbortExecution",
+			Handler:    _Status_AbortExecution_Handler,
+		},
+		{
+			MethodName: "GetJobExecution",
+			Handler:    _Status_GetJobExecution_Handler,
+		},
+		{
+			MethodName: "ListJobExecutions",
+			Handler:    _Status_ListJobExecutions_Handler,
+		},
+		{
+			MethodName: "AbortJobExecution",
+			Handler:    _Status_AbortJobExecution_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "GetRunningExecutions",
@@ -318,40 +776,67 @@ var _Status_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("status.proto", fileDescriptor9) }
 
 var fileDescriptor9 = []byte{
-	// 557 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0xd1, 0x6e, 0xd3, 0x3c,
-	0x14, 0xc7, 0xbf, 0xac, 0xeb, 0xd6, 0x9e, 0xb4, 0xdd, 0x37, 0xaf, 0x02, 0xab, 0x13, 0x5a, 0x28,
-	0x37, 0x9d, 0x90, 0x32, 0xe8, 0xb4, 0x0b, 0xae, 0x90, 0xb6, 0x02, 0x42, 0x42, 0x1a, 0x4a, 0xe1,
-	0x86, 0x9b, 0xe0, 0x26, 0xa7, 0x95, 0xa7, 0xd6, 0xce, 0x62, 0x7b, 0xb0, 0xbd, 0x04, 0xaf, 0xc9,
-	0x63, 0x20, 0xdb, 0x6b, 0xb3, 0x16, 0x21, 0xc4, 0x9d, 0xfd, 0xf7, 0xef, 0x9c, 0xfc, 0x8f, 0xcf,
-	0x71, 0xa0, 0xa5, 0x34, 0xd3, 0x46, 0xc5, 0x45, 0x29, 0xb5, 0x24, 0xed, 0x1b, 0xe4, 0x39, 0x2e,
-	0x98, 0x10, 0x31, 0x2b, 0x78, 0xaf, 0xb3, 0x40, 0xa5, 0xd8, 0x0c, 0xef, 0x8f, 0x7b, 0x47, 0x33,
-	0x29, 0x67, 0x73, 0x3c, 0x71, 0xbb, 0x89, 0x99, 0x9e, 0x68, 0xbe, 0x40, 0xa5, 0xd9, 0xa2, 0xf0,
-	0x40, 0x7f, 0x04, 0xfb, 0x6f, 0xbe, 0x63, 0x66, 0x34, 0x97, 0x42, 0x25, 0x78, 0x6d, 0x50, 0x69,
-	0x72, 0x08, 0xcd, 0x82, 0xcd, 0x30, 0x55, 0xfc, 0x0e, 0x69, 0x27, 0x0a, 0x06, 0xf5, 0xa4, 0x61,
-	0x85, 0x31, 0xbf, 0x43, 0x42, 0x60, 0xdb, 0xae, 0xe9, 0x9e, 0xd3, 0xdd, 0xba, 0xff, 0x23, 0x80,
-	0x83, 0x2a, 0xcd, 0x07, 0xae, 0x74, 0x82, 0xc5, 0xfc, 0x96, 0xbc, 0x84, 0xfa, 0x0d, 0x9b, 0x1b,
-	0xa4, 0x41, 0x54, 0x1b, 0x84, 0xc3, 0xc3, 0x78, 0xcd, 0x6d, 0x3c, 0x76, 0x95, 0x8c, 0x50, 0x33,
-	0x3e, 0x4f, 0x3c, 0x49, 0xba, 0x50, 0xcf, 0xa4, 0x11, 0x9a, 0x6e, 0x45, 0xc1, 0xa0, 0x96, 0xf8,
-	0xcd, 0xbf, 0x3b, 0xfa, 0xb9, 0x0d, 0xad, 0x87, 0xe9, 0x49, 0x07, 0xb6, 0x78, 0x4e, 0x83, 0x28,
-	0x18, 0x34, 0x93, 0x2d, 0x9e, 0x93, 0xd7, 0x50, 0xb7, 0x17, 0x89, 0xee, 0x3b, 0x9d, 0xe1, 0xf1,
-	0x86, 0xb5, 0x8b, 0x92, 0x7d, 0x9b, 0xaf, 0x4a, 0xf2, 0x99, 0x9c, 0x5f, 0x4c, 0x7c, 0x9c, 0x35,
-	0x7a, 0x25, 0x27, 0xef, 0x73, 0x5a, 0x73, 0x39, 0xfd, 0xc6, 0x7a, 0x51, 0x88, 0x39, 0xdd, 0x76,
-	0xa2, 0x5b, 0x93, 0x57, 0x00, 0x4a, 0xb3, 0x52, 0xa7, 0xf6, 0xf2, 0x69, 0x3d, 0x0a, 0x06, 0xe1,
-	0xb0, 0x17, 0xfb, 0xce, 0xc4, 0xcb, 0xce, 0xc4, 0x9f, 0x96, 0x9d, 0x49, 0x9a, 0x8e, 0xb6, 0x7b,
-	0x72, 0x06, 0x0d, 0x14, 0xb9, 0x0f, 0xdc, 0xf9, 0x6b, 0xe0, 0x2e, 0x8a, 0xdc, 0x85, 0x3d, 0x87,
-	0xfd, 0x5c, 0x66, 0x66, 0x81, 0x42, 0xab, 0x34, 0xb3, 0xa5, 0x60, 0x4e, 0x77, 0xdd, 0x85, 0xfe,
-	0xbf, 0x3a, 0xb8, 0xf0, 0x3a, 0x79, 0x06, 0xed, 0xc9, 0xad, 0xc6, 0x0a, 0x6c, 0x38, 0xb0, 0xe5,
-	0xc4, 0x25, 0xf4, 0x14, 0x5a, 0xa6, 0xe4, 0x15, 0xd3, 0x74, 0x4c, 0x68, 0xb5, 0x25, 0x72, 0x0c,
-	0x55, 0xee, 0x74, 0xca, 0xb8, 0xc5, 0xc0, 0x61, 0x7b, 0x2b, 0xfd, 0xad, 0x93, 0xc9, 0x29, 0x3c,
-	0xaa, 0x50, 0x69, 0x74, 0x2a, 0xa7, 0xa9, 0xca, 0x64, 0x81, 0x34, 0x74, 0x01, 0x07, 0xab, 0xd3,
-	0x4b, 0xa3, 0x2f, 0xa7, 0x63, 0x7b, 0xb4, 0x5e, 0x54, 0x89, 0xba, 0xe4, 0x98, 0xd3, 0xd6, 0x46,
-	0x51, 0x89, 0xd7, 0xd7, 0xcd, 0xe4, 0x28, 0x2c, 0xdb, 0xde, 0x30, 0x33, 0x72, 0x32, 0x79, 0x02,
-	0x70, 0x6d, 0xd0, 0x3c, 0x18, 0xae, 0x5a, 0xd2, 0x74, 0x8a, 0x9b, 0xae, 0x23, 0x08, 0x33, 0x53,
-	0x96, 0x28, 0x74, 0x6a, 0x4a, 0x4e, 0xbb, 0xae, 0xb1, 0x70, 0x2f, 0x7d, 0x2e, 0xf9, 0xf0, 0x0a,
-	0x76, 0xfc, 0x7c, 0x90, 0xaf, 0xd0, 0x7d, 0x87, 0x3a, 0x31, 0x42, 0x70, 0x31, 0xab, 0xde, 0x03,
-	0x89, 0x36, 0x86, 0xeb, 0xb7, 0x17, 0xd7, 0xeb, 0xff, 0x91, 0x58, 0x3d, 0xa6, 0xfe, 0x7f, 0x2f,
-	0x82, 0xf3, 0x33, 0x78, 0x2c, 0x64, 0x2c, 0x26, 0xb1, 0x10, 0x6c, 0x3d, 0xe4, 0x3c, 0xf4, 0x26,
-	0x3e, 0xda, 0xb1, 0xf8, 0x52, 0xfd, 0x16, 0x52, 0x56, 0xf0, 0xc9, 0x8e, 0x1b, 0x96, 0xd3, 0x5f,
-	0x01, 0x00, 0x00, 0xff, 0xff, 0x38, 0x6e, 0xaf, 0x8e, 0x3c, 0x04, 0x00, 0x00,
+	// 991 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xcf, 0x6e, 0xdb, 0xc6,
+	0x13, 0x06, 0xad, 0x3f, 0xb6, 0x46, 0xb2, 0x1c, 0x6f, 0x1c, 0x87, 0xa0, 0xe3, 0x9f, 0x65, 0xfa,
+	0xe7, 0x46, 0x76, 0x1a, 0xd2, 0x51, 0x50, 0x14, 0xc9, 0xa5, 0x70, 0x9c, 0xd6, 0x75, 0x5b, 0x20,
+	0x06, 0xdd, 0xf6, 0xd0, 0x8b, 0xb0, 0x14, 0xc7, 0xca, 0x1a, 0xd2, 0x2e, 0x43, 0x2e, 0xe3, 0x3a,
+	0x45, 0x51, 0xa0, 0x28, 0xd0, 0x1c, 0x7a, 0x6a, 0x81, 0xb6, 0x4f, 0xd0, 0x67, 0xe9, 0xbd, 0xaf,
+	0xd0, 0x43, 0x1f, 0xa3, 0xd8, 0xa5, 0xfe, 0x50, 0x52, 0x64, 0xc5, 0x80, 0x7b, 0x22, 0x77, 0xf6,
+	0xdb, 0x99, 0x6f, 0x66, 0xbe, 0x59, 0x12, 0x2a, 0xb1, 0xa4, 0x32, 0x89, 0x9d, 0x30, 0x12, 0x52,
+	0x90, 0xc5, 0x97, 0xc8, 0x02, 0xec, 0x52, 0xce, 0x1d, 0x1a, 0x32, 0xab, 0xda, 0xc5, 0x38, 0xa6,
+	0x6d, 0xec, 0x6d, 0x5b, 0x1b, 0x6d, 0x21, 0xda, 0x1d, 0x74, 0xf5, 0xca, 0x4f, 0x4e, 0x5d, 0xc9,
+	0xba, 0x18, 0x4b, 0xda, 0x0d, 0x7b, 0x80, 0x3b, 0x3d, 0x00, 0x0d, 0x99, 0x4b, 0x39, 0x17, 0x92,
+	0x4a, 0x26, 0x78, 0xff, 0xf8, 0xbb, 0xfa, 0xd1, 0xba, 0xdf, 0x46, 0x7e, 0x3f, 0x3e, 0xa7, 0xed,
+	0x36, 0x46, 0xae, 0x08, 0x35, 0x62, 0x12, 0x6d, 0x7f, 0x0a, 0xa6, 0x97, 0x70, 0xce, 0x78, 0xfb,
+	0xc3, 0xaf, 0xb1, 0x95, 0xe8, 0x2d, 0x0f, 0x5f, 0x24, 0x18, 0x4b, 0xb2, 0x06, 0xa5, 0x90, 0xb6,
+	0xb1, 0x19, 0xb3, 0x57, 0x68, 0x56, 0x6b, 0x46, 0xbd, 0xe0, 0x2d, 0x28, 0xc3, 0x09, 0x7b, 0x85,
+	0x84, 0x40, 0x5e, 0xbd, 0x9b, 0x4b, 0xda, 0xae, 0xdf, 0xed, 0x5f, 0x0d, 0xb0, 0x26, 0xbc, 0x7d,
+	0xc6, 0x62, 0xe9, 0x61, 0xd8, 0xb9, 0x20, 0x0f, 0xa0, 0xf0, 0x92, 0x76, 0x12, 0x34, 0x8d, 0x5a,
+	0xae, 0x5e, 0x6e, 0xac, 0x39, 0x23, 0x75, 0x70, 0x4e, 0x74, 0x8d, 0x9e, 0xa2, 0xa4, 0xac, 0xe3,
+	0xa5, 0x48, 0xb2, 0x02, 0x85, 0x96, 0x48, 0xb8, 0x34, 0xe7, 0x6a, 0x46, 0x3d, 0xe7, 0xa5, 0x8b,
+	0xab, 0x13, 0xfb, 0x27, 0x0f, 0x95, 0xac, 0x7b, 0x52, 0x85, 0x39, 0x16, 0x98, 0x46, 0xcd, 0xa8,
+	0x97, 0xbc, 0x39, 0x16, 0x90, 0x0f, 0xa0, 0xa0, 0x5a, 0x84, 0x3a, 0x4e, 0xb5, 0xb1, 0x33, 0x46,
+	0xed, 0x20, 0xa2, 0xe7, 0x9d, 0x41, 0x4a, 0xa9, 0x27, 0xcd, 0x17, 0xbd, 0xf4, 0x9c, 0x22, 0x7a,
+	0x26, 0xfc, 0xa3, 0xc0, 0xcc, 0x69, 0x9f, 0xe9, 0x42, 0x71, 0x89, 0x11, 0x03, 0x33, 0xaf, 0x8d,
+	0xfa, 0x9d, 0x3c, 0x02, 0x88, 0x25, 0x8d, 0x64, 0x53, 0xb5, 0xd5, 0x2c, 0xd4, 0x8c, 0x7a, 0xb9,
+	0x61, 0x39, 0x69, 0x4b, 0x9d, 0x7e, 0xcf, 0x9d, 0xcf, 0xfb, 0x3d, 0xf7, 0x4a, 0x1a, 0xad, 0xd6,
+	0xe4, 0x3d, 0x58, 0x40, 0x1e, 0xa4, 0x07, 0x8b, 0x33, 0x0f, 0xce, 0x23, 0x0f, 0xf4, 0xb1, 0x7b,
+	0xb0, 0x1c, 0x88, 0x56, 0xd2, 0x45, 0x2e, 0xe3, 0x66, 0x4b, 0xa5, 0x82, 0x81, 0x39, 0xaf, 0x0b,
+	0x7a, 0x63, 0xb0, 0x71, 0x90, 0xda, 0xc9, 0x16, 0x2c, 0xfa, 0x17, 0x12, 0x87, 0xc0, 0x05, 0x0d,
+	0xac, 0x68, 0x63, 0x1f, 0xb4, 0x09, 0x95, 0x24, 0x62, 0x43, 0x4c, 0x49, 0x63, 0xca, 0xca, 0xd6,
+	0x87, 0xec, 0xc0, 0xd0, 0x77, 0xf3, 0x94, 0x32, 0x05, 0x03, 0x0d, 0x5b, 0x1a, 0xd8, 0x3f, 0xd2,
+	0x66, 0xf2, 0x10, 0x56, 0x87, 0x50, 0x91, 0xc8, 0xa6, 0x38, 0x6d, 0xc6, 0x2d, 0x11, 0xa2, 0x59,
+	0xd6, 0x07, 0x6e, 0x0e, 0x76, 0x9f, 0x25, 0xf2, 0xd9, 0xe9, 0x89, 0xda, 0x1a, 0x4d, 0x2a, 0x42,
+	0x19, 0x31, 0x0c, 0xcc, 0xca, 0x58, 0x52, 0x5e, 0x6a, 0x1f, 0x25, 0x13, 0x20, 0x57, 0xd8, 0xc5,
+	0x31, 0x32, 0x4f, 0xb5, 0x99, 0xac, 0x03, 0xbc, 0x48, 0x30, 0xc9, 0x88, 0x2b, 0xe7, 0x95, 0xb4,
+	0x45, 0xab, 0x6b, 0x03, 0xca, 0xad, 0x24, 0x8a, 0x90, 0xcb, 0x66, 0x12, 0x31, 0x73, 0x45, 0x37,
+	0x16, 0x7a, 0xa6, 0x2f, 0x22, 0x66, 0xaf, 0x43, 0x79, 0x20, 0x94, 0xa3, 0x60, 0x5c, 0x68, 0xf6,
+	0x9f, 0x06, 0xdc, 0x52, 0x13, 0x31, 0x39, 0x6d, 0x7d, 0x64, 0xae, 0x27, 0xc9, 0x95, 0xa1, 0x24,
+	0x95, 0xa9, 0xa7, 0xb3, 0xdb, 0x30, 0xaf, 0x54, 0xd4, 0x64, 0x7d, 0xa5, 0x15, 0xd5, 0xf2, 0x28,
+	0x20, 0xb7, 0xa0, 0x78, 0x26, 0x7c, 0x65, 0xcf, 0x67, 0x15, 0x58, 0x87, 0x1b, 0xca, 0x8c, 0xfd,
+	0x70, 0x0a, 0x50, 0xd0, 0x80, 0xea, 0x99, 0xf0, 0xb3, 0x4c, 0xaf, 0x3c, 0x54, 0xaf, 0x0d, 0x30,
+	0x55, 0x2a, 0x9f, 0x64, 0xfc, 0x5c, 0x31, 0x9b, 0x29, 0xa4, 0xaf, 0x4c, 0xe5, 0x37, 0x03, 0x6e,
+	0xbe, 0xe9, 0xc6, 0x79, 0x34, 0x7a, 0xe3, 0x6c, 0xbd, 0xc5, 0x58, 0x5f, 0xf3, 0xcd, 0xf3, 0xbb,
+	0x01, 0xab, 0x23, 0x05, 0x1a, 0x92, 0x7b, 0x7f, 0x94, 0xdc, 0xe6, 0x18, 0xb9, 0xec, 0xa9, 0xff,
+	0x84, 0xda, 0x16, 0x2c, 0xef, 0xfb, 0x22, 0x92, 0xba, 0x0a, 0xe3, 0x7d, 0xeb, 0xe9, 0xb5, 0xf1,
+	0xc7, 0x3c, 0x14, 0xd3, 0xe8, 0xe4, 0x27, 0x03, 0x56, 0x0e, 0x51, 0x4e, 0x5c, 0xf0, 0xe4, 0xee,
+	0x18, 0xf3, 0x69, 0x1f, 0x14, 0x6b, 0x67, 0x16, 0x70, 0x50, 0x1c, 0xfb, 0x7f, 0xdf, 0xff, 0xf5,
+	0xf7, 0x2f, 0x73, 0x26, 0x59, 0xd5, 0x5f, 0xb9, 0xf4, 0xf3, 0xe9, 0x0e, 0x54, 0x1c, 0xef, 0x19,
+	0xe4, 0x02, 0x2a, 0x87, 0x38, 0x9c, 0x23, 0x62, 0x8d, 0x39, 0xcf, 0x68, 0xdb, 0x7a, 0x9b, 0xc6,
+	0xdb, 0x75, 0x1d, 0xd2, 0x26, 0xb5, 0x6c, 0x48, 0x35, 0x5d, 0x99, 0xb8, 0xee, 0x37, 0x2c, 0xf8,
+	0x96, 0x7c, 0x07, 0xd5, 0xd1, 0x19, 0x26, 0xff, 0x1f, 0x0b, 0xf0, 0xc6, 0x11, 0xb7, 0xec, 0x69,
+	0x14, 0x33, 0x89, 0x6f, 0x69, 0x16, 0xeb, 0x64, 0xed, 0x12, 0x16, 0xe4, 0x07, 0x03, 0xaa, 0xba,
+	0x77, 0xd7, 0x98, 0xfe, 0x03, 0x1d, 0xf8, 0x9e, 0xfd, 0xce, 0xac, 0xf4, 0x5d, 0xaa, 0x22, 0x3f,
+	0x36, 0x76, 0xc9, 0x05, 0x2c, 0x1d, 0xe2, 0xc8, 0xfc, 0x5f, 0x4a, 0x63, 0xb6, 0xc2, 0xed, 0xbb,
+	0x9a, 0xc4, 0x26, 0xd9, 0xc8, 0x92, 0x38, 0x13, 0xfe, 0x44, 0x0b, 0x7e, 0x34, 0x60, 0x79, 0xe2,
+	0xf2, 0x99, 0x50, 0xe2, 0xb4, 0xeb, 0xc9, 0xda, 0xbe, 0x84, 0x4a, 0xa6, 0x19, 0xb6, 0xa6, 0x73,
+	0x87, 0x58, 0xd3, 0xe9, 0xa8, 0x5e, 0xa4, 0x73, 0x74, 0x9d, 0x75, 0xd8, 0xd3, 0x81, 0x77, 0xed,
+	0xed, 0x19, 0x75, 0x18, 0xf4, 0xe2, 0xc9, 0x6b, 0xe3, 0xe7, 0xfd, 0x63, 0xf2, 0x31, 0x98, 0x5f,
+	0xf6, 0x7d, 0xd7, 0x0e, 0x04, 0x97, 0x91, 0xe8, 0x74, 0x30, 0xaa, 0xed, 0x1f, 0x1f, 0xd9, 0xdb,
+	0x50, 0x1a, 0xec, 0x11, 0xf3, 0xb9, 0x94, 0x61, 0xfc, 0xd8, 0x75, 0xdb, 0x4c, 0x3e, 0x4f, 0x7c,
+	0xa7, 0x25, 0xba, 0x2e, 0xef, 0xf0, 0x73, 0xda, 0x28, 0xec, 0x39, 0x0d, 0x67, 0x6f, 0x37, 0x6f,
+	0xcc, 0xe5, 0xf2, 0x70, 0x9b, 0x0b, 0x87, 0xfb, 0x0e, 0xe7, 0x74, 0x94, 0xf3, 0x93, 0x72, 0x4a,
+	0xf4, 0x58, 0xfd, 0x76, 0x7c, 0x35, 0xfc, 0xa1, 0x6d, 0xd2, 0x90, 0xf9, 0x45, 0xfd, 0x33, 0xf2,
+	0xf0, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0xda, 0xdd, 0x03, 0xd6, 0xf6, 0x0a, 0x00, 0x00,
 }
