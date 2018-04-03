@@ -16,8 +16,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/nlnwa/veidemannctl/util"
 	"github.com/spf13/cobra"
+	"github.com/nlnwa/veidemannctl/src/connection"
+	"github.com/nlnwa/veidemannctl/src/configutil"
 )
 
 // loginCmd represents the login command
@@ -26,12 +27,12 @@ var loginCmd = &cobra.Command{
 	Short: "Initiate browser session for logging in to Veidemann",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		idp, _ := util.GetIdp()
+		idp, _ := connection.GetIdp()
 		if idp == "" {
 			return
 		}
 
-		a := util.NewAuth(idp)
+		a := connection.NewAuth(idp)
 
 		authCodeURL := a.CreateAuthCodeURL()
 		fmt.Println("A login screen should now open in your browser. Follow the login steps and paste the code here.")
@@ -43,7 +44,7 @@ var loginCmd = &cobra.Command{
 		fmt.Scan(&code)
 		a.VerifyCode(code)
 		claims := a.Claims()
-		util.WriteConfig()
+		configutil.WriteConfig()
 		fmt.Printf("Hello %s\n", claims.Name)
 	},
 }

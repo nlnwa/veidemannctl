@@ -1,0 +1,5 @@
+{{define "LINE" -}}{{printf `%36s %36s %15s %10d` .Id .JobId .State .DocumentsCrawled}}{{end -}}
+{{inverse}}{{printf `%-36.36s %-36.36s %15s %10s` "Id" "JobId" "State" "Docs"}}{{reset}}
+{{range .Value}}{{template "LINE" .}}
+{{end}}
+TOTAL {{print .Count}}

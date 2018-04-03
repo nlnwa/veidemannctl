@@ -17,9 +17,9 @@ import (
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 
 	"context"
-	"github.com/nlnwa/veidemannctl/util"
 	"github.com/spf13/cobra"
 	"log"
+	"github.com/nlnwa/veidemannctl/src/connection"
 )
 
 // abortCmd represents the abort command
@@ -29,7 +29,7 @@ var abortCmd = &cobra.Command{
 	Long:  `Abort one or more crawl executions.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			client, conn := util.NewStatusClient()
+			client, conn := connection.NewStatusClient()
 			defer conn.Close()
 
 			for _, arg := range args {
@@ -47,14 +47,4 @@ var abortCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(abortCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// abortCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// abortCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

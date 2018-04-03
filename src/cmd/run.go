@@ -16,11 +16,11 @@ package cmd
 import (
 	"log"
 
-	"github.com/nlnwa/veidemannctl/util"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"golang.org/x/net/context"
 
 	"github.com/spf13/cobra"
+	"github.com/nlnwa/veidemannctl/src/connection"
 )
 
 // runCmd represents the run command
@@ -33,7 +33,7 @@ If seedId is not submitted then all the seeds wich are configured to use the sub
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			client, conn := util.NewControllerClient()
+			client, conn := connection.NewControllerClient()
 			defer conn.Close()
 
 			switch len(args) {

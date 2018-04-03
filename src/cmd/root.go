@@ -18,11 +18,13 @@ import (
 	"os"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/nlnwa/veidemannctl/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
+	"github.com/nlnwa/veidemannctl/src/version"
+	"github.com/nlnwa/veidemannctl/src/cmd/reports"
+	"github.com/nlnwa/veidemannctl/src/configutil"
 )
 
 var (
@@ -38,7 +40,7 @@ var RootCmd = &cobra.Command{
 	Use:   "veidemannctl",
 	Short: "Veidemann command line client",
 	Long:  `A command line client for Veidemann which can manipulate configs and request status of the crawler.`,
-
+	Version: "master",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -69,6 +71,11 @@ func init() {
 	viper.BindPFlag("serverNameOverride", RootCmd.PersistentFlags().Lookup("serverNameOverride"))
 
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Turn on debugging")
+
+	RootCmd.SetVersionTemplate("{{.Version}}")
+	RootCmd.Version = version.GetVersion()
+
+	RootCmd.AddCommand(reports.ReportCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -115,6 +122,6 @@ func initConfig() {
 		RootCmd.PersistentFlags().Changed("trusted-ca") ||
 		RootCmd.PersistentFlags().Changed("serverNameOverride") {
 
-		util.WriteConfig()
+		configutil.WriteConfig()
 	}
 }

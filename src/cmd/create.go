@@ -17,12 +17,13 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/nlnwa/veidemannctl/util"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"log"
 	"os"
+	"github.com/nlnwa/veidemannctl/src/format"
+	"github.com/nlnwa/veidemannctl/src/connection"
 )
 
 var filename string
@@ -40,13 +41,13 @@ var createCmd = &cobra.Command{
 		} else if filename == "-" {
 			filename = ""
 		}
-		result, err := util.Unmarshal(filename)
+		result, err := format.Unmarshal(filename)
 		if err != nil {
 			log.Fatalf("Parse error: %v", err)
 			os.Exit(1)
 		}
 
-		client, conn := util.NewControllerClient()
+		client, conn := connection.NewControllerClient()
 		defer conn.Close()
 
 		for _, v := range result {
@@ -106,15 +107,6 @@ func handleError(msg proto.Message, err error) {
 func init() {
 	RootCmd.AddCommand(createCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// createCmd.PersistentFlags().String("foo", "", "A help for foo")
 	createCmd.PersistentFlags().StringVarP(&filename, "input", "i", "", "File name to read from. "+
 		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

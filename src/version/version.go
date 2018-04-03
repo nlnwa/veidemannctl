@@ -11,23 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package version
 
 import (
-	"github.com/nlnwa/veidemannctl/src/cmd"
-	log "github.com/sirupsen/logrus"
+	"fmt"
+	"strings"
+	"github.com/nlnwa/veidemannctl/bindata"
+	"runtime"
 )
 
-//go:generate scripts/git-version.sh
-//go:generate scripts/build-protobuf.sh
-//go:generate go get github.com/golang/dep/cmd/dep
-//go:generate dep ensure -vendor-only
-//go:generate go get -u github.com/jteeuwen/go-bindata/...
-//go:generate go-bindata -prefix "res/" -pkg bindata -o bindata/resources.go res/...
-func main() {
-	cmd.Execute()
-}
+func GetVersion() string {
+	Version, err := bindata.Asset("version")
+	if err != nil {
+		panic(err)
+	}
 
-func init() {
-	log.SetLevel(log.WarnLevel)
+	return fmt.Sprintf("Client version: %s, Go version: %s, Platform: %s/%s\n",
+		strings.Trim(string(Version), "\n\r "),
+		runtime.Version(),
+		runtime.GOOS,
+		runtime.GOARCH)
 }
