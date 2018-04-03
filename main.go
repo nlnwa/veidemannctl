@@ -15,16 +15,19 @@ package main
 
 import (
 	"github.com/nlnwa/veidemannctl/src/cmd"
+	v "github.com/nlnwa/veidemannctl/src/version"
 	log "github.com/sirupsen/logrus"
 )
 
-//go:generate scripts/git-version.sh
+var version = "master"
+
 //go:generate scripts/build-protobuf.sh
 //go:generate go get github.com/golang/dep/cmd/dep
 //go:generate dep ensure -vendor-only
 //go:generate go get -u github.com/jteeuwen/go-bindata/...
 //go:generate go-bindata -prefix "res/" -pkg bindata -o bindata/resources.go res/...
 func main() {
+	v.Version.SetGitVersion(version)
 	cmd.Execute()
 }
 

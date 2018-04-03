@@ -15,20 +15,23 @@ package version
 
 import (
 	"fmt"
-	"strings"
-	"github.com/nlnwa/veidemannctl/bindata"
 	"runtime"
 )
 
-func GetVersion() string {
-	Version, err := bindata.Asset("version")
-	if err != nil {
-		panic(err)
-	}
+type VeidemannVersion struct {
+	gitVersion string
+}
 
+func (v *VeidemannVersion) SetGitVersion(version string) {
+	v.gitVersion = version
+}
+
+func (v *VeidemannVersion) GetVersionString() string {
 	return fmt.Sprintf("Client version: %s, Go version: %s, Platform: %s/%s\n",
-		strings.Trim(string(Version), "\n\r "),
+		v.gitVersion,
 		runtime.Version(),
 		runtime.GOOS,
 		runtime.GOARCH)
 }
+
+var Version = &VeidemannVersion{}

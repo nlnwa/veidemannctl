@@ -5,7 +5,6 @@
 // res/jobexecution.template
 // res/pagelog.template
 // res/screenshot.template
-// res/version
 // DO NOT EDIT!
 
 package bindata
@@ -173,26 +172,6 @@ func screenshotTemplate() (*asset, error) {
 	return a, nil
 }
 
-var _version = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x32\x4b\x4c\x4d\x34\x4b\x34\x37\x37\x31\xb2\x4c\x35\x34\x36\xb2\x30\x49\x4c\x32\x4c\x4d\x4d\xb2\x4c\x35\x34\x4a\x4e\x36\x32\x32\xb5\x48\x34\x33\xb5\x34\x37\x4f\xd6\x4d\xc9\x2c\x2a\xa9\xe4\x02\x04\x00\x00\xff\xff\x3c\x29\x52\xa5\x2f\x00\x00\x00")
-
-func versionBytes() ([]byte, error) {
-	return bindataRead(
-		_version,
-		"version",
-	)
-}
-
-func version() (*asset, error) {
-	bytes, err := versionBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "version", size: 47, mode: os.FileMode(436), modTime: time.Unix(1522752995, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -250,7 +229,6 @@ var _bindata = map[string]func() (*asset, error){
 	"jobexecution.template": jobexecutionTemplate,
 	"pagelog.template": pagelogTemplate,
 	"screenshot.template": screenshotTemplate,
-	"version": version,
 }
 
 // AssetDir returns the file names below a certain
@@ -298,7 +276,6 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"jobexecution.template": &bintree{jobexecutionTemplate, map[string]*bintree{}},
 	"pagelog.template": &bintree{pagelogTemplate, map[string]*bintree{}},
 	"screenshot.template": &bintree{screenshotTemplate, map[string]*bintree{}},
-	"version": &bintree{version, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory

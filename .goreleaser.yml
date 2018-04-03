@@ -1,0 +1,16 @@
+builds:
+  - goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+    hooks:
+      pre: go generate
+
+archive:
+  format: binary
+
+release:
+  draft: true
+  prerelease: true
