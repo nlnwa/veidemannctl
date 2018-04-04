@@ -1,3 +1,6 @@
+# Packages required by generator
+required = ["github.com/jteeuwen/go-bindata"]
+
 [[constraint]]
   name = "github.com/golang/protobuf"
   branch = "master"
@@ -8,11 +11,11 @@
 
 [[constraint]]
   name = "github.com/spf13/cobra"
-  version = "0.0.1"
+  version = "0.0.2"
 
 [[constraint]]
   name = "github.com/spf13/viper"
-  version = "1.0.0"
+  version = "1.0.2"
 
 [[constraint]]
   name = "golang.org/x/net"

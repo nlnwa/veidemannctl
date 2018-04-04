@@ -11,26 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cmd
 
 import (
-	"github.com/nlnwa/veidemannctl/src/cmd"
-	v "github.com/nlnwa/veidemannctl/src/version"
-	log "github.com/sirupsen/logrus"
+	"strings"
+	"testing"
 )
 
-var version = "master"
+func Test_printValidObjectTypes(t *testing.T) {
+	prefix := "Valid object types"
 
-//go:generate scripts/build-protobuf.sh
-//go:generate go get github.com/golang/dep/cmd/dep
-//go:generate dep ensure -vendor-only
-//go:generate go get -u github.com/jteeuwen/go-bindata/...
-//go:generate go-bindata -prefix "res/" -pkg bindata -o bindata/resources.go res/...
-func main() {
-	v.Version.SetGitVersion(version)
-	cmd.Execute()
-}
-
-func init() {
-	log.SetLevel(log.WarnLevel)
+	if got := printValidObjectTypes(); !strings.HasPrefix(got, prefix) {
+		t.Errorf("printValidObjectTypes() = '%v', but should start with '%v'", got, prefix)
+	}
 }

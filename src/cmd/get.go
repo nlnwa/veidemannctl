@@ -21,17 +21,21 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/nlnwa/veidemannctl/util"
+	"github.com/nlnwa/veidemannctl/src/apiutil"
+	"github.com/nlnwa/veidemannctl/src/connection"
+	"github.com/nlnwa/veidemannctl/src/format"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"golang.org/x/net/context"
 )
 
-var (
-	label  string
-	name   string
-	file   string
-	format string
-)
+var flags struct {
+	label    string
+	name     string
+	file     string
+	format   string
+	pageSize int32
+	page     int32
+}
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
@@ -50,7 +54,7 @@ var getCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 && len(args) <= 2 {
-			client, conn := util.NewControllerClient()
+			client, conn := connection.NewControllerClient()
 			defer conn.Close()
 
 			var selector []string
@@ -63,110 +67,110 @@ var getCmd = &cobra.Command{
 
 			switch args[0] {
 			case "entity":
-				request := util.CreateListRequest(ids, name, label, pageSize, page)
+				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
 
 				r, err := client.ListCrawlEntities(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get entity: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "seed":
 				request := api.SeedListRequest{}
 
-				selector = util.CreateSelector(label)
+				selector = apiutil.CreateSelector(flags.label)
 
 				request.Id = ids
-				request.Name = name
+				request.Name = flags.name
 				request.LabelSelector = selector
-				request.Page = page
-				request.PageSize = pageSize
+				request.Page = flags.page
+				request.PageSize = flags.pageSize
 
 				r, err := client.ListSeeds(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get seed: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "job":
-				request := util.CreateListRequest(ids, name, label, pageSize, page)
+				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
 
 				r, err := client.ListCrawlJobs(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get job: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "crawlconfig":
-				request := util.CreateListRequest(ids, name, label, pageSize, page)
+				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
 
 				r, err := client.ListCrawlConfigs(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get crawl config: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "schedule":
-				request := util.CreateListRequest(ids, name, label, pageSize, page)
+				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
 
 				r, err := client.ListCrawlScheduleConfigs(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get schedule config: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "browser":
-				request := util.CreateListRequest(ids, name, label, pageSize, page)
+				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
 
 				r, err := client.ListBrowserConfigs(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get browser config: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "politeness":
-				request := util.CreateListRequest(ids, name, label, pageSize, page)
+				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
 
 				r, err := client.ListPolitenessConfigs(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get politeness config: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "script":
-				request := util.CreateListRequest(ids, name, label, pageSize, page)
+				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
 
 				r, err := client.ListBrowserScripts(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get browser script: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "group":
-				request := util.CreateListRequest(ids, name, label, pageSize, page)
+				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
 
 				r, err := client.ListCrawlHostGroupConfigs(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get crawl host group config: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "loglevel":
@@ -175,7 +179,7 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get log config: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "activerole":
@@ -184,20 +188,20 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get active role: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			case "role":
 				request := api.RoleMappingsListRequest{}
-				request.Page = page
-				request.PageSize = pageSize
+				request.Page = flags.page
+				request.PageSize = flags.pageSize
 
 				r, err := client.ListRoleMappings(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not get active role: %v", err)
 				}
 
-				if util.Marshal(file, format, r) != nil {
+				if format.Marshal(flags.file, flags.format, r) != nil {
 					os.Exit(1)
 				}
 			default:
@@ -210,12 +214,12 @@ var getCmd = &cobra.Command{
 			fmt.Println("See 'veidemannctl get -h' for help")
 		}
 	},
-	ValidArgs: util.GetObjectNames(),
+	ValidArgs: format.GetObjectNames(),
 }
 
 func printValidObjectTypes() string {
 	var names string
-	for _, v := range util.GetObjectNames() {
+	for _, v := range format.GetObjectNames() {
 		names += fmt.Sprintf("  * %s\n", v)
 	}
 	return fmt.Sprintf("Valid object types include:\n%s\n", names)
@@ -226,16 +230,10 @@ func init() {
 
 	// Here you will define your flags and configuration settings.
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	getCmd.PersistentFlags().StringVarP(&label, "label", "l", "", "List objects by label (<type>:<value> | <value>)")
-	getCmd.PersistentFlags().StringVarP(&name, "name", "n", "", "List objects by name (accepts regular expressions)")
-	getCmd.PersistentFlags().StringVarP(&format, "format", "f", "table", "Output format (table|json|yaml)")
-	getCmd.PersistentFlags().StringVarP(&file, "output", "o", "", "File name to write to")
-	getCmd.PersistentFlags().Int32VarP(&pageSize, "pagesize", "s", 10, "Number of objects to get")
-	getCmd.PersistentFlags().Int32VarP(&page, "page", "p", 0, "The page number")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	getCmd.PersistentFlags().StringVarP(&flags.label, "label", "l", "", "List objects by label (<type>:<value> | <value>)")
+	getCmd.PersistentFlags().StringVarP(&flags.name, "name", "n", "", "List objects by name (accepts regular expressions)")
+	getCmd.PersistentFlags().StringVarP(&flags.format, "format", "f", "table", "Output format (table|json|yaml)")
+	getCmd.PersistentFlags().StringVarP(&flags.file, "output", "o", "", "File name to write to")
+	getCmd.PersistentFlags().Int32VarP(&flags.pageSize, "pagesize", "s", 10, "Number of objects to get")
+	getCmd.PersistentFlags().Int32VarP(&flags.page, "page", "p", 0, "The page number")
 }

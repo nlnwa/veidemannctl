@@ -11,26 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package apiutil
 
 import (
-	"github.com/nlnwa/veidemannctl/src/cmd"
-	v "github.com/nlnwa/veidemannctl/src/version"
-	log "github.com/sirupsen/logrus"
+	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	"strings"
 )
 
-var version = "master"
-
-//go:generate scripts/build-protobuf.sh
-//go:generate go get github.com/golang/dep/cmd/dep
-//go:generate dep ensure -vendor-only
-//go:generate go get -u github.com/jteeuwen/go-bindata/...
-//go:generate go-bindata -prefix "res/" -pkg bindata -o bindata/resources.go res/...
-func main() {
-	v.Version.SetGitVersion(version)
-	cmd.Execute()
+func CreateSelector(labelString string) []string {
+	var result []string
+	if labelString != "" {
+		result = strings.Split(labelString, ",")
+	}
+	return result
 }
 
-func init() {
-	log.SetLevel(log.WarnLevel)
+func CreateListRequest(ids []string, name string, labelString string, pageSize int32, page int32) api.ListRequest {
+	selector := CreateSelector(labelString)
+
+	request := api.ListRequest{}
+	request.Id = ids
+	request.Name = name
+	request.LabelSelector = selector
+	request.Page = page
+	request.PageSize = pageSize
+
+	return request
 }

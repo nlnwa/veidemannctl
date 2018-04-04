@@ -11,30 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package version
 
 import (
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
-	"strings"
+	"fmt"
+	"runtime"
 )
 
-func CreateSelector(labelString string) []string {
-	var result []string
-	if labelString != "" {
-		result = strings.Split(labelString, ",")
-	}
-	return result
+type VeidemannVersion struct {
+	gitVersion string
 }
 
-func CreateListRequest(ids []string, name string, labelString string, pageSize int32, page int32) api.ListRequest {
-	selector := CreateSelector(labelString)
-
-	request := api.ListRequest{}
-	request.Id = ids
-	request.Name = name
-	request.LabelSelector = selector
-	request.Page = page
-	request.PageSize = pageSize
-
-	return request
+func (v *VeidemannVersion) SetGitVersion(version string) {
+	v.gitVersion = version
 }
+
+func (v *VeidemannVersion) GetVersionString() string {
+	return fmt.Sprintf("Client version: %s, Go version: %s, Platform: %s/%s\n",
+		v.gitVersion,
+		runtime.Version(),
+		runtime.GOOS,
+		runtime.GOARCH)
+}
+
+var Version = &VeidemannVersion{}

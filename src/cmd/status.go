@@ -18,7 +18,7 @@ import (
 
 	tm "github.com/buger/goterm"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/nlnwa/veidemannctl/util"
+	"github.com/nlnwa/veidemannctl/src/connection"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -32,7 +32,7 @@ var statusCmd = &cobra.Command{
 	Short: "Get a realtime view of crawling activity",
 	Long:  `Get a realtime view of crawling activity.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, conn := util.NewStatusClient()
+		client, conn := connection.NewStatusClient()
 		defer conn.Close()
 
 		request := api.RunningExecutionsRequest{PageSize: 50}
@@ -88,14 +88,4 @@ var statusCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(statusCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// statusCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// statusCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

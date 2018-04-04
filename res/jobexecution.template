@@ -1,0 +1,8 @@
+{{define "LINE" -}}{{printf `%36s %36s %15s %8d %8d` .Id .JobId .State .DocumentsCrawled .UrisCrawled}}
+{{range $key, $value := .ExecutionsState}}{{printf `%16s %5d` $key $value}}
+{{end -}}
+{{end -}}
+{{inverse}}{{printf `%-36.36s %-36.36s %15s %8s %8s` "Id" "JobId" "State" "Docs" "Uris"}}{{reset}}
+{{range .Value}}{{template "LINE" .}}
+{{end}}
+TOTAL {{print .Count}}

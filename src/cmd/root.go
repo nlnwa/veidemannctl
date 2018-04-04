@@ -18,7 +18,9 @@ import (
 	"os"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/nlnwa/veidemannctl/util"
+	"github.com/nlnwa/veidemannctl/src/cmd/reports"
+	"github.com/nlnwa/veidemannctl/src/configutil"
+	"github.com/nlnwa/veidemannctl/src/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -38,7 +40,6 @@ var RootCmd = &cobra.Command{
 	Use:   "veidemannctl",
 	Short: "Veidemann command line client",
 	Long:  `A command line client for Veidemann which can manipulate configs and request status of the crawler.`,
-
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -47,6 +48,8 @@ var RootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	RootCmd.Version = version.Version.GetVersionString()
+
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -69,6 +72,10 @@ func init() {
 	viper.BindPFlag("serverNameOverride", RootCmd.PersistentFlags().Lookup("serverNameOverride"))
 
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Turn on debugging")
+
+	RootCmd.SetVersionTemplate("{{.Version}}")
+
+	RootCmd.AddCommand(reports.ReportCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -115,6 +122,6 @@ func initConfig() {
 		RootCmd.PersistentFlags().Changed("trusted-ca") ||
 		RootCmd.PersistentFlags().Changed("serverNameOverride") {
 
-		util.WriteConfig()
+		configutil.WriteConfig()
 	}
 }
