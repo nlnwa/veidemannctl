@@ -19,8 +19,8 @@ import (
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"golang.org/x/net/context"
 
-	"github.com/spf13/cobra"
 	"github.com/nlnwa/veidemannctl/src/connection"
+	"github.com/spf13/cobra"
 )
 
 // runCmd represents the run command

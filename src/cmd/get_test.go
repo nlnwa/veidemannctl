@@ -1,4 +1,4 @@
-// Copyright © 2017 National Library of Norway
+// Copyright © 2017 National Library of Norway.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,23 +14,14 @@
 package cmd
 
 import (
-	"github.com/nlnwa/veidemannctl/src/configutil"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"strings"
+	"testing"
 )
 
-// logoutCmd represents the logout command
-var logoutCmd = &cobra.Command{
-	Use:   "logout",
-	Short: "Log out of Veidemann",
-	Long:  `Log out of Veidemann.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		viper.Set("accessToken", "")
-		viper.Set("nonce", "")
-		configutil.WriteConfig()
-	},
-}
+func Test_printValidObjectTypes(t *testing.T) {
+	prefix := "Valid object types"
 
-func init() {
-	RootCmd.AddCommand(logoutCmd)
+	if got := printValidObjectTypes(); !strings.HasPrefix(got, prefix) {
+		t.Errorf("printValidObjectTypes() = '%v', but should start with '%v'", got, prefix)
+	}
 }

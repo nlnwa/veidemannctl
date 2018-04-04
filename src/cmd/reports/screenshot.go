@@ -15,15 +15,15 @@
 package reports
 
 import (
-	"github.com/spf13/cobra"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
-	"log"
+	"bytes"
 	"context"
+	"github.com/nlnwa/veidemannctl/src/connection"
+	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	"github.com/spf13/cobra"
+	"log"
 	"os"
 	"os/exec"
-	"bytes"
 	"time"
-	"github.com/nlnwa/veidemannctl/src/connection"
 )
 
 var (

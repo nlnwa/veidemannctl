@@ -21,11 +21,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/nlnwa/veidemannctl/src/format"
+	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
+	"github.com/nlnwa/veidemannctl/src/format"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"golang.org/x/net/context"
-	"github.com/nlnwa/veidemannctl/src/apiutil"
 )
 
 var flags struct {

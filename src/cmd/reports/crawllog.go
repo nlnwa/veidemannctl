@@ -15,11 +15,11 @@
 package reports
 
 import (
-	"github.com/spf13/cobra"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
-	"github.com/nlnwa/veidemannctl/src/connection"
-	"log"
 	"context"
+	"github.com/nlnwa/veidemannctl/src/connection"
+	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	"github.com/spf13/cobra"
+	"log"
 )
 
 // crawllogCmd represents the crawllog command

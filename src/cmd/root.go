@@ -18,13 +18,13 @@ import (
 	"os"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/nlnwa/veidemannctl/src/cmd/reports"
+	"github.com/nlnwa/veidemannctl/src/configutil"
+	"github.com/nlnwa/veidemannctl/src/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
-	"github.com/nlnwa/veidemannctl/src/version"
-	"github.com/nlnwa/veidemannctl/src/cmd/reports"
-	"github.com/nlnwa/veidemannctl/src/configutil"
 )
 
 var (
@@ -35,12 +35,11 @@ var (
 	debug              bool
 )
 
-
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:     "veidemannctl",
-	Short:   "Veidemann command line client",
-	Long:    `A command line client for Veidemann which can manipulate configs and request status of the crawler.`,
+	Use:   "veidemannctl",
+	Short: "Veidemann command line client",
+	Long:  `A command line client for Veidemann which can manipulate configs and request status of the crawler.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

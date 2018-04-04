@@ -28,11 +28,11 @@ import (
 )
 
 var (
-	executionId    string
-	pageSize       int32
-	page           int32
-	goTemplate     string
-	filter         []string
+	executionId string
+	pageSize    int32
+	page        int32
+	goTemplate  string
+	filter      []string
 	//validArgs      = []string{"crawllog", "pagelog", "screenshot", "crawlexecution", "jobexecution"}
 	//validArgs      = []string{"crawllog", "pagelog", "screenshot"}
 )
@@ -41,7 +41,7 @@ var (
 var ReportCmd = &cobra.Command{
 	Use:   "report",
 	Short: "Get log report",
-	Long: `Request a report.`,
+	Long:  `Request a report.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

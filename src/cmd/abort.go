@@ -17,9 +17,9 @@ import (
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 
 	"context"
+	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/spf13/cobra"
 	"log"
-	"github.com/nlnwa/veidemannctl/src/connection"
 )
 
 // abortCmd represents the abort command

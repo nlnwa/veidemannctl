@@ -18,12 +18,12 @@ import (
 
 	tm "github.com/buger/goterm"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/nlnwa/veidemannctl/src/connection"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"io"
 	"log"
-	"github.com/nlnwa/veidemannctl/src/connection"
 )
 
 // statusCmd represents the status command

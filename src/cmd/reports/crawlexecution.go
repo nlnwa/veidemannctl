@@ -15,11 +15,11 @@
 package reports
 
 import (
-	"github.com/spf13/cobra"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
-	"github.com/nlnwa/veidemannctl/src/connection"
-	"log"
 	"context"
+	"github.com/nlnwa/veidemannctl/src/connection"
+	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	"github.com/spf13/cobra"
+	"log"
 )
 
 // crawlexecutionCmd represents the crawlexecution command
@@ -36,23 +36,23 @@ to quickly create a Cobra application.`,
 		client, conn := connection.NewStatusClient()
 		defer conn.Close()
 
-			request := api.ListExecutionsRequest{}
-			if len(args) > 1 {
-				request.Id = args[1:]
-			}
-			//if executionId != "" {
-			//	request.ExecutionId = executionId
-			//}
-			//request.Filter = applyFilter(filter)
-			request.Page = page
-			request.PageSize = pageSize
+		request := api.ListExecutionsRequest{}
+		if len(args) > 1 {
+			request.Id = args[1:]
+		}
+		//if executionId != "" {
+		//	request.ExecutionId = executionId
+		//}
+		//request.Filter = applyFilter(filter)
+		request.Page = page
+		request.PageSize = pageSize
 
-			r, err := client.ListExecutions(context.Background(), &request)
-			if err != nil {
-				log.Fatalf("could not get crawl log: %v", err)
-			}
+		r, err := client.ListExecutions(context.Background(), &request)
+		if err != nil {
+			log.Fatalf("could not get crawl log: %v", err)
+		}
 
-			ApplyTemplate(r, "crawlexecution.template")
+		ApplyTemplate(r, "crawlexecution.template")
 	},
 }
 

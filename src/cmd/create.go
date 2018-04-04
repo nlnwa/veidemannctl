@@ -17,13 +17,13 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/nlnwa/veidemannctl/src/connection"
+	"github.com/nlnwa/veidemannctl/src/format"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"log"
 	"os"
-	"github.com/nlnwa/veidemannctl/src/format"
-	"github.com/nlnwa/veidemannctl/src/connection"
 )
 
 var filename string
