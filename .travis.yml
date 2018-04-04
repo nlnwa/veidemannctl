@@ -1,23 +1,24 @@
 language: go
 
-addons:
-  apt:
-    packages:
-    # needed for the nfpm pipe:
-    - rpm
-    # needed for the snap pipe:
-    - snapd
+#addons:
+#  apt:
+#    packages:
+#    # needed for the nfpm pipe:
+#    - rpm
+#    # needed for the snap pipe:
+#    - snapd
 
-env:
-# needed for the snap pipe:
-- PATH=/snap/bin:$PATH
+#env:
+## needed for the snap pipe:
+#- PATH=/snap/bin:$PATH
 
 install:
 # needed for the snap pipe:
-- sudo snap install snapcraft --classic
+#- sudo snap install snapcraft --classic
 # needed for dependencies
 - go get github.com/golang/dep/cmd/dep
 - dep ensure -vendor-only
+- go get -u github.com/golang/protobuf/protoc-gen-go
 
 # needed for the docker pipe
 services:
