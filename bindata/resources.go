@@ -87,7 +87,7 @@ func crawlexecutionTemplate() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "crawlexecution.template", size: 255, mode: os.FileMode(436), modTime: time.Unix(1522738166, 0)}
+	info := bindataFileInfo{name: "crawlexecution.template", size: 255, mode: os.FileMode(436), modTime: time.Unix(1523603756, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -107,12 +107,12 @@ func crawllogTemplate() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "crawllog.template", size: 984, mode: os.FileMode(436), modTime: time.Unix(1518713311, 0)}
+	info := bindataFileInfo{name: "crawllog.template", size: 984, mode: os.FileMode(436), modTime: time.Unix(1522780331, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _jobexecutionTemplate = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x54\x90\xc1\x4a\x03\x31\x10\x86\xef\x7d\x8a\x9f\xa1\xbd\xd9\x81\x52\x5a\x44\xf0\x20\x6d\x0f\x2b\x45\x0f\x56\xcf\xbb\x6e\xa6\xb2\xb8\x4d\x4a\x92\xad\x4a\xc8\xbb\x4b\xb2\x5b\x71\x0f\x93\x4c\x0e\xf3\xcd\xf7\x27\x04\x25\xc7\x46\x0b\x68\x5f\x3c\xed\x08\xf3\x18\x43\x38\xdb\x46\xfb\x23\xca\xd9\x72\xed\xd0\x1f\x8b\x95\xc3\xec\x56\xa5\x2a\xc1\x85\x02\x3f\x9a\xf7\x74\xbd\xf8\xca\x0b\x78\x6b\xea\xee\x24\xda\xbb\x8d\xad\xbe\x5a\x51\xe0\x57\xdb\x5c\x1f\x31\x4e\x42\xb0\x95\xfe\x10\x4c\x3f\xe5\xe7\x06\xd3\x4b\xd5\x76\x82\xbb\x7b\xf0\xee\x5b\xea\xce\x37\x46\xbb\x4c\x1a\xad\x5f\xa4\xcd\x2b\x55\xe6\xa9\x61\x28\xb3\x44\xab\x64\x3a\xea\x1a\x7d\x11\xeb\xc6\x80\xf9\x72\xcd\x59\xff\xaf\xe9\x73\xe4\x2a\x41\x85\x22\x50\x0e\x42\xa0\xbc\x9f\x40\x5b\x53\x3b\x02\x25\x7f\x4a\x34\x2b\x4e\xfc\xbf\x08\xfc\xd6\x7b\x84\xe0\xe5\x74\x6e\x53\xfc\xe1\xf3\xf8\xaa\x14\xe3\xe4\xf0\x7c\x78\xd8\x63\x70\x01\x6f\x4c\xa7\x13\xe4\x37\x00\x00\xff\xff\x39\x81\x68\x48\x70\x01\x00\x00")
+var _jobexecutionTemplate = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x54\x51\x41\x4f\x32\x31\x10\xbd\xf3\x2b\x5e\x26\x70\xfb\x68\xc2\x87\x10\x63\xe2\xc1\xc0\x1e\x30\x44\x0f\xa2\xe7\x5d\xe9\xa0\x8d\x6c\x97\xb4\x5d\xd0\x34\xfd\xef\xa6\xed\xae\x61\x0f\x33\x9d\xbe\xcc\x4c\xdf\x7b\xf5\x5e\xf2\x41\x69\x06\x6d\x37\x4f\x05\x61\x1a\x82\xf7\x27\xa3\xb4\x3b\xa0\x9c\xcc\x97\x16\x39\xcd\x16\x16\x93\x5b\x19\xa3\x84\xd8\x48\x88\xc7\xe6\x3d\x1e\x2f\xae\x72\x0c\xb1\x6e\xf6\x6d\xcd\xda\xd9\x95\xa9\x2e\x47\x96\x10\xaf\x46\xf5\x97\x10\xe0\xbd\x53\x35\xa7\x76\xe3\x76\xaa\xe6\x84\x5d\x94\xfb\x84\x28\xb4\xcc\x48\xdf\x74\x05\xb0\x96\x21\x8c\xbc\x37\x95\xfe\x60\x8c\xbf\xf8\xe7\x1f\xc6\xe7\xea\xd8\x32\xee\xee\x21\x8a\x6f\xde\xb7\x4e\x35\xda\x26\x1e\x03\xf2\xb3\xc8\x7b\x21\xcb\x34\xd5\x0d\xa5\x5d\xac\x65\xd4\x39\xa8\x94\x3e\xb3\xb1\xc3\x05\xd3\xf9\x52\x24\xf1\x7f\x45\x76\xa1\x8b\xe9\xff\x9b\x2e\x97\xa0\x8d\x24\x50\xb2\x84\x40\x89\x0b\x81\xd6\xcd\xde\x12\x28\x3a\x91\x51\xe3\x10\x15\x12\xa8\xd0\x32\x97\xf1\x45\xc3\x96\xdd\x95\x4c\xf1\x96\xb9\x7a\xef\xb8\x3e\x1d\xa3\xc1\xdd\xf7\x88\x9e\x76\x08\xa3\xdd\xf3\xee\x61\x8b\x8e\x2f\xc4\xaa\x69\x75\x5c\xf2\x1b\x00\x00\xff\xff\x94\xa3\xa0\x7f\xd2\x01\x00\x00")
 
 func jobexecutionTemplateBytes() ([]byte, error) {
 	return bindataRead(
@@ -127,7 +127,7 @@ func jobexecutionTemplate() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "jobexecution.template", size: 368, mode: os.FileMode(436), modTime: time.Unix(1522738203, 0)}
+	info := bindataFileInfo{name: "jobexecution.template", size: 466, mode: os.FileMode(436), modTime: time.Unix(1523860824, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -147,7 +147,7 @@ func pagelogTemplate() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "pagelog.template", size: 964, mode: os.FileMode(436), modTime: time.Unix(1518713311, 0)}
+	info := bindataFileInfo{name: "pagelog.template", size: 964, mode: os.FileMode(436), modTime: time.Unix(1522780331, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -167,7 +167,7 @@ func screenshotTemplate() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "screenshot.template", size: 236, mode: os.FileMode(436), modTime: time.Unix(1518713311, 0)}
+	info := bindataFileInfo{name: "screenshot.template", size: 236, mode: os.FileMode(436), modTime: time.Unix(1522780331, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -225,10 +225,10 @@ func AssetNames() []string {
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
 	"crawlexecution.template": crawlexecutionTemplate,
-	"crawllog.template":       crawllogTemplate,
-	"jobexecution.template":   jobexecutionTemplate,
-	"pagelog.template":        pagelogTemplate,
-	"screenshot.template":     screenshotTemplate,
+	"crawllog.template": crawllogTemplate,
+	"jobexecution.template": jobexecutionTemplate,
+	"pagelog.template": pagelogTemplate,
+	"screenshot.template": screenshotTemplate,
 }
 
 // AssetDir returns the file names below a certain
@@ -270,13 +270,12 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"crawlexecution.template": &bintree{crawlexecutionTemplate, map[string]*bintree{}},
-	"crawllog.template":       &bintree{crawllogTemplate, map[string]*bintree{}},
-	"jobexecution.template":   &bintree{jobexecutionTemplate, map[string]*bintree{}},
-	"pagelog.template":        &bintree{pagelogTemplate, map[string]*bintree{}},
-	"screenshot.template":     &bintree{screenshotTemplate, map[string]*bintree{}},
+	"crawllog.template": &bintree{crawllogTemplate, map[string]*bintree{}},
+	"jobexecution.template": &bintree{jobexecutionTemplate, map[string]*bintree{}},
+	"pagelog.template": &bintree{pagelogTemplate, map[string]*bintree{}},
+	"screenshot.template": &bintree{screenshotTemplate, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
@@ -325,3 +324,4 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+
