@@ -22,6 +22,12 @@ import (
 	"log"
 )
 
+var (
+	jobExecutionId string
+	jobId string
+	seedId string
+)
+
 // crawlexecutionCmd represents the crawlexecution command
 var crawlexecutionCmd = &cobra.Command{
 	Use:   "crawlexecution",
@@ -40,10 +46,16 @@ to quickly create a Cobra application.`,
 		if len(args) > 1 {
 			request.Id = args[1:]
 		}
-		//if executionId != "" {
-		//	request.ExecutionId = executionId
-		//}
-		//request.Filter = applyFilter(filter)
+		if jobExecutionId != "" {
+			request.JobExecutionId = jobExecutionId
+		}
+		if jobId != "" {
+			request.JobId = jobId
+		}
+		if seedId != "" {
+			request.SeedId = seedId
+		}
+
 		request.Page = page
 		request.PageSize = pageSize
 
@@ -59,13 +71,7 @@ to quickly create a Cobra application.`,
 func init() {
 	ReportCmd.AddCommand(crawlexecutionCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// crawlexecutionCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// crawlexecutionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	ReportCmd.PersistentFlags().StringVarP(&jobExecutionId, "jobexecution", "j", "", "All executions for a Job Execution ID")
+	ReportCmd.PersistentFlags().StringVarP(&jobId, "job", "", "", "All executions for a Job ID")
+	ReportCmd.PersistentFlags().StringVarP(&seedId, "seed", "", "", "All executions for a Seed ID")
 }

@@ -1,4 +1,4 @@
-{{define "LINE" -}}{{printf `%36s %36s %15s %8d %8d` .Id .JobId .State .DocumentsCrawled .UrisCrawled}} {{time .StartTime}} {{with .EndTime}}{{time .EndTime}}{{end}}
+{{define "LINE" -}}{{printf `%36s %36s %15s %8d %8d` .Id .JobId .State .DocumentsCrawled .UrisCrawled}} {{time .StartTime}} {{with .EndTime}}{{time .}}{{end}}
 {{range $key, $value := .ExecutionsState}}{{printf `%16s %5d` $key $value}}
 {{end -}}
 {{end -}}
