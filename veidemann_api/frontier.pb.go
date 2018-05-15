@@ -17,16 +17,44 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 type CrawlSeedRequest struct {
-	JobExecutionId string    `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
-	Job            *CrawlJob `protobuf:"bytes,5,opt,name=job" json:"job,omitempty"`
-	Seed           *Seed     `protobuf:"bytes,6,opt,name=seed" json:"seed,omitempty"`
+	JobExecutionId       string    `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
+	Job                  *CrawlJob `protobuf:"bytes,5,opt,name=job" json:"job,omitempty"`
+	Seed                 *Seed     `protobuf:"bytes,6,opt,name=seed" json:"seed,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
-func (m *CrawlSeedRequest) Reset()                    { *m = CrawlSeedRequest{} }
-func (m *CrawlSeedRequest) String() string            { return proto.CompactTextString(m) }
-func (*CrawlSeedRequest) ProtoMessage()               {}
-func (*CrawlSeedRequest) Descriptor() ([]byte, []int) { return fileDescriptor4, []int{0} }
+func (m *CrawlSeedRequest) Reset()         { *m = CrawlSeedRequest{} }
+func (m *CrawlSeedRequest) String() string { return proto.CompactTextString(m) }
+func (*CrawlSeedRequest) ProtoMessage()    {}
+func (*CrawlSeedRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_frontier_91c7c475d9a131af, []int{0}
+}
+func (m *CrawlSeedRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CrawlSeedRequest.Unmarshal(m, b)
+}
+func (m *CrawlSeedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CrawlSeedRequest.Marshal(b, m, deterministic)
+}
+func (dst *CrawlSeedRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CrawlSeedRequest.Merge(dst, src)
+}
+func (m *CrawlSeedRequest) XXX_Size() int {
+	return xxx_messageInfo_CrawlSeedRequest.Size(m)
+}
+func (m *CrawlSeedRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CrawlSeedRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CrawlSeedRequest proto.InternalMessageInfo
 
 func (m *CrawlSeedRequest) GetJobExecutionId() string {
 	if m != nil {
@@ -61,8 +89,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for Frontier service
-
+// FrontierClient is the client API for Frontier service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type FrontierClient interface {
 	CrawlSeed(ctx context.Context, in *CrawlSeedRequest, opts ...grpc.CallOption) (*CrawlExecutionStatus, error)
 }
@@ -77,7 +106,7 @@ func NewFrontierClient(cc *grpc.ClientConn) FrontierClient {
 
 func (c *frontierClient) CrawlSeed(ctx context.Context, in *CrawlSeedRequest, opts ...grpc.CallOption) (*CrawlExecutionStatus, error) {
 	out := new(CrawlExecutionStatus)
-	err := grpc.Invoke(ctx, "/veidemann.api.Frontier/CrawlSeed", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Frontier/CrawlSeed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -125,9 +154,9 @@ var _Frontier_serviceDesc = grpc.ServiceDesc{
 	Metadata: "frontier.proto",
 }
 
-func init() { proto.RegisterFile("frontier.proto", fileDescriptor4) }
+func init() { proto.RegisterFile("frontier.proto", fileDescriptor_frontier_91c7c475d9a131af) }
 
-var fileDescriptor4 = []byte{
+var fileDescriptor_frontier_91c7c475d9a131af = []byte{
 	// 248 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x90, 0x31, 0x4f, 0xc3, 0x30,
 	0x10, 0x85, 0x89, 0x80, 0x8a, 0x1e, 0x34, 0xaa, 0xcc, 0xd0, 0x28, 0x0b, 0x55, 0x19, 0x08, 0x8b,

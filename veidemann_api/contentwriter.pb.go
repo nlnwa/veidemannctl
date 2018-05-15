@@ -6,8 +6,8 @@ package veidemann_api
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
-import google_protobuf1 "github.com/golang/protobuf/ptypes/empty"
+import empty "github.com/golang/protobuf/ptypes/empty"
+import timestamp "github.com/golang/protobuf/ptypes/timestamp"
 
 import (
 	context "golang.org/x/net/context"
@@ -18,6 +18,12 @@ import (
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type RecordType int32
 
@@ -56,17 +62,41 @@ var RecordType_value = map[string]int32{
 func (x RecordType) String() string {
 	return proto.EnumName(RecordType_name, int32(x))
 }
-func (RecordType) EnumDescriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
-
-type Data struct {
-	RecordNum int32  `protobuf:"varint,1,opt,name=record_num,json=recordNum" json:"record_num,omitempty"`
-	Data      []byte `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+func (RecordType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_contentwriter_0f4f7b57a0ce87e0, []int{0}
 }
 
-func (m *Data) Reset()                    { *m = Data{} }
-func (m *Data) String() string            { return proto.CompactTextString(m) }
-func (*Data) ProtoMessage()               {}
-func (*Data) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
+type Data struct {
+	RecordNum            int32    `protobuf:"varint,1,opt,name=record_num,json=recordNum" json:"record_num,omitempty"`
+	Data                 []byte   `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Data) Reset()         { *m = Data{} }
+func (m *Data) String() string { return proto.CompactTextString(m) }
+func (*Data) ProtoMessage()    {}
+func (*Data) Descriptor() ([]byte, []int) {
+	return fileDescriptor_contentwriter_0f4f7b57a0ce87e0, []int{0}
+}
+func (m *Data) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Data.Unmarshal(m, b)
+}
+func (m *Data) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Data.Marshal(b, m, deterministic)
+}
+func (dst *Data) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Data.Merge(dst, src)
+}
+func (m *Data) XXX_Size() int {
+	return xxx_messageInfo_Data.Size(m)
+}
+func (m *Data) XXX_DiscardUnknown() {
+	xxx_messageInfo_Data.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Data proto.InternalMessageInfo
 
 func (m *Data) GetRecordNum() int32 {
 	if m != nil {
@@ -86,16 +116,38 @@ type WriteRequestMeta struct {
 	ExecutionId    string                                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
 	TargetUri      string                                 `protobuf:"bytes,2,opt,name=target_uri,json=targetUri" json:"target_uri,omitempty"`
 	RecordMeta     map[int32]*WriteRequestMeta_RecordMeta `protobuf:"bytes,3,rep,name=record_meta,json=recordMeta" json:"record_meta,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	FetchTimeStamp *google_protobuf.Timestamp             `protobuf:"bytes,4,opt,name=fetch_time_stamp,json=fetchTimeStamp" json:"fetch_time_stamp,omitempty"`
+	FetchTimeStamp *timestamp.Timestamp                   `protobuf:"bytes,4,opt,name=fetch_time_stamp,json=fetchTimeStamp" json:"fetch_time_stamp,omitempty"`
 	IpAddress      string                                 `protobuf:"bytes,5,opt,name=ip_address,json=ipAddress" json:"ip_address,omitempty"`
 	// The http status code. Only relevant for response records.
-	StatusCode int32 `protobuf:"varint,6,opt,name=status_code,json=statusCode" json:"status_code,omitempty"`
+	StatusCode           int32    `protobuf:"varint,6,opt,name=status_code,json=statusCode" json:"status_code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *WriteRequestMeta) Reset()                    { *m = WriteRequestMeta{} }
-func (m *WriteRequestMeta) String() string            { return proto.CompactTextString(m) }
-func (*WriteRequestMeta) ProtoMessage()               {}
-func (*WriteRequestMeta) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1} }
+func (m *WriteRequestMeta) Reset()         { *m = WriteRequestMeta{} }
+func (m *WriteRequestMeta) String() string { return proto.CompactTextString(m) }
+func (*WriteRequestMeta) ProtoMessage()    {}
+func (*WriteRequestMeta) Descriptor() ([]byte, []int) {
+	return fileDescriptor_contentwriter_0f4f7b57a0ce87e0, []int{1}
+}
+func (m *WriteRequestMeta) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_WriteRequestMeta.Unmarshal(m, b)
+}
+func (m *WriteRequestMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_WriteRequestMeta.Marshal(b, m, deterministic)
+}
+func (dst *WriteRequestMeta) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_WriteRequestMeta.Merge(dst, src)
+}
+func (m *WriteRequestMeta) XXX_Size() int {
+	return xxx_messageInfo_WriteRequestMeta.Size(m)
+}
+func (m *WriteRequestMeta) XXX_DiscardUnknown() {
+	xxx_messageInfo_WriteRequestMeta.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_WriteRequestMeta proto.InternalMessageInfo
 
 func (m *WriteRequestMeta) GetExecutionId() string {
 	if m != nil {
@@ -118,7 +170,7 @@ func (m *WriteRequestMeta) GetRecordMeta() map[int32]*WriteRequestMeta_RecordMet
 	return nil
 }
 
-func (m *WriteRequestMeta) GetFetchTimeStamp() *google_protobuf.Timestamp {
+func (m *WriteRequestMeta) GetFetchTimeStamp() *timestamp.Timestamp {
 	if m != nil {
 		return m.FetchTimeStamp
 	}
@@ -140,20 +192,42 @@ func (m *WriteRequestMeta) GetStatusCode() int32 {
 }
 
 type WriteRequestMeta_RecordMeta struct {
-	RecordNum          int32      `protobuf:"varint,1,opt,name=record_num,json=recordNum" json:"record_num,omitempty"`
-	Type               RecordType `protobuf:"varint,2,opt,name=type,enum=veidemann.api.RecordType" json:"type,omitempty"`
-	RecordContentType  string     `protobuf:"bytes,3,opt,name=record_content_type,json=recordContentType" json:"record_content_type,omitempty"`
-	PayloadContentType string     `protobuf:"bytes,4,opt,name=payload_content_type,json=payloadContentType" json:"payload_content_type,omitempty"`
-	BlockDigest        string     `protobuf:"bytes,5,opt,name=block_digest,json=blockDigest" json:"block_digest,omitempty"`
-	PayloadDigest      string     `protobuf:"bytes,6,opt,name=payload_digest,json=payloadDigest" json:"payload_digest,omitempty"`
-	Size               int64      `protobuf:"varint,7,opt,name=size" json:"size,omitempty"`
-	WarcRefersTo       string     `protobuf:"bytes,8,opt,name=warc_refers_to,json=warcRefersTo" json:"warc_refers_to,omitempty"`
+	RecordNum            int32      `protobuf:"varint,1,opt,name=record_num,json=recordNum" json:"record_num,omitempty"`
+	Type                 RecordType `protobuf:"varint,2,opt,name=type,enum=veidemann.api.RecordType" json:"type,omitempty"`
+	RecordContentType    string     `protobuf:"bytes,3,opt,name=record_content_type,json=recordContentType" json:"record_content_type,omitempty"`
+	PayloadContentType   string     `protobuf:"bytes,4,opt,name=payload_content_type,json=payloadContentType" json:"payload_content_type,omitempty"`
+	BlockDigest          string     `protobuf:"bytes,5,opt,name=block_digest,json=blockDigest" json:"block_digest,omitempty"`
+	PayloadDigest        string     `protobuf:"bytes,6,opt,name=payload_digest,json=payloadDigest" json:"payload_digest,omitempty"`
+	Size                 int64      `protobuf:"varint,7,opt,name=size" json:"size,omitempty"`
+	WarcRefersTo         string     `protobuf:"bytes,8,opt,name=warc_refers_to,json=warcRefersTo" json:"warc_refers_to,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
 }
 
-func (m *WriteRequestMeta_RecordMeta) Reset()                    { *m = WriteRequestMeta_RecordMeta{} }
-func (m *WriteRequestMeta_RecordMeta) String() string            { return proto.CompactTextString(m) }
-func (*WriteRequestMeta_RecordMeta) ProtoMessage()               {}
-func (*WriteRequestMeta_RecordMeta) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1, 0} }
+func (m *WriteRequestMeta_RecordMeta) Reset()         { *m = WriteRequestMeta_RecordMeta{} }
+func (m *WriteRequestMeta_RecordMeta) String() string { return proto.CompactTextString(m) }
+func (*WriteRequestMeta_RecordMeta) ProtoMessage()    {}
+func (*WriteRequestMeta_RecordMeta) Descriptor() ([]byte, []int) {
+	return fileDescriptor_contentwriter_0f4f7b57a0ce87e0, []int{1, 0}
+}
+func (m *WriteRequestMeta_RecordMeta) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_WriteRequestMeta_RecordMeta.Unmarshal(m, b)
+}
+func (m *WriteRequestMeta_RecordMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_WriteRequestMeta_RecordMeta.Marshal(b, m, deterministic)
+}
+func (dst *WriteRequestMeta_RecordMeta) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_WriteRequestMeta_RecordMeta.Merge(dst, src)
+}
+func (m *WriteRequestMeta_RecordMeta) XXX_Size() int {
+	return xxx_messageInfo_WriteRequestMeta_RecordMeta.Size(m)
+}
+func (m *WriteRequestMeta_RecordMeta) XXX_DiscardUnknown() {
+	xxx_messageInfo_WriteRequestMeta_RecordMeta.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_WriteRequestMeta_RecordMeta proto.InternalMessageInfo
 
 func (m *WriteRequestMeta_RecordMeta) GetRecordNum() int32 {
 	if m != nil {
@@ -217,13 +291,35 @@ type WriteRequest struct {
 	//	*WriteRequest_Header
 	//	*WriteRequest_Payload
 	//	*WriteRequest_Cancel
-	Value isWriteRequest_Value `protobuf_oneof:"value"`
+	Value                isWriteRequest_Value `protobuf_oneof:"value"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
 }
 
-func (m *WriteRequest) Reset()                    { *m = WriteRequest{} }
-func (m *WriteRequest) String() string            { return proto.CompactTextString(m) }
-func (*WriteRequest) ProtoMessage()               {}
-func (*WriteRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{2} }
+func (m *WriteRequest) Reset()         { *m = WriteRequest{} }
+func (m *WriteRequest) String() string { return proto.CompactTextString(m) }
+func (*WriteRequest) ProtoMessage()    {}
+func (*WriteRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_contentwriter_0f4f7b57a0ce87e0, []int{2}
+}
+func (m *WriteRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_WriteRequest.Unmarshal(m, b)
+}
+func (m *WriteRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_WriteRequest.Marshal(b, m, deterministic)
+}
+func (dst *WriteRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_WriteRequest.Merge(dst, src)
+}
+func (m *WriteRequest) XXX_Size() int {
+	return xxx_messageInfo_WriteRequest.Size(m)
+}
+func (m *WriteRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_WriteRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_WriteRequest proto.InternalMessageInfo
 
 type isWriteRequest_Value interface {
 	isWriteRequest_Value()
@@ -366,21 +462,21 @@ func _WriteRequest_OneofSizer(msg proto.Message) (n int) {
 	switch x := m.Value.(type) {
 	case *WriteRequest_Meta:
 		s := proto.Size(x.Meta)
-		n += proto.SizeVarint(1<<3 | proto.WireBytes)
+		n += 1 // tag and wire
 		n += proto.SizeVarint(uint64(s))
 		n += s
 	case *WriteRequest_Header:
 		s := proto.Size(x.Header)
-		n += proto.SizeVarint(2<<3 | proto.WireBytes)
+		n += 1 // tag and wire
 		n += proto.SizeVarint(uint64(s))
 		n += s
 	case *WriteRequest_Payload:
 		s := proto.Size(x.Payload)
-		n += proto.SizeVarint(3<<3 | proto.WireBytes)
+		n += 1 // tag and wire
 		n += proto.SizeVarint(uint64(s))
 		n += s
 	case *WriteRequest_Cancel:
-		n += proto.SizeVarint(4<<3 | proto.WireBytes)
+		n += 1 // tag and wire
 		n += proto.SizeVarint(uint64(len(x.Cancel)))
 		n += len(x.Cancel)
 	case nil:
@@ -391,13 +487,35 @@ func _WriteRequest_OneofSizer(msg proto.Message) (n int) {
 }
 
 type WriteResponseMeta struct {
-	RecordMeta map[int32]*WriteResponseMeta_RecordMeta `protobuf:"bytes,1,rep,name=record_meta,json=recordMeta" json:"record_meta,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	RecordMeta           map[int32]*WriteResponseMeta_RecordMeta `protobuf:"bytes,1,rep,name=record_meta,json=recordMeta" json:"record_meta,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	XXX_NoUnkeyedLiteral struct{}                                `json:"-"`
+	XXX_unrecognized     []byte                                  `json:"-"`
+	XXX_sizecache        int32                                   `json:"-"`
 }
 
-func (m *WriteResponseMeta) Reset()                    { *m = WriteResponseMeta{} }
-func (m *WriteResponseMeta) String() string            { return proto.CompactTextString(m) }
-func (*WriteResponseMeta) ProtoMessage()               {}
-func (*WriteResponseMeta) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{3} }
+func (m *WriteResponseMeta) Reset()         { *m = WriteResponseMeta{} }
+func (m *WriteResponseMeta) String() string { return proto.CompactTextString(m) }
+func (*WriteResponseMeta) ProtoMessage()    {}
+func (*WriteResponseMeta) Descriptor() ([]byte, []int) {
+	return fileDescriptor_contentwriter_0f4f7b57a0ce87e0, []int{3}
+}
+func (m *WriteResponseMeta) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_WriteResponseMeta.Unmarshal(m, b)
+}
+func (m *WriteResponseMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_WriteResponseMeta.Marshal(b, m, deterministic)
+}
+func (dst *WriteResponseMeta) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_WriteResponseMeta.Merge(dst, src)
+}
+func (m *WriteResponseMeta) XXX_Size() int {
+	return xxx_messageInfo_WriteResponseMeta.Size(m)
+}
+func (m *WriteResponseMeta) XXX_DiscardUnknown() {
+	xxx_messageInfo_WriteResponseMeta.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_WriteResponseMeta proto.InternalMessageInfo
 
 func (m *WriteResponseMeta) GetRecordMeta() map[int32]*WriteResponseMeta_RecordMeta {
 	if m != nil {
@@ -407,18 +525,40 @@ func (m *WriteResponseMeta) GetRecordMeta() map[int32]*WriteResponseMeta_RecordM
 }
 
 type WriteResponseMeta_RecordMeta struct {
-	RecordNum     int32      `protobuf:"varint,1,opt,name=record_num,json=recordNum" json:"record_num,omitempty"`
-	Type          RecordType `protobuf:"varint,2,opt,name=type,enum=veidemann.api.RecordType" json:"type,omitempty"`
-	WarcId        string     `protobuf:"bytes,3,opt,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	StorageRef    string     `protobuf:"bytes,4,opt,name=storage_ref,json=storageRef" json:"storage_ref,omitempty"`
-	BlockDigest   string     `protobuf:"bytes,5,opt,name=block_digest,json=blockDigest" json:"block_digest,omitempty"`
-	PayloadDigest string     `protobuf:"bytes,6,opt,name=payload_digest,json=payloadDigest" json:"payload_digest,omitempty"`
+	RecordNum            int32      `protobuf:"varint,1,opt,name=record_num,json=recordNum" json:"record_num,omitempty"`
+	Type                 RecordType `protobuf:"varint,2,opt,name=type,enum=veidemann.api.RecordType" json:"type,omitempty"`
+	WarcId               string     `protobuf:"bytes,3,opt,name=warc_id,json=warcId" json:"warc_id,omitempty"`
+	StorageRef           string     `protobuf:"bytes,4,opt,name=storage_ref,json=storageRef" json:"storage_ref,omitempty"`
+	BlockDigest          string     `protobuf:"bytes,5,opt,name=block_digest,json=blockDigest" json:"block_digest,omitempty"`
+	PayloadDigest        string     `protobuf:"bytes,6,opt,name=payload_digest,json=payloadDigest" json:"payload_digest,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
 }
 
-func (m *WriteResponseMeta_RecordMeta) Reset()                    { *m = WriteResponseMeta_RecordMeta{} }
-func (m *WriteResponseMeta_RecordMeta) String() string            { return proto.CompactTextString(m) }
-func (*WriteResponseMeta_RecordMeta) ProtoMessage()               {}
-func (*WriteResponseMeta_RecordMeta) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{3, 0} }
+func (m *WriteResponseMeta_RecordMeta) Reset()         { *m = WriteResponseMeta_RecordMeta{} }
+func (m *WriteResponseMeta_RecordMeta) String() string { return proto.CompactTextString(m) }
+func (*WriteResponseMeta_RecordMeta) ProtoMessage()    {}
+func (*WriteResponseMeta_RecordMeta) Descriptor() ([]byte, []int) {
+	return fileDescriptor_contentwriter_0f4f7b57a0ce87e0, []int{3, 0}
+}
+func (m *WriteResponseMeta_RecordMeta) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_WriteResponseMeta_RecordMeta.Unmarshal(m, b)
+}
+func (m *WriteResponseMeta_RecordMeta) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_WriteResponseMeta_RecordMeta.Marshal(b, m, deterministic)
+}
+func (dst *WriteResponseMeta_RecordMeta) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_WriteResponseMeta_RecordMeta.Merge(dst, src)
+}
+func (m *WriteResponseMeta_RecordMeta) XXX_Size() int {
+	return xxx_messageInfo_WriteResponseMeta_RecordMeta.Size(m)
+}
+func (m *WriteResponseMeta_RecordMeta) XXX_DiscardUnknown() {
+	xxx_messageInfo_WriteResponseMeta_RecordMeta.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_WriteResponseMeta_RecordMeta proto.InternalMessageInfo
 
 func (m *WriteResponseMeta_RecordMeta) GetRecordNum() int32 {
 	if m != nil {
@@ -463,13 +603,35 @@ func (m *WriteResponseMeta_RecordMeta) GetPayloadDigest() string {
 }
 
 type WriteReply struct {
-	Meta *WriteResponseMeta `protobuf:"bytes,1,opt,name=meta" json:"meta,omitempty"`
+	Meta                 *WriteResponseMeta `protobuf:"bytes,1,opt,name=meta" json:"meta,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
-func (m *WriteReply) Reset()                    { *m = WriteReply{} }
-func (m *WriteReply) String() string            { return proto.CompactTextString(m) }
-func (*WriteReply) ProtoMessage()               {}
-func (*WriteReply) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{4} }
+func (m *WriteReply) Reset()         { *m = WriteReply{} }
+func (m *WriteReply) String() string { return proto.CompactTextString(m) }
+func (*WriteReply) ProtoMessage()    {}
+func (*WriteReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_contentwriter_0f4f7b57a0ce87e0, []int{4}
+}
+func (m *WriteReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_WriteReply.Unmarshal(m, b)
+}
+func (m *WriteReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_WriteReply.Marshal(b, m, deterministic)
+}
+func (dst *WriteReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_WriteReply.Merge(dst, src)
+}
+func (m *WriteReply) XXX_Size() int {
+	return xxx_messageInfo_WriteReply.Size(m)
+}
+func (m *WriteReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_WriteReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_WriteReply proto.InternalMessageInfo
 
 func (m *WriteReply) GetMeta() *WriteResponseMeta {
 	if m != nil {
@@ -481,9 +643,11 @@ func (m *WriteReply) GetMeta() *WriteResponseMeta {
 func init() {
 	proto.RegisterType((*Data)(nil), "veidemann.api.Data")
 	proto.RegisterType((*WriteRequestMeta)(nil), "veidemann.api.WriteRequestMeta")
+	proto.RegisterMapType((map[int32]*WriteRequestMeta_RecordMeta)(nil), "veidemann.api.WriteRequestMeta.RecordMetaEntry")
 	proto.RegisterType((*WriteRequestMeta_RecordMeta)(nil), "veidemann.api.WriteRequestMeta.RecordMeta")
 	proto.RegisterType((*WriteRequest)(nil), "veidemann.api.WriteRequest")
 	proto.RegisterType((*WriteResponseMeta)(nil), "veidemann.api.WriteResponseMeta")
+	proto.RegisterMapType((map[int32]*WriteResponseMeta_RecordMeta)(nil), "veidemann.api.WriteResponseMeta.RecordMetaEntry")
 	proto.RegisterType((*WriteResponseMeta_RecordMeta)(nil), "veidemann.api.WriteResponseMeta.RecordMeta")
 	proto.RegisterType((*WriteReply)(nil), "veidemann.api.WriteReply")
 	proto.RegisterEnum("veidemann.api.RecordType", RecordType_name, RecordType_value)
@@ -497,12 +661,13 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for ContentWriter service
-
+// ContentWriterClient is the client API for ContentWriter service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ContentWriterClient interface {
 	Write(ctx context.Context, opts ...grpc.CallOption) (ContentWriter_WriteClient, error)
-	Flush(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
-	Delete(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	Flush(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
+	Delete(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type contentWriterClient struct {
@@ -514,7 +679,7 @@ func NewContentWriterClient(cc *grpc.ClientConn) ContentWriterClient {
 }
 
 func (c *contentWriterClient) Write(ctx context.Context, opts ...grpc.CallOption) (ContentWriter_WriteClient, error) {
-	stream, err := grpc.NewClientStream(ctx, &_ContentWriter_serviceDesc.Streams[0], c.cc, "/veidemann.api.ContentWriter/write", opts...)
+	stream, err := c.cc.NewStream(ctx, &_ContentWriter_serviceDesc.Streams[0], "/veidemann.api.ContentWriter/write", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -547,18 +712,18 @@ func (x *contentWriterWriteClient) CloseAndRecv() (*WriteReply, error) {
 	return m, nil
 }
 
-func (c *contentWriterClient) Flush(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.ContentWriter/flush", in, out, c.cc, opts...)
+func (c *contentWriterClient) Flush(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.ContentWriter/flush", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *contentWriterClient) Delete(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.ContentWriter/delete", in, out, c.cc, opts...)
+func (c *contentWriterClient) Delete(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.ContentWriter/delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -569,8 +734,8 @@ func (c *contentWriterClient) Delete(ctx context.Context, in *google_protobuf1.E
 
 type ContentWriterServer interface {
 	Write(ContentWriter_WriteServer) error
-	Flush(context.Context, *google_protobuf1.Empty) (*google_protobuf1.Empty, error)
-	Delete(context.Context, *google_protobuf1.Empty) (*google_protobuf1.Empty, error)
+	Flush(context.Context, *empty.Empty) (*empty.Empty, error)
+	Delete(context.Context, *empty.Empty) (*empty.Empty, error)
 }
 
 func RegisterContentWriterServer(s *grpc.Server, srv ContentWriterServer) {
@@ -604,7 +769,7 @@ func (x *contentWriterWriteServer) Recv() (*WriteRequest, error) {
 }
 
 func _ContentWriter_Flush_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.Empty)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -616,13 +781,13 @@ func _ContentWriter_Flush_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/veidemann.api.ContentWriter/Flush",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ContentWriterServer).Flush(ctx, req.(*google_protobuf1.Empty))
+		return srv.(ContentWriterServer).Flush(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ContentWriter_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.Empty)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -634,7 +799,7 @@ func _ContentWriter_Delete_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/veidemann.api.ContentWriter/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ContentWriterServer).Delete(ctx, req.(*google_protobuf1.Empty))
+		return srv.(ContentWriterServer).Delete(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -662,9 +827,9 @@ var _ContentWriter_serviceDesc = grpc.ServiceDesc{
 	Metadata: "contentwriter.proto",
 }
 
-func init() { proto.RegisterFile("contentwriter.proto", fileDescriptor1) }
+func init() { proto.RegisterFile("contentwriter.proto", fileDescriptor_contentwriter_0f4f7b57a0ce87e0) }
 
-var fileDescriptor1 = []byte{
+var fileDescriptor_contentwriter_0f4f7b57a0ce87e0 = []byte{
 	// 859 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x55, 0xdd, 0x8e, 0xdb, 0x44,
 	0x14, 0x8e, 0x37, 0x7f, 0xdd, 0x93, 0x6c, 0x70, 0x67, 0x11, 0x75, 0x5d, 0xa1, 0x4d, 0x23, 0x90,

@@ -6,8 +6,8 @@ package veidemann_api
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import _ "google.golang.org/genproto/googleapis/api/annotations"
 import _ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options"
+import _ "google.golang.org/genproto/googleapis/api/annotations"
 
 import (
 	context "golang.org/x/net/context"
@@ -18,6 +18,12 @@ import (
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type Filter_Operator int32
 
@@ -47,18 +53,42 @@ var Filter_Operator_value = map[string]int32{
 func (x Filter_Operator) String() string {
 	return proto.EnumName(Filter_Operator_name, int32(x))
 }
-func (Filter_Operator) EnumDescriptor() ([]byte, []int) { return fileDescriptor7, []int{0, 0} }
-
-type Filter struct {
-	FieldName string          `protobuf:"bytes,1,opt,name=field_name,json=fieldName" json:"field_name,omitempty"`
-	Op        Filter_Operator `protobuf:"varint,2,opt,name=op,enum=veidemann.api.Filter_Operator" json:"op,omitempty"`
-	Value     string          `protobuf:"bytes,3,opt,name=value" json:"value,omitempty"`
+func (Filter_Operator) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_report_815df019fd9313b3, []int{0, 0}
 }
 
-func (m *Filter) Reset()                    { *m = Filter{} }
-func (m *Filter) String() string            { return proto.CompactTextString(m) }
-func (*Filter) ProtoMessage()               {}
-func (*Filter) Descriptor() ([]byte, []int) { return fileDescriptor7, []int{0} }
+type Filter struct {
+	FieldName            string          `protobuf:"bytes,1,opt,name=field_name,json=fieldName" json:"field_name,omitempty"`
+	Op                   Filter_Operator `protobuf:"varint,2,opt,name=op,enum=veidemann.api.Filter_Operator" json:"op,omitempty"`
+	Value                string          `protobuf:"bytes,3,opt,name=value" json:"value,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *Filter) Reset()         { *m = Filter{} }
+func (m *Filter) String() string { return proto.CompactTextString(m) }
+func (*Filter) ProtoMessage()    {}
+func (*Filter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_report_815df019fd9313b3, []int{0}
+}
+func (m *Filter) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Filter.Unmarshal(m, b)
+}
+func (m *Filter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Filter.Marshal(b, m, deterministic)
+}
+func (dst *Filter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Filter.Merge(dst, src)
+}
+func (m *Filter) XXX_Size() int {
+	return xxx_messageInfo_Filter.Size(m)
+}
+func (m *Filter) XXX_DiscardUnknown() {
+	xxx_messageInfo_Filter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Filter proto.InternalMessageInfo
 
 func (m *Filter) GetFieldName() string {
 	if m != nil {
@@ -82,17 +112,39 @@ func (m *Filter) GetValue() string {
 }
 
 type CrawlLogListRequest struct {
-	WarcId      []string  `protobuf:"bytes,1,rep,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	ExecutionId string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Filter      []*Filter `protobuf:"bytes,3,rep,name=filter" json:"filter,omitempty"`
-	PageSize    int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page        int32     `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	WarcId               []string  `protobuf:"bytes,1,rep,name=warc_id,json=warcId" json:"warc_id,omitempty"`
+	ExecutionId          string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
+	Filter               []*Filter `protobuf:"bytes,3,rep,name=filter" json:"filter,omitempty"`
+	PageSize             int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32     `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
-func (m *CrawlLogListRequest) Reset()                    { *m = CrawlLogListRequest{} }
-func (m *CrawlLogListRequest) String() string            { return proto.CompactTextString(m) }
-func (*CrawlLogListRequest) ProtoMessage()               {}
-func (*CrawlLogListRequest) Descriptor() ([]byte, []int) { return fileDescriptor7, []int{1} }
+func (m *CrawlLogListRequest) Reset()         { *m = CrawlLogListRequest{} }
+func (m *CrawlLogListRequest) String() string { return proto.CompactTextString(m) }
+func (*CrawlLogListRequest) ProtoMessage()    {}
+func (*CrawlLogListRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_report_815df019fd9313b3, []int{1}
+}
+func (m *CrawlLogListRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CrawlLogListRequest.Unmarshal(m, b)
+}
+func (m *CrawlLogListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CrawlLogListRequest.Marshal(b, m, deterministic)
+}
+func (dst *CrawlLogListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CrawlLogListRequest.Merge(dst, src)
+}
+func (m *CrawlLogListRequest) XXX_Size() int {
+	return xxx_messageInfo_CrawlLogListRequest.Size(m)
+}
+func (m *CrawlLogListRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CrawlLogListRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CrawlLogListRequest proto.InternalMessageInfo
 
 func (m *CrawlLogListRequest) GetWarcId() []string {
 	if m != nil {
@@ -130,16 +182,38 @@ func (m *CrawlLogListRequest) GetPage() int32 {
 }
 
 type CrawlLogListReply struct {
-	Value    []*CrawlLog `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64       `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32       `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32       `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlLog `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64       `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32       `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32       `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
 }
 
-func (m *CrawlLogListReply) Reset()                    { *m = CrawlLogListReply{} }
-func (m *CrawlLogListReply) String() string            { return proto.CompactTextString(m) }
-func (*CrawlLogListReply) ProtoMessage()               {}
-func (*CrawlLogListReply) Descriptor() ([]byte, []int) { return fileDescriptor7, []int{2} }
+func (m *CrawlLogListReply) Reset()         { *m = CrawlLogListReply{} }
+func (m *CrawlLogListReply) String() string { return proto.CompactTextString(m) }
+func (*CrawlLogListReply) ProtoMessage()    {}
+func (*CrawlLogListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_report_815df019fd9313b3, []int{2}
+}
+func (m *CrawlLogListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CrawlLogListReply.Unmarshal(m, b)
+}
+func (m *CrawlLogListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CrawlLogListReply.Marshal(b, m, deterministic)
+}
+func (dst *CrawlLogListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CrawlLogListReply.Merge(dst, src)
+}
+func (m *CrawlLogListReply) XXX_Size() int {
+	return xxx_messageInfo_CrawlLogListReply.Size(m)
+}
+func (m *CrawlLogListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_CrawlLogListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CrawlLogListReply proto.InternalMessageInfo
 
 func (m *CrawlLogListReply) GetValue() []*CrawlLog {
 	if m != nil {
@@ -170,17 +244,39 @@ func (m *CrawlLogListReply) GetPage() int32 {
 }
 
 type PageLogListRequest struct {
-	WarcId      []string  `protobuf:"bytes,1,rep,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	ExecutionId string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Filter      []*Filter `protobuf:"bytes,3,rep,name=filter" json:"filter,omitempty"`
-	PageSize    int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page        int32     `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	WarcId               []string  `protobuf:"bytes,1,rep,name=warc_id,json=warcId" json:"warc_id,omitempty"`
+	ExecutionId          string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
+	Filter               []*Filter `protobuf:"bytes,3,rep,name=filter" json:"filter,omitempty"`
+	PageSize             int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32     `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
-func (m *PageLogListRequest) Reset()                    { *m = PageLogListRequest{} }
-func (m *PageLogListRequest) String() string            { return proto.CompactTextString(m) }
-func (*PageLogListRequest) ProtoMessage()               {}
-func (*PageLogListRequest) Descriptor() ([]byte, []int) { return fileDescriptor7, []int{3} }
+func (m *PageLogListRequest) Reset()         { *m = PageLogListRequest{} }
+func (m *PageLogListRequest) String() string { return proto.CompactTextString(m) }
+func (*PageLogListRequest) ProtoMessage()    {}
+func (*PageLogListRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_report_815df019fd9313b3, []int{3}
+}
+func (m *PageLogListRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PageLogListRequest.Unmarshal(m, b)
+}
+func (m *PageLogListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PageLogListRequest.Marshal(b, m, deterministic)
+}
+func (dst *PageLogListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PageLogListRequest.Merge(dst, src)
+}
+func (m *PageLogListRequest) XXX_Size() int {
+	return xxx_messageInfo_PageLogListRequest.Size(m)
+}
+func (m *PageLogListRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_PageLogListRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PageLogListRequest proto.InternalMessageInfo
 
 func (m *PageLogListRequest) GetWarcId() []string {
 	if m != nil {
@@ -218,16 +314,38 @@ func (m *PageLogListRequest) GetPage() int32 {
 }
 
 type PageLogListReply struct {
-	Value    []*PageLog `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64      `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32      `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32      `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*PageLog `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64      `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32      `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32      `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
 }
 
-func (m *PageLogListReply) Reset()                    { *m = PageLogListReply{} }
-func (m *PageLogListReply) String() string            { return proto.CompactTextString(m) }
-func (*PageLogListReply) ProtoMessage()               {}
-func (*PageLogListReply) Descriptor() ([]byte, []int) { return fileDescriptor7, []int{4} }
+func (m *PageLogListReply) Reset()         { *m = PageLogListReply{} }
+func (m *PageLogListReply) String() string { return proto.CompactTextString(m) }
+func (*PageLogListReply) ProtoMessage()    {}
+func (*PageLogListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_report_815df019fd9313b3, []int{4}
+}
+func (m *PageLogListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PageLogListReply.Unmarshal(m, b)
+}
+func (m *PageLogListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PageLogListReply.Marshal(b, m, deterministic)
+}
+func (dst *PageLogListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PageLogListReply.Merge(dst, src)
+}
+func (m *PageLogListReply) XXX_Size() int {
+	return xxx_messageInfo_PageLogListReply.Size(m)
+}
+func (m *PageLogListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_PageLogListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PageLogListReply proto.InternalMessageInfo
 
 func (m *PageLogListReply) GetValue() []*PageLog {
 	if m != nil {
@@ -258,18 +376,40 @@ func (m *PageLogListReply) GetPage() int32 {
 }
 
 type ScreenshotListRequest struct {
-	Id          []string  `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
-	ExecutionId string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Filter      []*Filter `protobuf:"bytes,3,rep,name=filter" json:"filter,omitempty"`
-	ImgData     bool      `protobuf:"varint,4,opt,name=img_data,json=imgData" json:"img_data,omitempty"`
-	PageSize    int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page        int32     `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Id                   []string  `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
+	ExecutionId          string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
+	Filter               []*Filter `protobuf:"bytes,3,rep,name=filter" json:"filter,omitempty"`
+	ImgData              bool      `protobuf:"varint,4,opt,name=img_data,json=imgData" json:"img_data,omitempty"`
+	PageSize             int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32     `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
-func (m *ScreenshotListRequest) Reset()                    { *m = ScreenshotListRequest{} }
-func (m *ScreenshotListRequest) String() string            { return proto.CompactTextString(m) }
-func (*ScreenshotListRequest) ProtoMessage()               {}
-func (*ScreenshotListRequest) Descriptor() ([]byte, []int) { return fileDescriptor7, []int{5} }
+func (m *ScreenshotListRequest) Reset()         { *m = ScreenshotListRequest{} }
+func (m *ScreenshotListRequest) String() string { return proto.CompactTextString(m) }
+func (*ScreenshotListRequest) ProtoMessage()    {}
+func (*ScreenshotListRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_report_815df019fd9313b3, []int{5}
+}
+func (m *ScreenshotListRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ScreenshotListRequest.Unmarshal(m, b)
+}
+func (m *ScreenshotListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ScreenshotListRequest.Marshal(b, m, deterministic)
+}
+func (dst *ScreenshotListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScreenshotListRequest.Merge(dst, src)
+}
+func (m *ScreenshotListRequest) XXX_Size() int {
+	return xxx_messageInfo_ScreenshotListRequest.Size(m)
+}
+func (m *ScreenshotListRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScreenshotListRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScreenshotListRequest proto.InternalMessageInfo
 
 func (m *ScreenshotListRequest) GetId() []string {
 	if m != nil {
@@ -314,16 +454,38 @@ func (m *ScreenshotListRequest) GetPage() int32 {
 }
 
 type ScreenshotListReply struct {
-	Value    []*Screenshot `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64         `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32         `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32         `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*Screenshot `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64         `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32         `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32         `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
 }
 
-func (m *ScreenshotListReply) Reset()                    { *m = ScreenshotListReply{} }
-func (m *ScreenshotListReply) String() string            { return proto.CompactTextString(m) }
-func (*ScreenshotListReply) ProtoMessage()               {}
-func (*ScreenshotListReply) Descriptor() ([]byte, []int) { return fileDescriptor7, []int{6} }
+func (m *ScreenshotListReply) Reset()         { *m = ScreenshotListReply{} }
+func (m *ScreenshotListReply) String() string { return proto.CompactTextString(m) }
+func (*ScreenshotListReply) ProtoMessage()    {}
+func (*ScreenshotListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_report_815df019fd9313b3, []int{6}
+}
+func (m *ScreenshotListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ScreenshotListReply.Unmarshal(m, b)
+}
+func (m *ScreenshotListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ScreenshotListReply.Marshal(b, m, deterministic)
+}
+func (dst *ScreenshotListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScreenshotListReply.Merge(dst, src)
+}
+func (m *ScreenshotListReply) XXX_Size() int {
+	return xxx_messageInfo_ScreenshotListReply.Size(m)
+}
+func (m *ScreenshotListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScreenshotListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScreenshotListReply proto.InternalMessageInfo
 
 func (m *ScreenshotListReply) GetValue() []*Screenshot {
 	if m != nil {
@@ -372,8 +534,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for Report service
-
+// ReportClient is the client API for Report service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ReportClient interface {
 	// List crawl logs
 	ListCrawlLogs(ctx context.Context, in *CrawlLogListRequest, opts ...grpc.CallOption) (*CrawlLogListReply, error)
@@ -393,7 +556,7 @@ func NewReportClient(cc *grpc.ClientConn) ReportClient {
 
 func (c *reportClient) ListCrawlLogs(ctx context.Context, in *CrawlLogListRequest, opts ...grpc.CallOption) (*CrawlLogListReply, error) {
 	out := new(CrawlLogListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Report/ListCrawlLogs", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Report/ListCrawlLogs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +565,7 @@ func (c *reportClient) ListCrawlLogs(ctx context.Context, in *CrawlLogListReques
 
 func (c *reportClient) ListPageLogs(ctx context.Context, in *PageLogListRequest, opts ...grpc.CallOption) (*PageLogListReply, error) {
 	out := new(PageLogListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Report/ListPageLogs", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Report/ListPageLogs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -411,7 +574,7 @@ func (c *reportClient) ListPageLogs(ctx context.Context, in *PageLogListRequest,
 
 func (c *reportClient) ListScreenshots(ctx context.Context, in *ScreenshotListRequest, opts ...grpc.CallOption) (*ScreenshotListReply, error) {
 	out := new(ScreenshotListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Report/ListScreenshots", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Report/ListScreenshots", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -508,9 +671,9 @@ var _Report_serviceDesc = grpc.ServiceDesc{
 	Metadata: "report.proto",
 }
 
-func init() { proto.RegisterFile("report.proto", fileDescriptor7) }
+func init() { proto.RegisterFile("report.proto", fileDescriptor_report_815df019fd9313b3) }
 
-var fileDescriptor7 = []byte{
+var fileDescriptor_report_815df019fd9313b3 = []byte{
 	// 701 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x95, 0xcd, 0x52, 0x13, 0x4b,
 	0x18, 0x86, 0x4f, 0x4f, 0x7e, 0x48, 0x3e, 0x20, 0xe4, 0x34, 0x3f, 0x19, 0x38, 0x70, 0x18, 0xa6,

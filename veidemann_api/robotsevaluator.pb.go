@@ -17,17 +17,45 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 type IsAllowedRequest struct {
-	ExecutionId string            `protobuf:"bytes,1,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Uri         string            `protobuf:"bytes,2,opt,name=uri" json:"uri,omitempty"`
-	UserAgent   string            `protobuf:"bytes,3,opt,name=user_agent,json=userAgent" json:"user_agent,omitempty"`
-	Politeness  *PolitenessConfig `protobuf:"bytes,4,opt,name=politeness" json:"politeness,omitempty"`
+	ExecutionId          string            `protobuf:"bytes,1,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
+	Uri                  string            `protobuf:"bytes,2,opt,name=uri" json:"uri,omitempty"`
+	UserAgent            string            `protobuf:"bytes,3,opt,name=user_agent,json=userAgent" json:"user_agent,omitempty"`
+	Politeness           *PolitenessConfig `protobuf:"bytes,4,opt,name=politeness" json:"politeness,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
 }
 
-func (m *IsAllowedRequest) Reset()                    { *m = IsAllowedRequest{} }
-func (m *IsAllowedRequest) String() string            { return proto.CompactTextString(m) }
-func (*IsAllowedRequest) ProtoMessage()               {}
-func (*IsAllowedRequest) Descriptor() ([]byte, []int) { return fileDescriptor8, []int{0} }
+func (m *IsAllowedRequest) Reset()         { *m = IsAllowedRequest{} }
+func (m *IsAllowedRequest) String() string { return proto.CompactTextString(m) }
+func (*IsAllowedRequest) ProtoMessage()    {}
+func (*IsAllowedRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_robotsevaluator_768f17bc5537f375, []int{0}
+}
+func (m *IsAllowedRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IsAllowedRequest.Unmarshal(m, b)
+}
+func (m *IsAllowedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IsAllowedRequest.Marshal(b, m, deterministic)
+}
+func (dst *IsAllowedRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IsAllowedRequest.Merge(dst, src)
+}
+func (m *IsAllowedRequest) XXX_Size() int {
+	return xxx_messageInfo_IsAllowedRequest.Size(m)
+}
+func (m *IsAllowedRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_IsAllowedRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IsAllowedRequest proto.InternalMessageInfo
 
 func (m *IsAllowedRequest) GetExecutionId() string {
 	if m != nil {
@@ -58,13 +86,35 @@ func (m *IsAllowedRequest) GetPoliteness() *PolitenessConfig {
 }
 
 type IsAllowedReply struct {
-	IsAllowed bool `protobuf:"varint,1,opt,name=is_allowed,json=isAllowed" json:"is_allowed,omitempty"`
+	IsAllowed            bool     `protobuf:"varint,1,opt,name=is_allowed,json=isAllowed" json:"is_allowed,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *IsAllowedReply) Reset()                    { *m = IsAllowedReply{} }
-func (m *IsAllowedReply) String() string            { return proto.CompactTextString(m) }
-func (*IsAllowedReply) ProtoMessage()               {}
-func (*IsAllowedReply) Descriptor() ([]byte, []int) { return fileDescriptor8, []int{1} }
+func (m *IsAllowedReply) Reset()         { *m = IsAllowedReply{} }
+func (m *IsAllowedReply) String() string { return proto.CompactTextString(m) }
+func (*IsAllowedReply) ProtoMessage()    {}
+func (*IsAllowedReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_robotsevaluator_768f17bc5537f375, []int{1}
+}
+func (m *IsAllowedReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IsAllowedReply.Unmarshal(m, b)
+}
+func (m *IsAllowedReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IsAllowedReply.Marshal(b, m, deterministic)
+}
+func (dst *IsAllowedReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IsAllowedReply.Merge(dst, src)
+}
+func (m *IsAllowedReply) XXX_Size() int {
+	return xxx_messageInfo_IsAllowedReply.Size(m)
+}
+func (m *IsAllowedReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_IsAllowedReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IsAllowedReply proto.InternalMessageInfo
 
 func (m *IsAllowedReply) GetIsAllowed() bool {
 	if m != nil {
@@ -86,8 +136,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for RobotsEvaluator service
-
+// RobotsEvaluatorClient is the client API for RobotsEvaluator service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type RobotsEvaluatorClient interface {
 	IsAllowed(ctx context.Context, in *IsAllowedRequest, opts ...grpc.CallOption) (*IsAllowedReply, error)
 }
@@ -102,7 +153,7 @@ func NewRobotsEvaluatorClient(cc *grpc.ClientConn) RobotsEvaluatorClient {
 
 func (c *robotsEvaluatorClient) IsAllowed(ctx context.Context, in *IsAllowedRequest, opts ...grpc.CallOption) (*IsAllowedReply, error) {
 	out := new(IsAllowedReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.RobotsEvaluator/isAllowed", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.RobotsEvaluator/isAllowed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -150,9 +201,11 @@ var _RobotsEvaluator_serviceDesc = grpc.ServiceDesc{
 	Metadata: "robotsevaluator.proto",
 }
 
-func init() { proto.RegisterFile("robotsevaluator.proto", fileDescriptor8) }
+func init() {
+	proto.RegisterFile("robotsevaluator.proto", fileDescriptor_robotsevaluator_768f17bc5537f375)
+}
 
-var fileDescriptor8 = []byte{
+var fileDescriptor_robotsevaluator_768f17bc5537f375 = []byte{
 	// 275 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x91, 0x4f, 0x4b, 0x03, 0x31,
 	0x14, 0xc4, 0x5d, 0x2b, 0xe2, 0xbe, 0x56, 0x2d, 0x41, 0x71, 0x29, 0x14, 0xeb, 0x9e, 0x7a, 0x8a,

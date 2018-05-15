@@ -6,7 +6,7 @@ package veidemann_api
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import google_protobuf1 "github.com/golang/protobuf/ptypes/empty"
+import empty "github.com/golang/protobuf/ptypes/empty"
 
 import (
 	context "golang.org/x/net/context"
@@ -18,16 +18,44 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 // A request telling which page to harvest.
 type HarvestPageRequest struct {
-	QueuedUri   *QueuedUri   `protobuf:"bytes,1,opt,name=queued_uri,json=queuedUri" json:"queued_uri,omitempty"`
-	CrawlConfig *CrawlConfig `protobuf:"bytes,2,opt,name=crawl_config,json=crawlConfig" json:"crawl_config,omitempty"`
+	QueuedUri            *QueuedUri   `protobuf:"bytes,1,opt,name=queued_uri,json=queuedUri" json:"queued_uri,omitempty"`
+	CrawlConfig          *CrawlConfig `protobuf:"bytes,2,opt,name=crawl_config,json=crawlConfig" json:"crawl_config,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
 }
 
-func (m *HarvestPageRequest) Reset()                    { *m = HarvestPageRequest{} }
-func (m *HarvestPageRequest) String() string            { return proto.CompactTextString(m) }
-func (*HarvestPageRequest) ProtoMessage()               {}
-func (*HarvestPageRequest) Descriptor() ([]byte, []int) { return fileDescriptor5, []int{0} }
+func (m *HarvestPageRequest) Reset()         { *m = HarvestPageRequest{} }
+func (m *HarvestPageRequest) String() string { return proto.CompactTextString(m) }
+func (*HarvestPageRequest) ProtoMessage()    {}
+func (*HarvestPageRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_harvester_14f00e887095b0f7, []int{0}
+}
+func (m *HarvestPageRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_HarvestPageRequest.Unmarshal(m, b)
+}
+func (m *HarvestPageRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_HarvestPageRequest.Marshal(b, m, deterministic)
+}
+func (dst *HarvestPageRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HarvestPageRequest.Merge(dst, src)
+}
+func (m *HarvestPageRequest) XXX_Size() int {
+	return xxx_messageInfo_HarvestPageRequest.Size(m)
+}
+func (m *HarvestPageRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_HarvestPageRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_HarvestPageRequest proto.InternalMessageInfo
 
 func (m *HarvestPageRequest) GetQueuedUri() *QueuedUri {
 	if m != nil {
@@ -45,15 +73,37 @@ func (m *HarvestPageRequest) GetCrawlConfig() *CrawlConfig {
 
 type HarvestPageReply struct {
 	// The outlinks found in the harvested page
-	Outlinks        []*QueuedUri `protobuf:"bytes,1,rep,name=outlinks" json:"outlinks,omitempty"`
-	UriCount        int32        `protobuf:"varint,2,opt,name=uri_count,json=uriCount" json:"uri_count,omitempty"`
-	BytesDownloaded int64        `protobuf:"varint,3,opt,name=bytes_downloaded,json=bytesDownloaded" json:"bytes_downloaded,omitempty"`
+	Outlinks             []*QueuedUri `protobuf:"bytes,1,rep,name=outlinks" json:"outlinks,omitempty"`
+	UriCount             int32        `protobuf:"varint,2,opt,name=uri_count,json=uriCount" json:"uri_count,omitempty"`
+	BytesDownloaded      int64        `protobuf:"varint,3,opt,name=bytes_downloaded,json=bytesDownloaded" json:"bytes_downloaded,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
 }
 
-func (m *HarvestPageReply) Reset()                    { *m = HarvestPageReply{} }
-func (m *HarvestPageReply) String() string            { return proto.CompactTextString(m) }
-func (*HarvestPageReply) ProtoMessage()               {}
-func (*HarvestPageReply) Descriptor() ([]byte, []int) { return fileDescriptor5, []int{1} }
+func (m *HarvestPageReply) Reset()         { *m = HarvestPageReply{} }
+func (m *HarvestPageReply) String() string { return proto.CompactTextString(m) }
+func (*HarvestPageReply) ProtoMessage()    {}
+func (*HarvestPageReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_harvester_14f00e887095b0f7, []int{1}
+}
+func (m *HarvestPageReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_HarvestPageReply.Unmarshal(m, b)
+}
+func (m *HarvestPageReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_HarvestPageReply.Marshal(b, m, deterministic)
+}
+func (dst *HarvestPageReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HarvestPageReply.Merge(dst, src)
+}
+func (m *HarvestPageReply) XXX_Size() int {
+	return xxx_messageInfo_HarvestPageReply.Size(m)
+}
+func (m *HarvestPageReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_HarvestPageReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_HarvestPageReply proto.InternalMessageInfo
 
 func (m *HarvestPageReply) GetOutlinks() []*QueuedUri {
 	if m != nil {
@@ -77,13 +127,35 @@ func (m *HarvestPageReply) GetBytesDownloaded() int64 {
 }
 
 type CleanupExecutionRequest struct {
-	ExecutionId string `protobuf:"bytes,1,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
+	ExecutionId          string   `protobuf:"bytes,1,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *CleanupExecutionRequest) Reset()                    { *m = CleanupExecutionRequest{} }
-func (m *CleanupExecutionRequest) String() string            { return proto.CompactTextString(m) }
-func (*CleanupExecutionRequest) ProtoMessage()               {}
-func (*CleanupExecutionRequest) Descriptor() ([]byte, []int) { return fileDescriptor5, []int{2} }
+func (m *CleanupExecutionRequest) Reset()         { *m = CleanupExecutionRequest{} }
+func (m *CleanupExecutionRequest) String() string { return proto.CompactTextString(m) }
+func (*CleanupExecutionRequest) ProtoMessage()    {}
+func (*CleanupExecutionRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_harvester_14f00e887095b0f7, []int{2}
+}
+func (m *CleanupExecutionRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CleanupExecutionRequest.Unmarshal(m, b)
+}
+func (m *CleanupExecutionRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CleanupExecutionRequest.Marshal(b, m, deterministic)
+}
+func (dst *CleanupExecutionRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CleanupExecutionRequest.Merge(dst, src)
+}
+func (m *CleanupExecutionRequest) XXX_Size() int {
+	return xxx_messageInfo_CleanupExecutionRequest.Size(m)
+}
+func (m *CleanupExecutionRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CleanupExecutionRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CleanupExecutionRequest proto.InternalMessageInfo
 
 func (m *CleanupExecutionRequest) GetExecutionId() string {
 	if m != nil {
@@ -106,13 +178,14 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for Harvester service
-
+// HarvesterClient is the client API for Harvester service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type HarvesterClient interface {
 	// Harvest a page
 	HarvestPage(ctx context.Context, in *HarvestPageRequest, opts ...grpc.CallOption) (*HarvestPageReply, error)
 	// Request cleanup of caches after all pages for a seed are harvested.
-	CleanupExecution(ctx context.Context, in *CleanupExecutionRequest, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	CleanupExecution(ctx context.Context, in *CleanupExecutionRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type harvesterClient struct {
@@ -125,16 +198,16 @@ func NewHarvesterClient(cc *grpc.ClientConn) HarvesterClient {
 
 func (c *harvesterClient) HarvestPage(ctx context.Context, in *HarvestPageRequest, opts ...grpc.CallOption) (*HarvestPageReply, error) {
 	out := new(HarvestPageReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Harvester/HarvestPage", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Harvester/HarvestPage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *harvesterClient) CleanupExecution(ctx context.Context, in *CleanupExecutionRequest, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Harvester/CleanupExecution", in, out, c.cc, opts...)
+func (c *harvesterClient) CleanupExecution(ctx context.Context, in *CleanupExecutionRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Harvester/CleanupExecution", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +220,7 @@ type HarvesterServer interface {
 	// Harvest a page
 	HarvestPage(context.Context, *HarvestPageRequest) (*HarvestPageReply, error)
 	// Request cleanup of caches after all pages for a seed are harvested.
-	CleanupExecution(context.Context, *CleanupExecutionRequest) (*google_protobuf1.Empty, error)
+	CleanupExecution(context.Context, *CleanupExecutionRequest) (*empty.Empty, error)
 }
 
 func RegisterHarvesterServer(s *grpc.Server, srv HarvesterServer) {
@@ -207,9 +280,9 @@ var _Harvester_serviceDesc = grpc.ServiceDesc{
 	Metadata: "harvester.proto",
 }
 
-func init() { proto.RegisterFile("harvester.proto", fileDescriptor5) }
+func init() { proto.RegisterFile("harvester.proto", fileDescriptor_harvester_14f00e887095b0f7) }
 
-var fileDescriptor5 = []byte{
+var fileDescriptor_harvester_14f00e887095b0f7 = []byte{
 	// 387 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x52, 0xc1, 0xae, 0x93, 0x40,
 	0x14, 0x7d, 0xd8, 0x68, 0x1e, 0x43, 0x7d, 0xaf, 0x99, 0x85, 0x25, 0x74, 0x61, 0xcb, 0xc2, 0xd4,

@@ -25,6 +25,7 @@ import (
 	"os"
 	"strings"
 	"text/template"
+	"fmt"
 )
 
 var (
@@ -60,7 +61,7 @@ func applyFilter(filter []string) []*api.Filter {
 	for _, f := range filter {
 		tokens := strings.SplitN(f, " ", 3)
 		op := api.Filter_Operator(api.Filter_Operator_value[strings.ToUpper(tokens[1])])
-		result = append(result, &api.Filter{tokens[0], op, tokens[2]})
+		result = append(result, &api.Filter{FieldName: tokens[0], Op: op, Value: tokens[2]})
 	}
 	return result
 }
@@ -99,7 +100,13 @@ func ApplyTemplate(msg proto.Message, defaultTemplate string) {
 		"brightcyan":    func() string { return ESC + "[1;36m" },
 		"bgwhite":       func() string { return ESC + "[47m" },
 		"bgbrightblack": func() string { return ESC + "[100m" },
-		"time":          func(ts *tspb.Timestamp) string { return ptypes.TimestampString(ts) },
+		"time": func(ts *tspb.Timestamp) string {
+			if ts == nil {
+				return "                        "
+			} else {
+				return fmt.Sprintf("%-24.24s", ptypes.TimestampString(ts))
+			}
+		},
 	}
 
 	tmpl, err := template.New(defaultTemplate).Funcs(funcMap).Parse(string(data))

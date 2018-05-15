@@ -23,7 +23,7 @@ required = ["github.com/jteeuwen/go-bindata"]
 
 [[constraint]]
   name = "google.golang.org/grpc"
-  version = "1.10.0"
+  version = "1.12.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
