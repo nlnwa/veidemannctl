@@ -15,7 +15,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -53,7 +53,7 @@ var getCmd = &cobra.Command{
   veidemannctl get seed -f yaml`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 && len(args) <= 2 {
+		if len(args) > 0 {
 			client, conn := connection.NewControllerClient()
 			defer conn.Close()
 

@@ -18,6 +18,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
+	"os/user"
 )
 
 type config struct {
@@ -54,4 +56,13 @@ func WriteConfig() {
 	defer f.Close()
 
 	f.Write(y)
+}
+
+func GetConfigDir(subdir string) string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return filepath.Join(usr.HomeDir, ".veidemann", subdir)
 }

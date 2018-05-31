@@ -37,8 +37,8 @@ to quickly create a Cobra application.`,
 		defer conn.Close()
 
 		request := api.PageLogListRequest{}
-		if len(args) > 1 {
-			request.WarcId = args[1:]
+		if len(args) > 0 {
+			request.WarcId = args
 		}
 		if executionId != "" {
 			request.ExecutionId = executionId

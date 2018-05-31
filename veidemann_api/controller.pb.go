@@ -6,9 +6,9 @@ package veidemann_api
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import google_protobuf1 "github.com/golang/protobuf/ptypes/empty"
-import _ "google.golang.org/genproto/googleapis/api/annotations"
+import empty "github.com/golang/protobuf/ptypes/empty"
 import _ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options"
+import _ "google.golang.org/genproto/googleapis/api/annotations"
 
 import (
 	context "golang.org/x/net/context"
@@ -20,15 +20,43 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 // Request for getting an object by id
 type GetRequest struct {
-	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetRequest) Reset()                    { *m = GetRequest{} }
-func (m *GetRequest) String() string            { return proto.CompactTextString(m) }
-func (*GetRequest) ProtoMessage()               {}
-func (*GetRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{0} }
+func (m *GetRequest) Reset()         { *m = GetRequest{} }
+func (m *GetRequest) String() string { return proto.CompactTextString(m) }
+func (*GetRequest) ProtoMessage()    {}
+func (*GetRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{0}
+}
+func (m *GetRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetRequest.Unmarshal(m, b)
+}
+func (m *GetRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetRequest.Marshal(b, m, deterministic)
+}
+func (dst *GetRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequest.Merge(dst, src)
+}
+func (m *GetRequest) XXX_Size() int {
+	return xxx_messageInfo_GetRequest.Size(m)
+}
+func (m *GetRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRequest proto.InternalMessageInfo
 
 func (m *GetRequest) GetId() string {
 	if m != nil {
@@ -70,15 +98,37 @@ type ListRequest struct {
 	//   ":"        - matches every label
 	//   ""         - matches every label
 	// </pre>
-	LabelSelector []string `protobuf:"bytes,3,rep,name=label_selector,json=labelSelector" json:"label_selector,omitempty"`
-	PageSize      int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page          int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	LabelSelector        []string `protobuf:"bytes,3,rep,name=label_selector,json=labelSelector" json:"label_selector,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *ListRequest) Reset()                    { *m = ListRequest{} }
-func (m *ListRequest) String() string            { return proto.CompactTextString(m) }
-func (*ListRequest) ProtoMessage()               {}
-func (*ListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{1} }
+func (m *ListRequest) Reset()         { *m = ListRequest{} }
+func (m *ListRequest) String() string { return proto.CompactTextString(m) }
+func (*ListRequest) ProtoMessage()    {}
+func (*ListRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{1}
+}
+func (m *ListRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListRequest.Unmarshal(m, b)
+}
+func (m *ListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListRequest.Marshal(b, m, deterministic)
+}
+func (dst *ListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListRequest.Merge(dst, src)
+}
+func (m *ListRequest) XXX_Size() int {
+	return xxx_messageInfo_ListRequest.Size(m)
+}
+func (m *ListRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListRequest proto.InternalMessageInfo
 
 func (m *ListRequest) GetId() []string {
 	if m != nil {
@@ -117,16 +167,38 @@ func (m *ListRequest) GetPage() int32 {
 
 // A list of entities
 type CrawlEntityListReply struct {
-	Value    []*CrawlEntity `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64          `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlEntity `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64          `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
-func (m *CrawlEntityListReply) Reset()                    { *m = CrawlEntityListReply{} }
-func (m *CrawlEntityListReply) String() string            { return proto.CompactTextString(m) }
-func (*CrawlEntityListReply) ProtoMessage()               {}
-func (*CrawlEntityListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{2} }
+func (m *CrawlEntityListReply) Reset()         { *m = CrawlEntityListReply{} }
+func (m *CrawlEntityListReply) String() string { return proto.CompactTextString(m) }
+func (*CrawlEntityListReply) ProtoMessage()    {}
+func (*CrawlEntityListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{2}
+}
+func (m *CrawlEntityListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CrawlEntityListReply.Unmarshal(m, b)
+}
+func (m *CrawlEntityListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CrawlEntityListReply.Marshal(b, m, deterministic)
+}
+func (dst *CrawlEntityListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CrawlEntityListReply.Merge(dst, src)
+}
+func (m *CrawlEntityListReply) XXX_Size() int {
+	return xxx_messageInfo_CrawlEntityListReply.Size(m)
+}
+func (m *CrawlEntityListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_CrawlEntityListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CrawlEntityListReply proto.InternalMessageInfo
 
 func (m *CrawlEntityListReply) GetValue() []*CrawlEntity {
 	if m != nil {
@@ -192,15 +264,37 @@ type SeedListRequest struct {
 	// Select objects by crawl job id
 	CrawlJobId string `protobuf:"bytes,4,opt,name=crawl_job_id,json=crawlJobId" json:"crawl_job_id,omitempty"`
 	// Select objects by entity id
-	EntityId string `protobuf:"bytes,5,opt,name=entity_id,json=entityId" json:"entity_id,omitempty"`
-	PageSize int32  `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32  `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	EntityId             string   `protobuf:"bytes,5,opt,name=entity_id,json=entityId" json:"entity_id,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *SeedListRequest) Reset()                    { *m = SeedListRequest{} }
-func (m *SeedListRequest) String() string            { return proto.CompactTextString(m) }
-func (*SeedListRequest) ProtoMessage()               {}
-func (*SeedListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{3} }
+func (m *SeedListRequest) Reset()         { *m = SeedListRequest{} }
+func (m *SeedListRequest) String() string { return proto.CompactTextString(m) }
+func (*SeedListRequest) ProtoMessage()    {}
+func (*SeedListRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{3}
+}
+func (m *SeedListRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SeedListRequest.Unmarshal(m, b)
+}
+func (m *SeedListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SeedListRequest.Marshal(b, m, deterministic)
+}
+func (dst *SeedListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SeedListRequest.Merge(dst, src)
+}
+func (m *SeedListRequest) XXX_Size() int {
+	return xxx_messageInfo_SeedListRequest.Size(m)
+}
+func (m *SeedListRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_SeedListRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SeedListRequest proto.InternalMessageInfo
 
 func (m *SeedListRequest) GetId() []string {
 	if m != nil {
@@ -252,16 +346,38 @@ func (m *SeedListRequest) GetPage() int32 {
 }
 
 type SeedListReply struct {
-	Value    []*Seed `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64   `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32   `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32   `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*Seed  `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64    `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *SeedListReply) Reset()                    { *m = SeedListReply{} }
-func (m *SeedListReply) String() string            { return proto.CompactTextString(m) }
-func (*SeedListReply) ProtoMessage()               {}
-func (*SeedListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{4} }
+func (m *SeedListReply) Reset()         { *m = SeedListReply{} }
+func (m *SeedListReply) String() string { return proto.CompactTextString(m) }
+func (*SeedListReply) ProtoMessage()    {}
+func (*SeedListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{4}
+}
+func (m *SeedListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SeedListReply.Unmarshal(m, b)
+}
+func (m *SeedListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SeedListReply.Marshal(b, m, deterministic)
+}
+func (dst *SeedListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SeedListReply.Merge(dst, src)
+}
+func (m *SeedListReply) XXX_Size() int {
+	return xxx_messageInfo_SeedListReply.Size(m)
+}
+func (m *SeedListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_SeedListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SeedListReply proto.InternalMessageInfo
 
 func (m *SeedListReply) GetValue() []*Seed {
 	if m != nil {
@@ -292,16 +408,38 @@ func (m *SeedListReply) GetPage() int32 {
 }
 
 type CrawlJobListReply struct {
-	Value    []*CrawlJob `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64       `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32       `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32       `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlJob `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64       `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32       `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32       `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
 }
 
-func (m *CrawlJobListReply) Reset()                    { *m = CrawlJobListReply{} }
-func (m *CrawlJobListReply) String() string            { return proto.CompactTextString(m) }
-func (*CrawlJobListReply) ProtoMessage()               {}
-func (*CrawlJobListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{5} }
+func (m *CrawlJobListReply) Reset()         { *m = CrawlJobListReply{} }
+func (m *CrawlJobListReply) String() string { return proto.CompactTextString(m) }
+func (*CrawlJobListReply) ProtoMessage()    {}
+func (*CrawlJobListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{5}
+}
+func (m *CrawlJobListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CrawlJobListReply.Unmarshal(m, b)
+}
+func (m *CrawlJobListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CrawlJobListReply.Marshal(b, m, deterministic)
+}
+func (dst *CrawlJobListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CrawlJobListReply.Merge(dst, src)
+}
+func (m *CrawlJobListReply) XXX_Size() int {
+	return xxx_messageInfo_CrawlJobListReply.Size(m)
+}
+func (m *CrawlJobListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_CrawlJobListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CrawlJobListReply proto.InternalMessageInfo
 
 func (m *CrawlJobListReply) GetValue() []*CrawlJob {
 	if m != nil {
@@ -332,16 +470,38 @@ func (m *CrawlJobListReply) GetPage() int32 {
 }
 
 type CrawlConfigListReply struct {
-	Value    []*CrawlConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64          `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64          `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
-func (m *CrawlConfigListReply) Reset()                    { *m = CrawlConfigListReply{} }
-func (m *CrawlConfigListReply) String() string            { return proto.CompactTextString(m) }
-func (*CrawlConfigListReply) ProtoMessage()               {}
-func (*CrawlConfigListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{6} }
+func (m *CrawlConfigListReply) Reset()         { *m = CrawlConfigListReply{} }
+func (m *CrawlConfigListReply) String() string { return proto.CompactTextString(m) }
+func (*CrawlConfigListReply) ProtoMessage()    {}
+func (*CrawlConfigListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{6}
+}
+func (m *CrawlConfigListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CrawlConfigListReply.Unmarshal(m, b)
+}
+func (m *CrawlConfigListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CrawlConfigListReply.Marshal(b, m, deterministic)
+}
+func (dst *CrawlConfigListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CrawlConfigListReply.Merge(dst, src)
+}
+func (m *CrawlConfigListReply) XXX_Size() int {
+	return xxx_messageInfo_CrawlConfigListReply.Size(m)
+}
+func (m *CrawlConfigListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_CrawlConfigListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CrawlConfigListReply proto.InternalMessageInfo
 
 func (m *CrawlConfigListReply) GetValue() []*CrawlConfig {
 	if m != nil {
@@ -372,16 +532,38 @@ func (m *CrawlConfigListReply) GetPage() int32 {
 }
 
 type CrawlScheduleConfigListReply struct {
-	Value    []*CrawlScheduleConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64                  `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32                  `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32                  `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlScheduleConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64                  `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32                  `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32                  `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
 }
 
-func (m *CrawlScheduleConfigListReply) Reset()                    { *m = CrawlScheduleConfigListReply{} }
-func (m *CrawlScheduleConfigListReply) String() string            { return proto.CompactTextString(m) }
-func (*CrawlScheduleConfigListReply) ProtoMessage()               {}
-func (*CrawlScheduleConfigListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{7} }
+func (m *CrawlScheduleConfigListReply) Reset()         { *m = CrawlScheduleConfigListReply{} }
+func (m *CrawlScheduleConfigListReply) String() string { return proto.CompactTextString(m) }
+func (*CrawlScheduleConfigListReply) ProtoMessage()    {}
+func (*CrawlScheduleConfigListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{7}
+}
+func (m *CrawlScheduleConfigListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CrawlScheduleConfigListReply.Unmarshal(m, b)
+}
+func (m *CrawlScheduleConfigListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CrawlScheduleConfigListReply.Marshal(b, m, deterministic)
+}
+func (dst *CrawlScheduleConfigListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CrawlScheduleConfigListReply.Merge(dst, src)
+}
+func (m *CrawlScheduleConfigListReply) XXX_Size() int {
+	return xxx_messageInfo_CrawlScheduleConfigListReply.Size(m)
+}
+func (m *CrawlScheduleConfigListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_CrawlScheduleConfigListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CrawlScheduleConfigListReply proto.InternalMessageInfo
 
 func (m *CrawlScheduleConfigListReply) GetValue() []*CrawlScheduleConfig {
 	if m != nil {
@@ -412,16 +594,38 @@ func (m *CrawlScheduleConfigListReply) GetPage() int32 {
 }
 
 type PolitenessConfigListReply struct {
-	Value    []*PolitenessConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64               `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32               `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32               `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*PolitenessConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64               `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32               `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32               `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
 }
 
-func (m *PolitenessConfigListReply) Reset()                    { *m = PolitenessConfigListReply{} }
-func (m *PolitenessConfigListReply) String() string            { return proto.CompactTextString(m) }
-func (*PolitenessConfigListReply) ProtoMessage()               {}
-func (*PolitenessConfigListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{8} }
+func (m *PolitenessConfigListReply) Reset()         { *m = PolitenessConfigListReply{} }
+func (m *PolitenessConfigListReply) String() string { return proto.CompactTextString(m) }
+func (*PolitenessConfigListReply) ProtoMessage()    {}
+func (*PolitenessConfigListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{8}
+}
+func (m *PolitenessConfigListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PolitenessConfigListReply.Unmarshal(m, b)
+}
+func (m *PolitenessConfigListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PolitenessConfigListReply.Marshal(b, m, deterministic)
+}
+func (dst *PolitenessConfigListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PolitenessConfigListReply.Merge(dst, src)
+}
+func (m *PolitenessConfigListReply) XXX_Size() int {
+	return xxx_messageInfo_PolitenessConfigListReply.Size(m)
+}
+func (m *PolitenessConfigListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_PolitenessConfigListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PolitenessConfigListReply proto.InternalMessageInfo
 
 func (m *PolitenessConfigListReply) GetValue() []*PolitenessConfig {
 	if m != nil {
@@ -452,16 +656,38 @@ func (m *PolitenessConfigListReply) GetPage() int32 {
 }
 
 type BrowserConfigListReply struct {
-	Value    []*BrowserConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64            `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32            `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32            `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*BrowserConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64            `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32            `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32            `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
-func (m *BrowserConfigListReply) Reset()                    { *m = BrowserConfigListReply{} }
-func (m *BrowserConfigListReply) String() string            { return proto.CompactTextString(m) }
-func (*BrowserConfigListReply) ProtoMessage()               {}
-func (*BrowserConfigListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{9} }
+func (m *BrowserConfigListReply) Reset()         { *m = BrowserConfigListReply{} }
+func (m *BrowserConfigListReply) String() string { return proto.CompactTextString(m) }
+func (*BrowserConfigListReply) ProtoMessage()    {}
+func (*BrowserConfigListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{9}
+}
+func (m *BrowserConfigListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BrowserConfigListReply.Unmarshal(m, b)
+}
+func (m *BrowserConfigListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BrowserConfigListReply.Marshal(b, m, deterministic)
+}
+func (dst *BrowserConfigListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BrowserConfigListReply.Merge(dst, src)
+}
+func (m *BrowserConfigListReply) XXX_Size() int {
+	return xxx_messageInfo_BrowserConfigListReply.Size(m)
+}
+func (m *BrowserConfigListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_BrowserConfigListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BrowserConfigListReply proto.InternalMessageInfo
 
 func (m *BrowserConfigListReply) GetValue() []*BrowserConfig {
 	if m != nil {
@@ -493,16 +719,38 @@ func (m *BrowserConfigListReply) GetPage() int32 {
 
 // A list of browserscripts
 type BrowserScriptListReply struct {
-	Value    []*BrowserScript `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64            `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32            `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32            `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*BrowserScript `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64            `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32            `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32            `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
-func (m *BrowserScriptListReply) Reset()                    { *m = BrowserScriptListReply{} }
-func (m *BrowserScriptListReply) String() string            { return proto.CompactTextString(m) }
-func (*BrowserScriptListReply) ProtoMessage()               {}
-func (*BrowserScriptListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{10} }
+func (m *BrowserScriptListReply) Reset()         { *m = BrowserScriptListReply{} }
+func (m *BrowserScriptListReply) String() string { return proto.CompactTextString(m) }
+func (*BrowserScriptListReply) ProtoMessage()    {}
+func (*BrowserScriptListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{10}
+}
+func (m *BrowserScriptListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BrowserScriptListReply.Unmarshal(m, b)
+}
+func (m *BrowserScriptListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BrowserScriptListReply.Marshal(b, m, deterministic)
+}
+func (dst *BrowserScriptListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BrowserScriptListReply.Merge(dst, src)
+}
+func (m *BrowserScriptListReply) XXX_Size() int {
+	return xxx_messageInfo_BrowserScriptListReply.Size(m)
+}
+func (m *BrowserScriptListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_BrowserScriptListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BrowserScriptListReply proto.InternalMessageInfo
 
 func (m *BrowserScriptListReply) GetValue() []*BrowserScript {
 	if m != nil {
@@ -534,16 +782,38 @@ func (m *BrowserScriptListReply) GetPage() int32 {
 
 // A list of CrawlHostGroupConfigs
 type CrawlHostGroupConfigListReply struct {
-	Value    []*CrawlHostGroupConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64                   `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32                   `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32                   `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlHostGroupConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64                   `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32                   `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32                   `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
+	XXX_unrecognized     []byte                  `json:"-"`
+	XXX_sizecache        int32                   `json:"-"`
 }
 
-func (m *CrawlHostGroupConfigListReply) Reset()                    { *m = CrawlHostGroupConfigListReply{} }
-func (m *CrawlHostGroupConfigListReply) String() string            { return proto.CompactTextString(m) }
-func (*CrawlHostGroupConfigListReply) ProtoMessage()               {}
-func (*CrawlHostGroupConfigListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{11} }
+func (m *CrawlHostGroupConfigListReply) Reset()         { *m = CrawlHostGroupConfigListReply{} }
+func (m *CrawlHostGroupConfigListReply) String() string { return proto.CompactTextString(m) }
+func (*CrawlHostGroupConfigListReply) ProtoMessage()    {}
+func (*CrawlHostGroupConfigListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{11}
+}
+func (m *CrawlHostGroupConfigListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CrawlHostGroupConfigListReply.Unmarshal(m, b)
+}
+func (m *CrawlHostGroupConfigListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CrawlHostGroupConfigListReply.Marshal(b, m, deterministic)
+}
+func (dst *CrawlHostGroupConfigListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CrawlHostGroupConfigListReply.Merge(dst, src)
+}
+func (m *CrawlHostGroupConfigListReply) XXX_Size() int {
+	return xxx_messageInfo_CrawlHostGroupConfigListReply.Size(m)
+}
+func (m *CrawlHostGroupConfigListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_CrawlHostGroupConfigListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CrawlHostGroupConfigListReply proto.InternalMessageInfo
 
 func (m *CrawlHostGroupConfigListReply) GetValue() []*CrawlHostGroupConfig {
 	if m != nil {
@@ -578,13 +848,35 @@ type RunCrawlRequest struct {
 	JobId string `protobuf:"bytes,5,opt,name=job_id,json=jobId" json:"job_id,omitempty"`
 	// If seed id is submitted, only this seed will be harvested.
 	// If empty, all seeds configured with the submitted job id will be harvested.
-	SeedId string `protobuf:"bytes,6,opt,name=seed_id,json=seedId" json:"seed_id,omitempty"`
+	SeedId               string   `protobuf:"bytes,6,opt,name=seed_id,json=seedId" json:"seed_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *RunCrawlRequest) Reset()                    { *m = RunCrawlRequest{} }
-func (m *RunCrawlRequest) String() string            { return proto.CompactTextString(m) }
-func (*RunCrawlRequest) ProtoMessage()               {}
-func (*RunCrawlRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{12} }
+func (m *RunCrawlRequest) Reset()         { *m = RunCrawlRequest{} }
+func (m *RunCrawlRequest) String() string { return proto.CompactTextString(m) }
+func (*RunCrawlRequest) ProtoMessage()    {}
+func (*RunCrawlRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{12}
+}
+func (m *RunCrawlRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RunCrawlRequest.Unmarshal(m, b)
+}
+func (m *RunCrawlRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RunCrawlRequest.Marshal(b, m, deterministic)
+}
+func (dst *RunCrawlRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RunCrawlRequest.Merge(dst, src)
+}
+func (m *RunCrawlRequest) XXX_Size() int {
+	return xxx_messageInfo_RunCrawlRequest.Size(m)
+}
+func (m *RunCrawlRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RunCrawlRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RunCrawlRequest proto.InternalMessageInfo
 
 func (m *RunCrawlRequest) GetJobId() string {
 	if m != nil {
@@ -601,13 +893,35 @@ func (m *RunCrawlRequest) GetSeedId() string {
 }
 
 type RunCrawlReply struct {
-	JobExecutionId string `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
+	JobExecutionId       string   `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *RunCrawlReply) Reset()                    { *m = RunCrawlReply{} }
-func (m *RunCrawlReply) String() string            { return proto.CompactTextString(m) }
-func (*RunCrawlReply) ProtoMessage()               {}
-func (*RunCrawlReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{13} }
+func (m *RunCrawlReply) Reset()         { *m = RunCrawlReply{} }
+func (m *RunCrawlReply) String() string { return proto.CompactTextString(m) }
+func (*RunCrawlReply) ProtoMessage()    {}
+func (*RunCrawlReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{13}
+}
+func (m *RunCrawlReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RunCrawlReply.Unmarshal(m, b)
+}
+func (m *RunCrawlReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RunCrawlReply.Marshal(b, m, deterministic)
+}
+func (dst *RunCrawlReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RunCrawlReply.Merge(dst, src)
+}
+func (m *RunCrawlReply) XXX_Size() int {
+	return xxx_messageInfo_RunCrawlReply.Size(m)
+}
+func (m *RunCrawlReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_RunCrawlReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RunCrawlReply proto.InternalMessageInfo
 
 func (m *RunCrawlReply) GetJobExecutionId() string {
 	if m != nil {
@@ -617,13 +931,35 @@ func (m *RunCrawlReply) GetJobExecutionId() string {
 }
 
 type RoleList struct {
-	Role []Role `protobuf:"varint,1,rep,packed,name=role,enum=veidemann.api.Role" json:"role,omitempty"`
+	Role                 []Role   `protobuf:"varint,1,rep,packed,name=role,enum=veidemann.api.Role" json:"role,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *RoleList) Reset()                    { *m = RoleList{} }
-func (m *RoleList) String() string            { return proto.CompactTextString(m) }
-func (*RoleList) ProtoMessage()               {}
-func (*RoleList) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{14} }
+func (m *RoleList) Reset()         { *m = RoleList{} }
+func (m *RoleList) String() string { return proto.CompactTextString(m) }
+func (*RoleList) ProtoMessage()    {}
+func (*RoleList) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{14}
+}
+func (m *RoleList) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RoleList.Unmarshal(m, b)
+}
+func (m *RoleList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RoleList.Marshal(b, m, deterministic)
+}
+func (dst *RoleList) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RoleList.Merge(dst, src)
+}
+func (m *RoleList) XXX_Size() int {
+	return xxx_messageInfo_RoleList.Size(m)
+}
+func (m *RoleList) XXX_DiscardUnknown() {
+	xxx_messageInfo_RoleList.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RoleList proto.InternalMessageInfo
 
 func (m *RoleList) GetRole() []Role {
 	if m != nil {
@@ -633,15 +969,37 @@ func (m *RoleList) GetRole() []Role {
 }
 
 type RoleMappingsListRequest struct {
-	Id       string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	PageSize int32  `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32  `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *RoleMappingsListRequest) Reset()                    { *m = RoleMappingsListRequest{} }
-func (m *RoleMappingsListRequest) String() string            { return proto.CompactTextString(m) }
-func (*RoleMappingsListRequest) ProtoMessage()               {}
-func (*RoleMappingsListRequest) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{15} }
+func (m *RoleMappingsListRequest) Reset()         { *m = RoleMappingsListRequest{} }
+func (m *RoleMappingsListRequest) String() string { return proto.CompactTextString(m) }
+func (*RoleMappingsListRequest) ProtoMessage()    {}
+func (*RoleMappingsListRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{15}
+}
+func (m *RoleMappingsListRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RoleMappingsListRequest.Unmarshal(m, b)
+}
+func (m *RoleMappingsListRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RoleMappingsListRequest.Marshal(b, m, deterministic)
+}
+func (dst *RoleMappingsListRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RoleMappingsListRequest.Merge(dst, src)
+}
+func (m *RoleMappingsListRequest) XXX_Size() int {
+	return xxx_messageInfo_RoleMappingsListRequest.Size(m)
+}
+func (m *RoleMappingsListRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RoleMappingsListRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RoleMappingsListRequest proto.InternalMessageInfo
 
 func (m *RoleMappingsListRequest) GetId() string {
 	if m != nil {
@@ -665,16 +1023,38 @@ func (m *RoleMappingsListRequest) GetPage() int32 {
 }
 
 type RoleMappingsListReply struct {
-	Value    []*RoleMapping `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count    int64          `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page     int32          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*RoleMapping `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
+	Count                int64          `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
+	PageSize             int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
+	Page                 int32          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
-func (m *RoleMappingsListReply) Reset()                    { *m = RoleMappingsListReply{} }
-func (m *RoleMappingsListReply) String() string            { return proto.CompactTextString(m) }
-func (*RoleMappingsListReply) ProtoMessage()               {}
-func (*RoleMappingsListReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{16} }
+func (m *RoleMappingsListReply) Reset()         { *m = RoleMappingsListReply{} }
+func (m *RoleMappingsListReply) String() string { return proto.CompactTextString(m) }
+func (*RoleMappingsListReply) ProtoMessage()    {}
+func (*RoleMappingsListReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{16}
+}
+func (m *RoleMappingsListReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RoleMappingsListReply.Unmarshal(m, b)
+}
+func (m *RoleMappingsListReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RoleMappingsListReply.Marshal(b, m, deterministic)
+}
+func (dst *RoleMappingsListReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RoleMappingsListReply.Merge(dst, src)
+}
+func (m *RoleMappingsListReply) XXX_Size() int {
+	return xxx_messageInfo_RoleMappingsListReply.Size(m)
+}
+func (m *RoleMappingsListReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_RoleMappingsListReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RoleMappingsListReply proto.InternalMessageInfo
 
 func (m *RoleMappingsListReply) GetValue() []*RoleMapping {
 	if m != nil {
@@ -705,13 +1085,35 @@ func (m *RoleMappingsListReply) GetPage() int32 {
 }
 
 type OpenIdConnectIssuerReply struct {
-	OpenIdConnectIssuer string `protobuf:"bytes,1,opt,name=open_id_connect_issuer,json=openIdConnectIssuer" json:"open_id_connect_issuer,omitempty"`
+	OpenIdConnectIssuer  string   `protobuf:"bytes,1,opt,name=open_id_connect_issuer,json=openIdConnectIssuer" json:"open_id_connect_issuer,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *OpenIdConnectIssuerReply) Reset()                    { *m = OpenIdConnectIssuerReply{} }
-func (m *OpenIdConnectIssuerReply) String() string            { return proto.CompactTextString(m) }
-func (*OpenIdConnectIssuerReply) ProtoMessage()               {}
-func (*OpenIdConnectIssuerReply) Descriptor() ([]byte, []int) { return fileDescriptor2, []int{17} }
+func (m *OpenIdConnectIssuerReply) Reset()         { *m = OpenIdConnectIssuerReply{} }
+func (m *OpenIdConnectIssuerReply) String() string { return proto.CompactTextString(m) }
+func (*OpenIdConnectIssuerReply) ProtoMessage()    {}
+func (*OpenIdConnectIssuerReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_controller_91bd6c5fe81a4cda, []int{17}
+}
+func (m *OpenIdConnectIssuerReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_OpenIdConnectIssuerReply.Unmarshal(m, b)
+}
+func (m *OpenIdConnectIssuerReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_OpenIdConnectIssuerReply.Marshal(b, m, deterministic)
+}
+func (dst *OpenIdConnectIssuerReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_OpenIdConnectIssuerReply.Merge(dst, src)
+}
+func (m *OpenIdConnectIssuerReply) XXX_Size() int {
+	return xxx_messageInfo_OpenIdConnectIssuerReply.Size(m)
+}
+func (m *OpenIdConnectIssuerReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_OpenIdConnectIssuerReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_OpenIdConnectIssuerReply proto.InternalMessageInfo
 
 func (m *OpenIdConnectIssuerReply) GetOpenIdConnectIssuer() string {
 	if m != nil {
@@ -749,8 +1151,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for Controller service
-
+// ControllerClient is the client API for Controller service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ControllerClient interface {
 	// Get a crawl entity by ID
 	GetCrawlEntity(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlEntity, error)
@@ -759,64 +1162,64 @@ type ControllerClient interface {
 	// Save a crawl entity
 	SaveEntity(ctx context.Context, in *CrawlEntity, opts ...grpc.CallOption) (*CrawlEntity, error)
 	// Delete a crawl entity
-	DeleteEntity(ctx context.Context, in *CrawlEntity, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	DeleteEntity(ctx context.Context, in *CrawlEntity, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Get a seed by ID
 	GetSeed(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Seed, error)
 	// List a set of seeds
 	ListSeeds(ctx context.Context, in *SeedListRequest, opts ...grpc.CallOption) (*SeedListReply, error)
 	SaveSeed(ctx context.Context, in *Seed, opts ...grpc.CallOption) (*Seed, error)
-	DeleteSeed(ctx context.Context, in *Seed, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	DeleteSeed(ctx context.Context, in *Seed, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Get a crawl job by ID
 	GetCrawlJob(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlJob, error)
 	// List a set of crawl jobs
 	ListCrawlJobs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlJobListReply, error)
 	SaveCrawlJob(ctx context.Context, in *CrawlJob, opts ...grpc.CallOption) (*CrawlJob, error)
-	DeleteCrawlJob(ctx context.Context, in *CrawlJob, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	DeleteCrawlJob(ctx context.Context, in *CrawlJob, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Get a crawl config by ID
 	GetCrawlConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlConfig, error)
 	// List a set of crawl configs
 	ListCrawlConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlConfigListReply, error)
 	SaveCrawlConfig(ctx context.Context, in *CrawlConfig, opts ...grpc.CallOption) (*CrawlConfig, error)
-	DeleteCrawlConfig(ctx context.Context, in *CrawlConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	DeleteCrawlConfig(ctx context.Context, in *CrawlConfig, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Get a crawl schedule config by ID
 	GetCrawlScheduleConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlScheduleConfig, error)
 	// List a set of crawl schedule configs
 	ListCrawlScheduleConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlScheduleConfigListReply, error)
 	SaveCrawlScheduleConfig(ctx context.Context, in *CrawlScheduleConfig, opts ...grpc.CallOption) (*CrawlScheduleConfig, error)
-	DeleteCrawlScheduleConfig(ctx context.Context, in *CrawlScheduleConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	DeleteCrawlScheduleConfig(ctx context.Context, in *CrawlScheduleConfig, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Get a politeness config by ID
 	GetPolitenessConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*PolitenessConfig, error)
 	// List a set of politeness configs
 	ListPolitenessConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*PolitenessConfigListReply, error)
 	SavePolitenessConfig(ctx context.Context, in *PolitenessConfig, opts ...grpc.CallOption) (*PolitenessConfig, error)
-	DeletePolitenessConfig(ctx context.Context, in *PolitenessConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	DeletePolitenessConfig(ctx context.Context, in *PolitenessConfig, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Get a browser config by ID
 	GetBrowserConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*BrowserConfig, error)
 	// List a set of browser configs
 	ListBrowserConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*BrowserConfigListReply, error)
 	SaveBrowserConfig(ctx context.Context, in *BrowserConfig, opts ...grpc.CallOption) (*BrowserConfig, error)
-	DeleteBrowserConfig(ctx context.Context, in *BrowserConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	DeleteBrowserConfig(ctx context.Context, in *BrowserConfig, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Get a browser script by ID
 	GetBrowserScript(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*BrowserScript, error)
 	// List a set of browser scripts
 	ListBrowserScripts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*BrowserScriptListReply, error)
 	SaveBrowserScript(ctx context.Context, in *BrowserScript, opts ...grpc.CallOption) (*BrowserScript, error)
-	DeleteBrowserScript(ctx context.Context, in *BrowserScript, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
+	DeleteBrowserScript(ctx context.Context, in *BrowserScript, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Get a crawl host group config by ID
 	GetCrawlHostGroupConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlHostGroupConfig, error)
 	// List a set of crawl host group configs
 	ListCrawlHostGroupConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlHostGroupConfigListReply, error)
 	SaveCrawlHostGroupConfig(ctx context.Context, in *CrawlHostGroupConfig, opts ...grpc.CallOption) (*CrawlHostGroupConfig, error)
-	DeleteCrawlHostGroupConfig(ctx context.Context, in *CrawlHostGroupConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
-	GetLogConfig(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*LogLevels, error)
+	DeleteCrawlHostGroupConfig(ctx context.Context, in *CrawlHostGroupConfig, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetLogConfig(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*LogLevels, error)
 	SaveLogConfig(ctx context.Context, in *LogLevels, opts ...grpc.CallOption) (*LogLevels, error)
 	ListRoleMappings(ctx context.Context, in *RoleMappingsListRequest, opts ...grpc.CallOption) (*RoleMappingsListReply, error)
 	SaveRoleMapping(ctx context.Context, in *RoleMapping, opts ...grpc.CallOption) (*RoleMapping, error)
-	DeleteRoleMapping(ctx context.Context, in *RoleMapping, opts ...grpc.CallOption) (*google_protobuf1.Empty, error)
-	GetRolesForActiveUser(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*RoleList, error)
+	DeleteRoleMapping(ctx context.Context, in *RoleMapping, opts ...grpc.CallOption) (*empty.Empty, error)
+	GetRolesForActiveUser(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RoleList, error)
 	RunCrawl(ctx context.Context, in *RunCrawlRequest, opts ...grpc.CallOption) (*RunCrawlReply, error)
 	// Get the configured OpenID connect issuer address
-	GetOpenIdConnectIssuer(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*OpenIdConnectIssuerReply, error)
+	GetOpenIdConnectIssuer(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*OpenIdConnectIssuerReply, error)
 }
 
 type controllerClient struct {
@@ -829,7 +1232,7 @@ func NewControllerClient(cc *grpc.ClientConn) ControllerClient {
 
 func (c *controllerClient) GetCrawlEntity(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlEntity, error) {
 	out := new(CrawlEntity)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlEntity", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlEntity", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -838,7 +1241,7 @@ func (c *controllerClient) GetCrawlEntity(ctx context.Context, in *GetRequest, o
 
 func (c *controllerClient) ListCrawlEntities(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlEntityListReply, error) {
 	out := new(CrawlEntityListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlEntities", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlEntities", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -847,16 +1250,16 @@ func (c *controllerClient) ListCrawlEntities(ctx context.Context, in *ListReques
 
 func (c *controllerClient) SaveEntity(ctx context.Context, in *CrawlEntity, opts ...grpc.CallOption) (*CrawlEntity, error) {
 	out := new(CrawlEntity)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveEntity", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveEntity", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeleteEntity(ctx context.Context, in *CrawlEntity, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteEntity", in, out, c.cc, opts...)
+func (c *controllerClient) DeleteEntity(ctx context.Context, in *CrawlEntity, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeleteEntity", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -865,7 +1268,7 @@ func (c *controllerClient) DeleteEntity(ctx context.Context, in *CrawlEntity, op
 
 func (c *controllerClient) GetSeed(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Seed, error) {
 	out := new(Seed)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetSeed", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetSeed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -874,7 +1277,7 @@ func (c *controllerClient) GetSeed(ctx context.Context, in *GetRequest, opts ...
 
 func (c *controllerClient) ListSeeds(ctx context.Context, in *SeedListRequest, opts ...grpc.CallOption) (*SeedListReply, error) {
 	out := new(SeedListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListSeeds", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListSeeds", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -883,16 +1286,16 @@ func (c *controllerClient) ListSeeds(ctx context.Context, in *SeedListRequest, o
 
 func (c *controllerClient) SaveSeed(ctx context.Context, in *Seed, opts ...grpc.CallOption) (*Seed, error) {
 	out := new(Seed)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveSeed", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveSeed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeleteSeed(ctx context.Context, in *Seed, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteSeed", in, out, c.cc, opts...)
+func (c *controllerClient) DeleteSeed(ctx context.Context, in *Seed, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeleteSeed", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -901,7 +1304,7 @@ func (c *controllerClient) DeleteSeed(ctx context.Context, in *Seed, opts ...grp
 
 func (c *controllerClient) GetCrawlJob(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlJob, error) {
 	out := new(CrawlJob)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlJob", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlJob", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -910,7 +1313,7 @@ func (c *controllerClient) GetCrawlJob(ctx context.Context, in *GetRequest, opts
 
 func (c *controllerClient) ListCrawlJobs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlJobListReply, error) {
 	out := new(CrawlJobListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlJobs", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlJobs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -919,16 +1322,16 @@ func (c *controllerClient) ListCrawlJobs(ctx context.Context, in *ListRequest, o
 
 func (c *controllerClient) SaveCrawlJob(ctx context.Context, in *CrawlJob, opts ...grpc.CallOption) (*CrawlJob, error) {
 	out := new(CrawlJob)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveCrawlJob", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveCrawlJob", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeleteCrawlJob(ctx context.Context, in *CrawlJob, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlJob", in, out, c.cc, opts...)
+func (c *controllerClient) DeleteCrawlJob(ctx context.Context, in *CrawlJob, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlJob", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -937,7 +1340,7 @@ func (c *controllerClient) DeleteCrawlJob(ctx context.Context, in *CrawlJob, opt
 
 func (c *controllerClient) GetCrawlConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlConfig, error) {
 	out := new(CrawlConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -946,7 +1349,7 @@ func (c *controllerClient) GetCrawlConfig(ctx context.Context, in *GetRequest, o
 
 func (c *controllerClient) ListCrawlConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlConfigListReply, error) {
 	out := new(CrawlConfigListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlConfigs", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlConfigs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -955,16 +1358,16 @@ func (c *controllerClient) ListCrawlConfigs(ctx context.Context, in *ListRequest
 
 func (c *controllerClient) SaveCrawlConfig(ctx context.Context, in *CrawlConfig, opts ...grpc.CallOption) (*CrawlConfig, error) {
 	out := new(CrawlConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveCrawlConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveCrawlConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeleteCrawlConfig(ctx context.Context, in *CrawlConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlConfig", in, out, c.cc, opts...)
+func (c *controllerClient) DeleteCrawlConfig(ctx context.Context, in *CrawlConfig, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -973,7 +1376,7 @@ func (c *controllerClient) DeleteCrawlConfig(ctx context.Context, in *CrawlConfi
 
 func (c *controllerClient) GetCrawlScheduleConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlScheduleConfig, error) {
 	out := new(CrawlScheduleConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlScheduleConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlScheduleConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -982,7 +1385,7 @@ func (c *controllerClient) GetCrawlScheduleConfig(ctx context.Context, in *GetRe
 
 func (c *controllerClient) ListCrawlScheduleConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlScheduleConfigListReply, error) {
 	out := new(CrawlScheduleConfigListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlScheduleConfigs", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlScheduleConfigs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -991,16 +1394,16 @@ func (c *controllerClient) ListCrawlScheduleConfigs(ctx context.Context, in *Lis
 
 func (c *controllerClient) SaveCrawlScheduleConfig(ctx context.Context, in *CrawlScheduleConfig, opts ...grpc.CallOption) (*CrawlScheduleConfig, error) {
 	out := new(CrawlScheduleConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveCrawlScheduleConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveCrawlScheduleConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeleteCrawlScheduleConfig(ctx context.Context, in *CrawlScheduleConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlScheduleConfig", in, out, c.cc, opts...)
+func (c *controllerClient) DeleteCrawlScheduleConfig(ctx context.Context, in *CrawlScheduleConfig, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlScheduleConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1009,7 +1412,7 @@ func (c *controllerClient) DeleteCrawlScheduleConfig(ctx context.Context, in *Cr
 
 func (c *controllerClient) GetPolitenessConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*PolitenessConfig, error) {
 	out := new(PolitenessConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetPolitenessConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetPolitenessConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1018,7 +1421,7 @@ func (c *controllerClient) GetPolitenessConfig(ctx context.Context, in *GetReque
 
 func (c *controllerClient) ListPolitenessConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*PolitenessConfigListReply, error) {
 	out := new(PolitenessConfigListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListPolitenessConfigs", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListPolitenessConfigs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1027,16 +1430,16 @@ func (c *controllerClient) ListPolitenessConfigs(ctx context.Context, in *ListRe
 
 func (c *controllerClient) SavePolitenessConfig(ctx context.Context, in *PolitenessConfig, opts ...grpc.CallOption) (*PolitenessConfig, error) {
 	out := new(PolitenessConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SavePolitenessConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SavePolitenessConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeletePolitenessConfig(ctx context.Context, in *PolitenessConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeletePolitenessConfig", in, out, c.cc, opts...)
+func (c *controllerClient) DeletePolitenessConfig(ctx context.Context, in *PolitenessConfig, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeletePolitenessConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1045,7 +1448,7 @@ func (c *controllerClient) DeletePolitenessConfig(ctx context.Context, in *Polit
 
 func (c *controllerClient) GetBrowserConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*BrowserConfig, error) {
 	out := new(BrowserConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetBrowserConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetBrowserConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1054,7 +1457,7 @@ func (c *controllerClient) GetBrowserConfig(ctx context.Context, in *GetRequest,
 
 func (c *controllerClient) ListBrowserConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*BrowserConfigListReply, error) {
 	out := new(BrowserConfigListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListBrowserConfigs", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListBrowserConfigs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1063,16 +1466,16 @@ func (c *controllerClient) ListBrowserConfigs(ctx context.Context, in *ListReque
 
 func (c *controllerClient) SaveBrowserConfig(ctx context.Context, in *BrowserConfig, opts ...grpc.CallOption) (*BrowserConfig, error) {
 	out := new(BrowserConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveBrowserConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveBrowserConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeleteBrowserConfig(ctx context.Context, in *BrowserConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteBrowserConfig", in, out, c.cc, opts...)
+func (c *controllerClient) DeleteBrowserConfig(ctx context.Context, in *BrowserConfig, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeleteBrowserConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1081,7 +1484,7 @@ func (c *controllerClient) DeleteBrowserConfig(ctx context.Context, in *BrowserC
 
 func (c *controllerClient) GetBrowserScript(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*BrowserScript, error) {
 	out := new(BrowserScript)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetBrowserScript", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetBrowserScript", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1090,7 +1493,7 @@ func (c *controllerClient) GetBrowserScript(ctx context.Context, in *GetRequest,
 
 func (c *controllerClient) ListBrowserScripts(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*BrowserScriptListReply, error) {
 	out := new(BrowserScriptListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListBrowserScripts", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListBrowserScripts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1099,16 +1502,16 @@ func (c *controllerClient) ListBrowserScripts(ctx context.Context, in *ListReque
 
 func (c *controllerClient) SaveBrowserScript(ctx context.Context, in *BrowserScript, opts ...grpc.CallOption) (*BrowserScript, error) {
 	out := new(BrowserScript)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveBrowserScript", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveBrowserScript", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeleteBrowserScript(ctx context.Context, in *BrowserScript, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteBrowserScript", in, out, c.cc, opts...)
+func (c *controllerClient) DeleteBrowserScript(ctx context.Context, in *BrowserScript, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeleteBrowserScript", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1117,7 +1520,7 @@ func (c *controllerClient) DeleteBrowserScript(ctx context.Context, in *BrowserS
 
 func (c *controllerClient) GetCrawlHostGroupConfig(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*CrawlHostGroupConfig, error) {
 	out := new(CrawlHostGroupConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlHostGroupConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetCrawlHostGroupConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1126,7 +1529,7 @@ func (c *controllerClient) GetCrawlHostGroupConfig(ctx context.Context, in *GetR
 
 func (c *controllerClient) ListCrawlHostGroupConfigs(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*CrawlHostGroupConfigListReply, error) {
 	out := new(CrawlHostGroupConfigListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlHostGroupConfigs", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListCrawlHostGroupConfigs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1135,25 +1538,25 @@ func (c *controllerClient) ListCrawlHostGroupConfigs(ctx context.Context, in *Li
 
 func (c *controllerClient) SaveCrawlHostGroupConfig(ctx context.Context, in *CrawlHostGroupConfig, opts ...grpc.CallOption) (*CrawlHostGroupConfig, error) {
 	out := new(CrawlHostGroupConfig)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveCrawlHostGroupConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveCrawlHostGroupConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeleteCrawlHostGroupConfig(ctx context.Context, in *CrawlHostGroupConfig, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlHostGroupConfig", in, out, c.cc, opts...)
+func (c *controllerClient) DeleteCrawlHostGroupConfig(ctx context.Context, in *CrawlHostGroupConfig, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeleteCrawlHostGroupConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) GetLogConfig(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*LogLevels, error) {
+func (c *controllerClient) GetLogConfig(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*LogLevels, error) {
 	out := new(LogLevels)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetLogConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetLogConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1162,7 +1565,7 @@ func (c *controllerClient) GetLogConfig(ctx context.Context, in *google_protobuf
 
 func (c *controllerClient) SaveLogConfig(ctx context.Context, in *LogLevels, opts ...grpc.CallOption) (*LogLevels, error) {
 	out := new(LogLevels)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveLogConfig", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveLogConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1171,7 +1574,7 @@ func (c *controllerClient) SaveLogConfig(ctx context.Context, in *LogLevels, opt
 
 func (c *controllerClient) ListRoleMappings(ctx context.Context, in *RoleMappingsListRequest, opts ...grpc.CallOption) (*RoleMappingsListReply, error) {
 	out := new(RoleMappingsListReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/ListRoleMappings", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/ListRoleMappings", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1180,25 +1583,25 @@ func (c *controllerClient) ListRoleMappings(ctx context.Context, in *RoleMapping
 
 func (c *controllerClient) SaveRoleMapping(ctx context.Context, in *RoleMapping, opts ...grpc.CallOption) (*RoleMapping, error) {
 	out := new(RoleMapping)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/SaveRoleMapping", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/SaveRoleMapping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) DeleteRoleMapping(ctx context.Context, in *RoleMapping, opts ...grpc.CallOption) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/DeleteRoleMapping", in, out, c.cc, opts...)
+func (c *controllerClient) DeleteRoleMapping(ctx context.Context, in *RoleMapping, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/DeleteRoleMapping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) GetRolesForActiveUser(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*RoleList, error) {
+func (c *controllerClient) GetRolesForActiveUser(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RoleList, error) {
 	out := new(RoleList)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetRolesForActiveUser", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetRolesForActiveUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1207,24 +1610,23 @@ func (c *controllerClient) GetRolesForActiveUser(ctx context.Context, in *google
 
 func (c *controllerClient) RunCrawl(ctx context.Context, in *RunCrawlRequest, opts ...grpc.CallOption) (*RunCrawlReply, error) {
 	out := new(RunCrawlReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/RunCrawl", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/RunCrawl", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controllerClient) GetOpenIdConnectIssuer(ctx context.Context, in *google_protobuf1.Empty, opts ...grpc.CallOption) (*OpenIdConnectIssuerReply, error) {
+func (c *controllerClient) GetOpenIdConnectIssuer(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*OpenIdConnectIssuerReply, error) {
 	out := new(OpenIdConnectIssuerReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.Controller/GetOpenIdConnectIssuer", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.Controller/GetOpenIdConnectIssuer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for Controller service
-
+// ControllerServer is the server API for Controller service.
 type ControllerServer interface {
 	// Get a crawl entity by ID
 	GetCrawlEntity(context.Context, *GetRequest) (*CrawlEntity, error)
@@ -1233,64 +1635,64 @@ type ControllerServer interface {
 	// Save a crawl entity
 	SaveEntity(context.Context, *CrawlEntity) (*CrawlEntity, error)
 	// Delete a crawl entity
-	DeleteEntity(context.Context, *CrawlEntity) (*google_protobuf1.Empty, error)
+	DeleteEntity(context.Context, *CrawlEntity) (*empty.Empty, error)
 	// Get a seed by ID
 	GetSeed(context.Context, *GetRequest) (*Seed, error)
 	// List a set of seeds
 	ListSeeds(context.Context, *SeedListRequest) (*SeedListReply, error)
 	SaveSeed(context.Context, *Seed) (*Seed, error)
-	DeleteSeed(context.Context, *Seed) (*google_protobuf1.Empty, error)
+	DeleteSeed(context.Context, *Seed) (*empty.Empty, error)
 	// Get a crawl job by ID
 	GetCrawlJob(context.Context, *GetRequest) (*CrawlJob, error)
 	// List a set of crawl jobs
 	ListCrawlJobs(context.Context, *ListRequest) (*CrawlJobListReply, error)
 	SaveCrawlJob(context.Context, *CrawlJob) (*CrawlJob, error)
-	DeleteCrawlJob(context.Context, *CrawlJob) (*google_protobuf1.Empty, error)
+	DeleteCrawlJob(context.Context, *CrawlJob) (*empty.Empty, error)
 	// Get a crawl config by ID
 	GetCrawlConfig(context.Context, *GetRequest) (*CrawlConfig, error)
 	// List a set of crawl configs
 	ListCrawlConfigs(context.Context, *ListRequest) (*CrawlConfigListReply, error)
 	SaveCrawlConfig(context.Context, *CrawlConfig) (*CrawlConfig, error)
-	DeleteCrawlConfig(context.Context, *CrawlConfig) (*google_protobuf1.Empty, error)
+	DeleteCrawlConfig(context.Context, *CrawlConfig) (*empty.Empty, error)
 	// Get a crawl schedule config by ID
 	GetCrawlScheduleConfig(context.Context, *GetRequest) (*CrawlScheduleConfig, error)
 	// List a set of crawl schedule configs
 	ListCrawlScheduleConfigs(context.Context, *ListRequest) (*CrawlScheduleConfigListReply, error)
 	SaveCrawlScheduleConfig(context.Context, *CrawlScheduleConfig) (*CrawlScheduleConfig, error)
-	DeleteCrawlScheduleConfig(context.Context, *CrawlScheduleConfig) (*google_protobuf1.Empty, error)
+	DeleteCrawlScheduleConfig(context.Context, *CrawlScheduleConfig) (*empty.Empty, error)
 	// Get a politeness config by ID
 	GetPolitenessConfig(context.Context, *GetRequest) (*PolitenessConfig, error)
 	// List a set of politeness configs
 	ListPolitenessConfigs(context.Context, *ListRequest) (*PolitenessConfigListReply, error)
 	SavePolitenessConfig(context.Context, *PolitenessConfig) (*PolitenessConfig, error)
-	DeletePolitenessConfig(context.Context, *PolitenessConfig) (*google_protobuf1.Empty, error)
+	DeletePolitenessConfig(context.Context, *PolitenessConfig) (*empty.Empty, error)
 	// Get a browser config by ID
 	GetBrowserConfig(context.Context, *GetRequest) (*BrowserConfig, error)
 	// List a set of browser configs
 	ListBrowserConfigs(context.Context, *ListRequest) (*BrowserConfigListReply, error)
 	SaveBrowserConfig(context.Context, *BrowserConfig) (*BrowserConfig, error)
-	DeleteBrowserConfig(context.Context, *BrowserConfig) (*google_protobuf1.Empty, error)
+	DeleteBrowserConfig(context.Context, *BrowserConfig) (*empty.Empty, error)
 	// Get a browser script by ID
 	GetBrowserScript(context.Context, *GetRequest) (*BrowserScript, error)
 	// List a set of browser scripts
 	ListBrowserScripts(context.Context, *ListRequest) (*BrowserScriptListReply, error)
 	SaveBrowserScript(context.Context, *BrowserScript) (*BrowserScript, error)
-	DeleteBrowserScript(context.Context, *BrowserScript) (*google_protobuf1.Empty, error)
+	DeleteBrowserScript(context.Context, *BrowserScript) (*empty.Empty, error)
 	// Get a crawl host group config by ID
 	GetCrawlHostGroupConfig(context.Context, *GetRequest) (*CrawlHostGroupConfig, error)
 	// List a set of crawl host group configs
 	ListCrawlHostGroupConfigs(context.Context, *ListRequest) (*CrawlHostGroupConfigListReply, error)
 	SaveCrawlHostGroupConfig(context.Context, *CrawlHostGroupConfig) (*CrawlHostGroupConfig, error)
-	DeleteCrawlHostGroupConfig(context.Context, *CrawlHostGroupConfig) (*google_protobuf1.Empty, error)
-	GetLogConfig(context.Context, *google_protobuf1.Empty) (*LogLevels, error)
+	DeleteCrawlHostGroupConfig(context.Context, *CrawlHostGroupConfig) (*empty.Empty, error)
+	GetLogConfig(context.Context, *empty.Empty) (*LogLevels, error)
 	SaveLogConfig(context.Context, *LogLevels) (*LogLevels, error)
 	ListRoleMappings(context.Context, *RoleMappingsListRequest) (*RoleMappingsListReply, error)
 	SaveRoleMapping(context.Context, *RoleMapping) (*RoleMapping, error)
-	DeleteRoleMapping(context.Context, *RoleMapping) (*google_protobuf1.Empty, error)
-	GetRolesForActiveUser(context.Context, *google_protobuf1.Empty) (*RoleList, error)
+	DeleteRoleMapping(context.Context, *RoleMapping) (*empty.Empty, error)
+	GetRolesForActiveUser(context.Context, *empty.Empty) (*RoleList, error)
 	RunCrawl(context.Context, *RunCrawlRequest) (*RunCrawlReply, error)
 	// Get the configured OpenID connect issuer address
-	GetOpenIdConnectIssuer(context.Context, *google_protobuf1.Empty) (*OpenIdConnectIssuerReply, error)
+	GetOpenIdConnectIssuer(context.Context, *empty.Empty) (*OpenIdConnectIssuerReply, error)
 }
 
 func RegisterControllerServer(s *grpc.Server, srv ControllerServer) {
@@ -1946,7 +2348,7 @@ func _Controller_DeleteCrawlHostGroupConfig_Handler(srv interface{}, ctx context
 }
 
 func _Controller_GetLogConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.Empty)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1958,7 +2360,7 @@ func _Controller_GetLogConfig_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/veidemann.api.Controller/GetLogConfig",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControllerServer).GetLogConfig(ctx, req.(*google_protobuf1.Empty))
+		return srv.(ControllerServer).GetLogConfig(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2036,7 +2438,7 @@ func _Controller_DeleteRoleMapping_Handler(srv interface{}, ctx context.Context,
 }
 
 func _Controller_GetRolesForActiveUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.Empty)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2048,7 +2450,7 @@ func _Controller_GetRolesForActiveUser_Handler(srv interface{}, ctx context.Cont
 		FullMethod: "/veidemann.api.Controller/GetRolesForActiveUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControllerServer).GetRolesForActiveUser(ctx, req.(*google_protobuf1.Empty))
+		return srv.(ControllerServer).GetRolesForActiveUser(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2072,7 +2474,7 @@ func _Controller_RunCrawl_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _Controller_GetOpenIdConnectIssuer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(google_protobuf1.Empty)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2084,7 +2486,7 @@ func _Controller_GetOpenIdConnectIssuer_Handler(srv interface{}, ctx context.Con
 		FullMethod: "/veidemann.api.Controller/GetOpenIdConnectIssuer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControllerServer).GetOpenIdConnectIssuer(ctx, req.(*google_protobuf1.Empty))
+		return srv.(ControllerServer).GetOpenIdConnectIssuer(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2274,9 +2676,9 @@ var _Controller_serviceDesc = grpc.ServiceDesc{
 	Metadata: "controller.proto",
 }
 
-func init() { proto.RegisterFile("controller.proto", fileDescriptor2) }
+func init() { proto.RegisterFile("controller.proto", fileDescriptor_controller_91bd6c5fe81a4cda) }
 
-var fileDescriptor2 = []byte{
+var fileDescriptor_controller_91bd6c5fe81a4cda = []byte{
 	// 1841 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x59, 0x5b, 0x6f, 0xdb, 0x46,
 	0x16, 0xc6, 0xf8, 0x16, 0xfb, 0xc4, 0xd7, 0xf1, 0x45, 0x32, 0xed, 0x24, 0xca, 0x38, 0x76, 0x1c,

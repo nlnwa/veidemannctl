@@ -39,7 +39,7 @@ to quickly create a Cobra application.`,
 		r := &api.JobExecutionsListReply{}
 
 		if len(args) == 1 {
-			e, err := client.GetJobExecution(context.Background(), &api.ExecutionId{args[0]})
+			e, err := client.GetJobExecution(context.Background(), &api.ExecutionId{Id: args[0]})
 			if err != nil {
 				log.Fatalf("could not get crawl log: %v", err)
 			}

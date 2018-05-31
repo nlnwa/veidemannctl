@@ -17,15 +17,43 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 type ResolveRequest struct {
-	Host string `protobuf:"bytes,1,opt,name=host" json:"host,omitempty"`
-	Port int32  `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
+	Host                 string   `protobuf:"bytes,1,opt,name=host" json:"host,omitempty"`
+	Port                 int32    `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *ResolveRequest) Reset()                    { *m = ResolveRequest{} }
-func (m *ResolveRequest) String() string            { return proto.CompactTextString(m) }
-func (*ResolveRequest) ProtoMessage()               {}
-func (*ResolveRequest) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{0} }
+func (m *ResolveRequest) Reset()         { *m = ResolveRequest{} }
+func (m *ResolveRequest) String() string { return proto.CompactTextString(m) }
+func (*ResolveRequest) ProtoMessage()    {}
+func (*ResolveRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_dnsresolver_4e4135bb1d83dc7b, []int{0}
+}
+func (m *ResolveRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ResolveRequest.Unmarshal(m, b)
+}
+func (m *ResolveRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ResolveRequest.Marshal(b, m, deterministic)
+}
+func (dst *ResolveRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ResolveRequest.Merge(dst, src)
+}
+func (m *ResolveRequest) XXX_Size() int {
+	return xxx_messageInfo_ResolveRequest.Size(m)
+}
+func (m *ResolveRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ResolveRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ResolveRequest proto.InternalMessageInfo
 
 func (m *ResolveRequest) GetHost() string {
 	if m != nil {
@@ -42,16 +70,38 @@ func (m *ResolveRequest) GetPort() int32 {
 }
 
 type ResolveReply struct {
-	Host      string `protobuf:"bytes,1,opt,name=host" json:"host,omitempty"`
-	Port      int32  `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
-	TextualIp string `protobuf:"bytes,3,opt,name=textual_ip,json=textualIp" json:"textual_ip,omitempty"`
-	RawIp     []byte `protobuf:"bytes,4,opt,name=raw_ip,json=rawIp,proto3" json:"raw_ip,omitempty"`
+	Host                 string   `protobuf:"bytes,1,opt,name=host" json:"host,omitempty"`
+	Port                 int32    `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
+	TextualIp            string   `protobuf:"bytes,3,opt,name=textual_ip,json=textualIp" json:"textual_ip,omitempty"`
+	RawIp                []byte   `protobuf:"bytes,4,opt,name=raw_ip,json=rawIp,proto3" json:"raw_ip,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *ResolveReply) Reset()                    { *m = ResolveReply{} }
-func (m *ResolveReply) String() string            { return proto.CompactTextString(m) }
-func (*ResolveReply) ProtoMessage()               {}
-func (*ResolveReply) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{1} }
+func (m *ResolveReply) Reset()         { *m = ResolveReply{} }
+func (m *ResolveReply) String() string { return proto.CompactTextString(m) }
+func (*ResolveReply) ProtoMessage()    {}
+func (*ResolveReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_dnsresolver_4e4135bb1d83dc7b, []int{1}
+}
+func (m *ResolveReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ResolveReply.Unmarshal(m, b)
+}
+func (m *ResolveReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ResolveReply.Marshal(b, m, deterministic)
+}
+func (dst *ResolveReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ResolveReply.Merge(dst, src)
+}
+func (m *ResolveReply) XXX_Size() int {
+	return xxx_messageInfo_ResolveReply.Size(m)
+}
+func (m *ResolveReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_ResolveReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ResolveReply proto.InternalMessageInfo
 
 func (m *ResolveReply) GetHost() string {
 	if m != nil {
@@ -94,8 +144,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for DnsResolver service
-
+// DnsResolverClient is the client API for DnsResolver service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type DnsResolverClient interface {
 	Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (*ResolveReply, error)
 }
@@ -110,15 +161,14 @@ func NewDnsResolverClient(cc *grpc.ClientConn) DnsResolverClient {
 
 func (c *dnsResolverClient) Resolve(ctx context.Context, in *ResolveRequest, opts ...grpc.CallOption) (*ResolveReply, error) {
 	out := new(ResolveReply)
-	err := grpc.Invoke(ctx, "/veidemann.api.DnsResolver/resolve", in, out, c.cc, opts...)
+	err := c.cc.Invoke(ctx, "/veidemann.api.DnsResolver/resolve", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for DnsResolver service
-
+// DnsResolverServer is the server API for DnsResolver service.
 type DnsResolverServer interface {
 	Resolve(context.Context, *ResolveRequest) (*ResolveReply, error)
 }
@@ -158,9 +208,9 @@ var _DnsResolver_serviceDesc = grpc.ServiceDesc{
 	Metadata: "dnsresolver.proto",
 }
 
-func init() { proto.RegisterFile("dnsresolver.proto", fileDescriptor3) }
+func init() { proto.RegisterFile("dnsresolver.proto", fileDescriptor_dnsresolver_4e4135bb1d83dc7b) }
 
-var fileDescriptor3 = []byte{
+var fileDescriptor_dnsresolver_4e4135bb1d83dc7b = []byte{
 	// 228 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x50, 0xbf, 0x4b, 0xc4, 0x30,
 	0x18, 0x35, 0x7a, 0x77, 0x72, 0x9f, 0xa7, 0x68, 0x40, 0x2c, 0xca, 0x41, 0xe9, 0xd4, 0x29, 0x83,

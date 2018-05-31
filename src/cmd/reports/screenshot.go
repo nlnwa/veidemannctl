@@ -48,8 +48,8 @@ to quickly create a Cobra application.`,
 		defer conn.Close()
 
 		request := api.ScreenshotListRequest{}
-		if len(args) > 1 {
-			request.Id = args[1:]
+		if len(args) > 0 {
+			request.Id = args
 		}
 		if executionId != "" {
 			request.ExecutionId = executionId
