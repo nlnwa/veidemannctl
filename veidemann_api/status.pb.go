@@ -787,8 +787,7 @@ func (c *statusClient) AbortJobExecution(ctx context.Context, in *ExecutionId, o
 	return out, nil
 }
 
-// Server API for Status service
-
+// StatusServer is the server API for Status service.
 type StatusServer interface {
 	// Get status of running crawls
 	GetRunningExecutions(*RunningExecutionsRequest, Status_GetRunningExecutionsServer) error

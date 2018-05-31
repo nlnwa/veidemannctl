@@ -1626,8 +1626,7 @@ func (c *controllerClient) GetOpenIdConnectIssuer(ctx context.Context, in *empty
 	return out, nil
 }
 
-// Server API for Controller service
-
+// ControllerServer is the server API for Controller service.
 type ControllerServer interface {
 	// Get a crawl entity by ID
 	GetCrawlEntity(context.Context, *GetRequest) (*CrawlEntity, error)

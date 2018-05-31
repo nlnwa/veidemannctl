@@ -168,8 +168,7 @@ func (c *dnsResolverClient) Resolve(ctx context.Context, in *ResolveRequest, opt
 	return out, nil
 }
 
-// Server API for DnsResolver service
-
+// DnsResolverServer is the server API for DnsResolver service.
 type DnsResolverServer interface {
 	Resolve(context.Context, *ResolveRequest) (*ResolveReply, error)
 }

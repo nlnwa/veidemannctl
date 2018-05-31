@@ -36,7 +36,7 @@ func (m *CrawlSeedRequest) Reset()         { *m = CrawlSeedRequest{} }
 func (m *CrawlSeedRequest) String() string { return proto.CompactTextString(m) }
 func (*CrawlSeedRequest) ProtoMessage()    {}
 func (*CrawlSeedRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_frontier_91c7c475d9a131af, []int{0}
+	return fileDescriptor_frontier_0b8cbaacf5bafeb9, []int{0}
 }
 func (m *CrawlSeedRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CrawlSeedRequest.Unmarshal(m, b)
@@ -77,8 +77,358 @@ func (m *CrawlSeedRequest) GetSeed() *Seed {
 	return nil
 }
 
+// The execution id for a seed crawl
+type CrawlExecutionId struct {
+	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CrawlExecutionId) Reset()         { *m = CrawlExecutionId{} }
+func (m *CrawlExecutionId) String() string { return proto.CompactTextString(m) }
+func (*CrawlExecutionId) ProtoMessage()    {}
+func (*CrawlExecutionId) Descriptor() ([]byte, []int) {
+	return fileDescriptor_frontier_0b8cbaacf5bafeb9, []int{1}
+}
+func (m *CrawlExecutionId) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CrawlExecutionId.Unmarshal(m, b)
+}
+func (m *CrawlExecutionId) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CrawlExecutionId.Marshal(b, m, deterministic)
+}
+func (dst *CrawlExecutionId) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CrawlExecutionId.Merge(dst, src)
+}
+func (m *CrawlExecutionId) XXX_Size() int {
+	return xxx_messageInfo_CrawlExecutionId.Size(m)
+}
+func (m *CrawlExecutionId) XXX_DiscardUnknown() {
+	xxx_messageInfo_CrawlExecutionId.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CrawlExecutionId proto.InternalMessageInfo
+
+func (m *CrawlExecutionId) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+// Message sent from Harvester to request a new page to fetch and also used to return the harvest result.
+// First message should set requestNextPage to true to tell frontier to respond with a page to fetch.
+// When the fetch is done, a stream of PageHarvest objects are returned:
+// The first object contains metrics.
+// Subsequent objects contain outlinks until all outlinks are sent.
+// Finally the client should complete the request.
+type PageHarvest struct {
+	// Types that are valid to be assigned to Msg:
+	//	*PageHarvest_RequestNextPage
+	//	*PageHarvest_Metrics_
+	//	*PageHarvest_Outlink
+	//	*PageHarvest_Error
+	Msg                  isPageHarvest_Msg `protobuf_oneof:"msg"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *PageHarvest) Reset()         { *m = PageHarvest{} }
+func (m *PageHarvest) String() string { return proto.CompactTextString(m) }
+func (*PageHarvest) ProtoMessage()    {}
+func (*PageHarvest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_frontier_0b8cbaacf5bafeb9, []int{2}
+}
+func (m *PageHarvest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PageHarvest.Unmarshal(m, b)
+}
+func (m *PageHarvest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PageHarvest.Marshal(b, m, deterministic)
+}
+func (dst *PageHarvest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PageHarvest.Merge(dst, src)
+}
+func (m *PageHarvest) XXX_Size() int {
+	return xxx_messageInfo_PageHarvest.Size(m)
+}
+func (m *PageHarvest) XXX_DiscardUnknown() {
+	xxx_messageInfo_PageHarvest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PageHarvest proto.InternalMessageInfo
+
+type isPageHarvest_Msg interface {
+	isPageHarvest_Msg()
+}
+
+type PageHarvest_RequestNextPage struct {
+	RequestNextPage bool `protobuf:"varint,1,opt,name=requestNextPage,oneof"`
+}
+type PageHarvest_Metrics_ struct {
+	Metrics *PageHarvest_Metrics `protobuf:"bytes,2,opt,name=metrics,oneof"`
+}
+type PageHarvest_Outlink struct {
+	Outlink *QueuedUri `protobuf:"bytes,3,opt,name=outlink,oneof"`
+}
+type PageHarvest_Error struct {
+	Error *Error `protobuf:"bytes,4,opt,name=error,oneof"`
+}
+
+func (*PageHarvest_RequestNextPage) isPageHarvest_Msg() {}
+func (*PageHarvest_Metrics_) isPageHarvest_Msg()        {}
+func (*PageHarvest_Outlink) isPageHarvest_Msg()         {}
+func (*PageHarvest_Error) isPageHarvest_Msg()           {}
+
+func (m *PageHarvest) GetMsg() isPageHarvest_Msg {
+	if m != nil {
+		return m.Msg
+	}
+	return nil
+}
+
+func (m *PageHarvest) GetRequestNextPage() bool {
+	if x, ok := m.GetMsg().(*PageHarvest_RequestNextPage); ok {
+		return x.RequestNextPage
+	}
+	return false
+}
+
+func (m *PageHarvest) GetMetrics() *PageHarvest_Metrics {
+	if x, ok := m.GetMsg().(*PageHarvest_Metrics_); ok {
+		return x.Metrics
+	}
+	return nil
+}
+
+func (m *PageHarvest) GetOutlink() *QueuedUri {
+	if x, ok := m.GetMsg().(*PageHarvest_Outlink); ok {
+		return x.Outlink
+	}
+	return nil
+}
+
+func (m *PageHarvest) GetError() *Error {
+	if x, ok := m.GetMsg().(*PageHarvest_Error); ok {
+		return x.Error
+	}
+	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*PageHarvest) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _PageHarvest_OneofMarshaler, _PageHarvest_OneofUnmarshaler, _PageHarvest_OneofSizer, []interface{}{
+		(*PageHarvest_RequestNextPage)(nil),
+		(*PageHarvest_Metrics_)(nil),
+		(*PageHarvest_Outlink)(nil),
+		(*PageHarvest_Error)(nil),
+	}
+}
+
+func _PageHarvest_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*PageHarvest)
+	// msg
+	switch x := m.Msg.(type) {
+	case *PageHarvest_RequestNextPage:
+		t := uint64(0)
+		if x.RequestNextPage {
+			t = 1
+		}
+		b.EncodeVarint(1<<3 | proto.WireVarint)
+		b.EncodeVarint(t)
+	case *PageHarvest_Metrics_:
+		b.EncodeVarint(2<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Metrics); err != nil {
+			return err
+		}
+	case *PageHarvest_Outlink:
+		b.EncodeVarint(3<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Outlink); err != nil {
+			return err
+		}
+	case *PageHarvest_Error:
+		b.EncodeVarint(4<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Error); err != nil {
+			return err
+		}
+	case nil:
+	default:
+		return fmt.Errorf("PageHarvest.Msg has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _PageHarvest_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*PageHarvest)
+	switch tag {
+	case 1: // msg.requestNextPage
+		if wire != proto.WireVarint {
+			return true, proto.ErrInternalBadWireType
+		}
+		x, err := b.DecodeVarint()
+		m.Msg = &PageHarvest_RequestNextPage{x != 0}
+		return true, err
+	case 2: // msg.metrics
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(PageHarvest_Metrics)
+		err := b.DecodeMessage(msg)
+		m.Msg = &PageHarvest_Metrics_{msg}
+		return true, err
+	case 3: // msg.outlink
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(QueuedUri)
+		err := b.DecodeMessage(msg)
+		m.Msg = &PageHarvest_Outlink{msg}
+		return true, err
+	case 4: // msg.error
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(Error)
+		err := b.DecodeMessage(msg)
+		m.Msg = &PageHarvest_Error{msg}
+		return true, err
+	default:
+		return false, nil
+	}
+}
+
+func _PageHarvest_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*PageHarvest)
+	// msg
+	switch x := m.Msg.(type) {
+	case *PageHarvest_RequestNextPage:
+		n += 1 // tag and wire
+		n += 1
+	case *PageHarvest_Metrics_:
+		s := proto.Size(x.Metrics)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *PageHarvest_Outlink:
+		s := proto.Size(x.Outlink)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *PageHarvest_Error:
+		s := proto.Size(x.Error)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
+type PageHarvest_Metrics struct {
+	// The number of uri's downloaded. The requested uri + embedded resources
+	UriCount int32 `protobuf:"varint,1,opt,name=uri_count,json=uriCount" json:"uri_count,omitempty"`
+	// Byte count for the resources downloaded. Includes embedded resources
+	BytesDownloaded      int64    `protobuf:"varint,2,opt,name=bytes_downloaded,json=bytesDownloaded" json:"bytes_downloaded,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PageHarvest_Metrics) Reset()         { *m = PageHarvest_Metrics{} }
+func (m *PageHarvest_Metrics) String() string { return proto.CompactTextString(m) }
+func (*PageHarvest_Metrics) ProtoMessage()    {}
+func (*PageHarvest_Metrics) Descriptor() ([]byte, []int) {
+	return fileDescriptor_frontier_0b8cbaacf5bafeb9, []int{2, 0}
+}
+func (m *PageHarvest_Metrics) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PageHarvest_Metrics.Unmarshal(m, b)
+}
+func (m *PageHarvest_Metrics) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PageHarvest_Metrics.Marshal(b, m, deterministic)
+}
+func (dst *PageHarvest_Metrics) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PageHarvest_Metrics.Merge(dst, src)
+}
+func (m *PageHarvest_Metrics) XXX_Size() int {
+	return xxx_messageInfo_PageHarvest_Metrics.Size(m)
+}
+func (m *PageHarvest_Metrics) XXX_DiscardUnknown() {
+	xxx_messageInfo_PageHarvest_Metrics.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PageHarvest_Metrics proto.InternalMessageInfo
+
+func (m *PageHarvest_Metrics) GetUriCount() int32 {
+	if m != nil {
+		return m.UriCount
+	}
+	return 0
+}
+
+func (m *PageHarvest_Metrics) GetBytesDownloaded() int64 {
+	if m != nil {
+		return m.BytesDownloaded
+	}
+	return 0
+}
+
+// A specification of the page to fetch.
+type PageHarvestSpec struct {
+	// The URI to fetch
+	QueuedUri *QueuedUri `protobuf:"bytes,1,opt,name=queued_uri,json=queuedUri" json:"queued_uri,omitempty"`
+	// The configuration for the fetch
+	CrawlConfig          *CrawlConfig `protobuf:"bytes,2,opt,name=crawl_config,json=crawlConfig" json:"crawl_config,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
+}
+
+func (m *PageHarvestSpec) Reset()         { *m = PageHarvestSpec{} }
+func (m *PageHarvestSpec) String() string { return proto.CompactTextString(m) }
+func (*PageHarvestSpec) ProtoMessage()    {}
+func (*PageHarvestSpec) Descriptor() ([]byte, []int) {
+	return fileDescriptor_frontier_0b8cbaacf5bafeb9, []int{3}
+}
+func (m *PageHarvestSpec) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PageHarvestSpec.Unmarshal(m, b)
+}
+func (m *PageHarvestSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PageHarvestSpec.Marshal(b, m, deterministic)
+}
+func (dst *PageHarvestSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PageHarvestSpec.Merge(dst, src)
+}
+func (m *PageHarvestSpec) XXX_Size() int {
+	return xxx_messageInfo_PageHarvestSpec.Size(m)
+}
+func (m *PageHarvestSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_PageHarvestSpec.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PageHarvestSpec proto.InternalMessageInfo
+
+func (m *PageHarvestSpec) GetQueuedUri() *QueuedUri {
+	if m != nil {
+		return m.QueuedUri
+	}
+	return nil
+}
+
+func (m *PageHarvestSpec) GetCrawlConfig() *CrawlConfig {
+	if m != nil {
+		return m.CrawlConfig
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*CrawlSeedRequest)(nil), "veidemann.api.CrawlSeedRequest")
+	proto.RegisterType((*CrawlExecutionId)(nil), "veidemann.api.CrawlExecutionId")
+	proto.RegisterType((*PageHarvest)(nil), "veidemann.api.PageHarvest")
+	proto.RegisterType((*PageHarvest_Metrics)(nil), "veidemann.api.PageHarvest.Metrics")
+	proto.RegisterType((*PageHarvestSpec)(nil), "veidemann.api.PageHarvestSpec")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -93,7 +443,10 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type FrontierClient interface {
-	CrawlSeed(ctx context.Context, in *CrawlSeedRequest, opts ...grpc.CallOption) (*CrawlExecutionStatus, error)
+	CrawlSeed(ctx context.Context, in *CrawlSeedRequest, opts ...grpc.CallOption) (*CrawlExecutionId, error)
+	// Request a URI from the Frontiers queue
+	// Used by a Harvester to fetch a new page
+	GetNextPage(ctx context.Context, opts ...grpc.CallOption) (Frontier_GetNextPageClient, error)
 }
 
 type frontierClient struct {
@@ -104,8 +457,8 @@ func NewFrontierClient(cc *grpc.ClientConn) FrontierClient {
 	return &frontierClient{cc}
 }
 
-func (c *frontierClient) CrawlSeed(ctx context.Context, in *CrawlSeedRequest, opts ...grpc.CallOption) (*CrawlExecutionStatus, error) {
-	out := new(CrawlExecutionStatus)
+func (c *frontierClient) CrawlSeed(ctx context.Context, in *CrawlSeedRequest, opts ...grpc.CallOption) (*CrawlExecutionId, error) {
+	out := new(CrawlExecutionId)
 	err := c.cc.Invoke(ctx, "/veidemann.api.Frontier/CrawlSeed", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -113,10 +466,43 @@ func (c *frontierClient) CrawlSeed(ctx context.Context, in *CrawlSeedRequest, op
 	return out, nil
 }
 
-// Server API for Frontier service
+func (c *frontierClient) GetNextPage(ctx context.Context, opts ...grpc.CallOption) (Frontier_GetNextPageClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Frontier_serviceDesc.Streams[0], "/veidemann.api.Frontier/GetNextPage", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &frontierGetNextPageClient{stream}
+	return x, nil
+}
 
+type Frontier_GetNextPageClient interface {
+	Send(*PageHarvest) error
+	Recv() (*PageHarvestSpec, error)
+	grpc.ClientStream
+}
+
+type frontierGetNextPageClient struct {
+	grpc.ClientStream
+}
+
+func (x *frontierGetNextPageClient) Send(m *PageHarvest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *frontierGetNextPageClient) Recv() (*PageHarvestSpec, error) {
+	m := new(PageHarvestSpec)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// FrontierServer is the server API for Frontier service.
 type FrontierServer interface {
-	CrawlSeed(context.Context, *CrawlSeedRequest) (*CrawlExecutionStatus, error)
+	CrawlSeed(context.Context, *CrawlSeedRequest) (*CrawlExecutionId, error)
+	// Request a URI from the Frontiers queue
+	// Used by a Harvester to fetch a new page
+	GetNextPage(Frontier_GetNextPageServer) error
 }
 
 func RegisterFrontierServer(s *grpc.Server, srv FrontierServer) {
@@ -141,6 +527,32 @@ func _Frontier_CrawlSeed_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Frontier_GetNextPage_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(FrontierServer).GetNextPage(&frontierGetNextPageServer{stream})
+}
+
+type Frontier_GetNextPageServer interface {
+	Send(*PageHarvestSpec) error
+	Recv() (*PageHarvest, error)
+	grpc.ServerStream
+}
+
+type frontierGetNextPageServer struct {
+	grpc.ServerStream
+}
+
+func (x *frontierGetNextPageServer) Send(m *PageHarvestSpec) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *frontierGetNextPageServer) Recv() (*PageHarvest, error) {
+	m := new(PageHarvest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _Frontier_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "veidemann.api.Frontier",
 	HandlerType: (*FrontierServer)(nil),
@@ -150,28 +562,50 @@ var _Frontier_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Frontier_CrawlSeed_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetNextPage",
+			Handler:       _Frontier_GetNextPage_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "frontier.proto",
 }
 
-func init() { proto.RegisterFile("frontier.proto", fileDescriptor_frontier_91c7c475d9a131af) }
+func init() { proto.RegisterFile("frontier.proto", fileDescriptor_frontier_0b8cbaacf5bafeb9) }
 
-var fileDescriptor_frontier_91c7c475d9a131af = []byte{
-	// 248 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x90, 0x31, 0x4f, 0xc3, 0x30,
-	0x10, 0x85, 0x89, 0x80, 0x8a, 0x1e, 0x34, 0xaa, 0xcc, 0xd0, 0x28, 0x0b, 0x55, 0x19, 0x08, 0x8b,
-	0x87, 0x32, 0xb0, 0x17, 0x81, 0x04, 0x13, 0x4a, 0x36, 0x96, 0xc8, 0xae, 0xaf, 0x95, 0x23, 0x7a,
-	0x17, 0x62, 0x07, 0xf8, 0x19, 0xfc, 0x64, 0x54, 0x97, 0x16, 0x8a, 0x32, 0xda, 0xf7, 0xdd, 0x7b,
-	0xef, 0x1e, 0xc4, 0x8b, 0x86, 0xc9, 0x5b, 0x6c, 0x64, 0xdd, 0xb0, 0x67, 0x31, 0x78, 0x47, 0x6b,
-	0x70, 0xa5, 0x88, 0xa4, 0xaa, 0x6d, 0x7a, 0x36, 0x67, 0x5a, 0xd8, 0xe5, 0x66, 0x98, 0xc6, 0x2b,
-	0x74, 0x4e, 0x2d, 0xd1, 0x6d, 0xde, 0x93, 0xaf, 0x08, 0x86, 0x77, 0x8d, 0xfa, 0x78, 0x2d, 0x10,
-	0x4d, 0x8e, 0x6f, 0x2d, 0x3a, 0x2f, 0x32, 0x18, 0x56, 0xac, 0x4b, 0xfc, 0xc4, 0x79, 0xeb, 0x2d,
-	0x53, 0x69, 0x4d, 0x12, 0x8d, 0xa3, 0xac, 0x9f, 0xc7, 0x15, 0xeb, 0xfb, 0xed, 0xf7, 0xa3, 0x11,
-	0xd7, 0x70, 0x58, 0xb1, 0x4e, 0x8e, 0xc7, 0x51, 0x76, 0x3a, 0x1d, 0xc9, 0x3d, 0x67, 0x19, 0x74,
-	0x9f, 0x58, 0xe7, 0x6b, 0x46, 0x5c, 0xc1, 0x91, 0x43, 0x34, 0x49, 0x2f, 0xb0, 0xe7, 0xff, 0xd8,
-	0x60, 0x1f, 0x80, 0x69, 0x09, 0x27, 0x0f, 0x3f, 0x17, 0x89, 0x02, 0xfa, 0xbb, 0x74, 0xe2, 0xa2,
-	0x4b, 0xff, 0x4f, 0xee, 0xf4, 0xb2, 0x0b, 0xd8, 0xc5, 0x2d, 0xbc, 0xf2, 0xad, 0x9b, 0x1c, 0xcc,
-	0x6e, 0x61, 0x44, 0x2c, 0x49, 0x4b, 0x22, 0xb5, 0xbf, 0x31, 0x1b, 0x6c, 0x9d, 0x9f, 0xd7, 0xed,
-	0xbc, 0xfc, 0x56, 0x59, 0xaa, 0xda, 0xea, 0x5e, 0xe8, 0xec, 0xe6, 0x3b, 0x00, 0x00, 0xff, 0xff,
-	0xfd, 0x68, 0x6a, 0x1a, 0x72, 0x01, 0x00, 0x00,
+var fileDescriptor_frontier_0b8cbaacf5bafeb9 = []byte{
+	// 494 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x53, 0xc1, 0x6e, 0xd3, 0x40,
+	0x10, 0xb5, 0x93, 0xa6, 0x49, 0x26, 0x6d, 0x12, 0x2d, 0x48, 0xb5, 0x8c, 0x04, 0x95, 0x2f, 0xa4,
+	0x08, 0x59, 0xa8, 0x20, 0xf5, 0x04, 0x87, 0x84, 0x42, 0x40, 0x82, 0xb6, 0x5b, 0x71, 0xe1, 0x62,
+	0xd9, 0xde, 0x69, 0xb4, 0x21, 0xd9, 0x4d, 0xd6, 0x76, 0x5b, 0x3e, 0x81, 0x1b, 0x1f, 0xc2, 0x9d,
+	0xdf, 0x43, 0xbb, 0x76, 0x12, 0xd7, 0x4a, 0xb8, 0x79, 0x67, 0xde, 0x9b, 0x79, 0xe3, 0x79, 0x03,
+	0xdd, 0x1b, 0x25, 0x45, 0xca, 0x51, 0xf9, 0x0b, 0x25, 0x53, 0x49, 0x0e, 0x6f, 0x91, 0x33, 0x9c,
+	0x87, 0x42, 0xf8, 0xe1, 0x82, 0xbb, 0x07, 0xb1, 0x14, 0x37, 0x7c, 0x92, 0x27, 0xdd, 0xee, 0x1c,
+	0x93, 0x24, 0x9c, 0x60, 0x92, 0xbf, 0xbd, 0xdf, 0x36, 0xf4, 0x47, 0x2a, 0xbc, 0x9b, 0x5d, 0x23,
+	0x32, 0x8a, 0xcb, 0x0c, 0x93, 0x94, 0x0c, 0xa0, 0x3f, 0x95, 0x51, 0x80, 0xf7, 0x18, 0x67, 0x29,
+	0x97, 0x22, 0xe0, 0xcc, 0xb1, 0x8f, 0xed, 0x41, 0x9b, 0x76, 0xa7, 0x32, 0x3a, 0x5f, 0x85, 0x3f,
+	0x31, 0x72, 0x02, 0xf5, 0xa9, 0x8c, 0x9c, 0xc6, 0xb1, 0x3d, 0xe8, 0x9c, 0x1e, 0xf9, 0x0f, 0x3a,
+	0xfb, 0xa6, 0xee, 0x67, 0x19, 0x51, 0x8d, 0x21, 0xcf, 0x61, 0x2f, 0x41, 0x64, 0xce, 0xbe, 0xc1,
+	0x3e, 0xaa, 0x60, 0x4d, 0x7b, 0x03, 0xf0, 0xbc, 0x42, 0x51, 0xb9, 0x4f, 0x17, 0x6a, 0x6b, 0x0d,
+	0x35, 0xce, 0xbc, 0xbf, 0x35, 0xe8, 0x5c, 0x86, 0x13, 0x1c, 0x87, 0xea, 0x56, 0x2b, 0x7e, 0x01,
+	0x3d, 0x95, 0x8b, 0xff, 0x8a, 0xf7, 0xa9, 0xce, 0x18, 0x70, 0x6b, 0x6c, 0xd1, 0x6a, 0x82, 0xbc,
+	0x83, 0xe6, 0x1c, 0x53, 0xc5, 0xe3, 0xc4, 0xa9, 0x19, 0x2d, 0x5e, 0x45, 0x4b, 0xa9, 0xb0, 0xff,
+	0x25, 0x47, 0x8e, 0x2d, 0xba, 0x22, 0x91, 0x37, 0xd0, 0x94, 0x59, 0x3a, 0xe3, 0xe2, 0x87, 0x53,
+	0x37, 0x7c, 0xa7, 0xc2, 0xbf, 0xca, 0x30, 0x43, 0xf6, 0x4d, 0x71, 0xcd, 0x2a, 0xa0, 0xe4, 0x25,
+	0x34, 0x50, 0x29, 0xa9, 0x9c, 0x3d, 0xc3, 0x79, 0x5c, 0xe1, 0x9c, 0xeb, 0xdc, 0xd8, 0xa2, 0x39,
+	0xc8, 0xbd, 0x82, 0x66, 0xd1, 0x99, 0x3c, 0x81, 0x76, 0xa6, 0x78, 0x10, 0xcb, 0x4c, 0xa4, 0x66,
+	0xa8, 0x06, 0x6d, 0x65, 0x8a, 0x8f, 0xf4, 0x9b, 0x9c, 0x40, 0x3f, 0xfa, 0x99, 0x62, 0x12, 0x30,
+	0x79, 0x27, 0x66, 0x32, 0x64, 0xc8, 0xcc, 0x50, 0x75, 0xda, 0x33, 0xf1, 0xf7, 0xeb, 0xf0, 0xb0,
+	0x01, 0xf5, 0x79, 0x32, 0xf1, 0x7e, 0xd9, 0xd0, 0x2b, 0x0d, 0x78, 0xbd, 0xc0, 0x98, 0x9c, 0x01,
+	0x2c, 0x8d, 0xe6, 0x20, 0x53, 0xdc, 0xf4, 0xf8, 0xcf, 0x50, 0xb4, 0xbd, 0x5c, 0x7d, 0x92, 0xb7,
+	0x70, 0x10, 0xeb, 0x55, 0x05, 0xb9, 0xc7, 0x8a, 0xff, 0xe9, 0x6e, 0xf3, 0xc1, 0xc8, 0x20, 0x68,
+	0x27, 0xde, 0x3c, 0x4e, 0xff, 0xd8, 0xd0, 0xfa, 0x50, 0x98, 0x97, 0x5c, 0x40, 0x7b, 0x6d, 0x44,
+	0xf2, 0x6c, 0x5b, 0x89, 0x92, 0x45, 0xdd, 0xad, 0x80, 0x92, 0x63, 0x3c, 0x8b, 0x5c, 0x40, 0xe7,
+	0x23, 0x6e, 0xd6, 0xee, 0xee, 0xde, 0xb2, 0xfb, 0x74, 0x77, 0x4e, 0xff, 0x20, 0xcf, 0x1a, 0xd8,
+	0xaf, 0xec, 0xe1, 0x19, 0x1c, 0x09, 0xe9, 0x8b, 0xc8, 0x17, 0x22, 0x7c, 0x48, 0x18, 0x1e, 0xae,
+	0xc6, 0xb8, 0xd4, 0x57, 0xf5, 0x7d, 0x73, 0x82, 0x41, 0xb8, 0xe0, 0xd1, 0xbe, 0xb9, 0xb5, 0xd7,
+	0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0x5b, 0xd6, 0x8e, 0xd7, 0xaa, 0x03, 0x00, 0x00,
 }

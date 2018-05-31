@@ -16,7 +16,6 @@ package reports
 import (
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/nlnwa/veidemannctl/bindata"
@@ -26,6 +25,8 @@ import (
 	"strings"
 	"text/template"
 	"fmt"
+	log "github.com/sirupsen/logrus"
+	"encoding/json"
 )
 
 var (
@@ -66,7 +67,7 @@ func applyFilter(filter []string) []*api.Filter {
 	return result
 }
 
-func ApplyTemplate(msg proto.Message, defaultTemplate string) {
+func ApplyTemplate(msg interface{}, defaultTemplate string) {
 	var data []byte
 	var err error
 	if goTemplate == "" {
@@ -81,6 +82,10 @@ func ApplyTemplate(msg proto.Message, defaultTemplate string) {
 		}
 	}
 
+	RunTemplate(msg, string(data))
+}
+
+func RunTemplate(msg interface{}, templateString string) {
 	ESC := string(0x1b)
 	funcMap := template.FuncMap{
 		"reset":         func() string { return ESC + "[0m" },
@@ -107,9 +112,20 @@ func ApplyTemplate(msg proto.Message, defaultTemplate string) {
 				return fmt.Sprintf("%-24.24s", ptypes.TimestampString(ts))
 			}
 		},
+		"prettyJson": func(v interface{}) string {
+			if v == nil {
+				return ""
+			} else {
+				json, err := json.MarshalIndent(v, "", "  ")
+				if err != nil {
+					log.Fatal(err)
+				}
+				return string(json)
+			}
+		},
 	}
 
-	tmpl, err := template.New(defaultTemplate).Funcs(funcMap).Parse(string(data))
+	tmpl, err := template.New("Template").Funcs(funcMap).Parse(templateString)
 	if err != nil {
 		panic(err)
 	}
