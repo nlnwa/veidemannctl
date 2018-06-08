@@ -22,6 +22,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"fmt"
 	"io"
+	"encoding/json"
 	"strings"
 	"io/ioutil"
 	"github.com/ghodss/yaml"
@@ -29,7 +30,6 @@ import (
 	"path/filepath"
 	"os"
 	"github.com/nlnwa/veidemannctl/src/configutil"
-	"github.com/nlnwa/veidemannctl/src/format"
 )
 
 // queryCmd represents the query command
@@ -45,8 +45,6 @@ var queryCmd = &cobra.Command{
 			request := api.ExecuteDbQueryRequest{}
 
 			queryDef := getQueryDef(args[0])
-			defer queryDef.marshalSpec.Close()
-
 			var params []interface{}
 
 			for _, v := range args[1:] {
@@ -55,7 +53,7 @@ var queryCmd = &cobra.Command{
 
 			request.Query = fmt.Sprintf(queryDef.Query, params...)
 
-			request.Limit = flags.pageSize
+			request.Limit = pageSize
 			log.Debugf("Executing query: %s", request.GetQuery())
 
 			stream, err := client.ExecuteDbQuery(context.Background(), &request)
@@ -73,29 +71,32 @@ var queryCmd = &cobra.Command{
 					break
 				}
 				if err != nil {
-					log.Fatalf("Query error: %v", err)
+					log.Fatalf("%v.ListFeatures(_) = _, %v", client, err)
 				}
-				format.MarshalJsonString(queryDef.marshalSpec, value.GetRecord())
+
+				if queryDef.Template != "" {
+					var js interface{}
+					json.Unmarshal([]byte(value.GetRecord()), &js)
+					//fmt.Printf("%v\n%v\n\n", js, value.GetRecord())
+					RunTemplate(js, queryDef.Template)
+					fmt.Println()
+				} else {
+					fmt.Println(value.GetRecord())
+				}
 			}
 		} else {
+			fmt.Println("Missing query.\nSee 'veidemannctl report query -h' for help")
 			d := configutil.GetConfigDir("query")
-			if flags.quiet {
-				q := listStoredQueries(d)
+			q := listStoredQueries(d)
+			if len(q) > 0 {
+				fmt.Printf("\nStored queries in '%s':\n", d)
 				for _, s := range q {
-					fmt.Println(s.Name)
-				}
-			} else {
-				fmt.Println("Missing query.\nSee 'veidemannctl report query -h' for help")
-				q := listStoredQueries(d)
-				if len(q) > 0 {
-					fmt.Printf("\nStored queries in '%s':\n", d)
-					for _, s := range q {
-						fmt.Printf(" * %-20s - %s", s.Name, s.Description)
-					}
+					fmt.Printf(" * %-20s - %s", s.Name, s.Description)
 				}
 			}
 		}
 	},
+	ValidArgs: listStoredQueryNames(),
 }
 
 func init() {
@@ -108,12 +109,10 @@ type queryDef struct {
 	Query       string
 	Header      string
 	Template    string
-	marshalSpec *format.MarshalSpec
 }
 
 func getQueryDef(queryArg string) queryDef {
 	var queryDef queryDef
-
 	if strings.HasPrefix(queryArg, "r.") {
 		queryDef.Query = queryArg
 	} else {
@@ -122,34 +121,23 @@ func getQueryDef(queryArg string) queryDef {
 		readFile(filename, &queryDef)
 	}
 
-	queryDef.marshalSpec = &format.MarshalSpec{}
 	// If template is set as command line option (option -t), then overwrite what was eventually found from file
-	switch flags.format {
-	case "template":
-		queryDef.marshalSpec.Template = flags.goTemplate
-		queryDef.marshalSpec.Format = flags.format
-	case "template-file":
-		queryDef.marshalSpec.Template = flags.goTemplate
-		queryDef.marshalSpec.Format = flags.format
-	case "yaml":
-		queryDef.marshalSpec.Template = ""
-		queryDef.marshalSpec.Format = flags.format
-	case "json":
-		queryDef.marshalSpec.Template = ""
-		queryDef.marshalSpec.Format = flags.format
-	default:
-		queryDef.marshalSpec.Template = queryDef.Template
-		queryDef.marshalSpec.Format = "template"
+	if goTemplate != "" {
+		data, err := ioutil.ReadFile(goTemplate)
+		if err != nil {
+			panic(err)
+		}
+		queryDef.Template = string(data)
+		queryDef.Header = ""
 	}
 
 	// If template is missing, use default json.template from bindata
-	if queryDef.marshalSpec.Template == "" && queryDef.marshalSpec.Format != "yaml" {
+	if queryDef.Template == "" {
 		data, err := bindata.Asset("json.template")
 		if err != nil {
 			panic(err)
 		}
-		queryDef.marshalSpec.Template = string(data)
-		queryDef.marshalSpec.Format = "template"
+		queryDef.Template = string(data)
 		queryDef.Header = ""
 	}
 	return queryDef
@@ -204,6 +192,17 @@ func listStoredQueries(path string) []queryDef {
 				r = append(r, q)
 			}
 		}
+	}
+	return r
+}
+
+func listStoredQueryNames() []string {
+	d := configutil.GetConfigDir("query")
+	q := listStoredQueries(d)
+
+	var r []string
+	for _, e := range q {
+		r = append(r, e.Name)
 	}
 	return r
 }

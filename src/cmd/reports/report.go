@@ -29,15 +29,13 @@ import (
 	"encoding/json"
 )
 
-var flags struct {
+var (
 	executionId string
 	pageSize    int32
 	page        int32
 	goTemplate  string
 	filter      []string
-	format      string
-	quiet       bool
-}
+)
 
 // reportCmd represents the report command
 var ReportCmd = &cobra.Command{
@@ -50,14 +48,11 @@ var ReportCmd = &cobra.Command{
 }
 
 func init() {
-	ReportCmd.PersistentFlags().StringVarP(&flags.executionId, "executionid", "e", "", "All objects by Execution ID")
-	ReportCmd.PersistentFlags().Int32VarP(&flags.pageSize, "pagesize", "s", 10, "Number of objects to get")
-	ReportCmd.PersistentFlags().Int32VarP(&flags.page, "page", "p", 0, "The page number")
-	ReportCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "table", "Output format (json|yaml|template|template-file)")
-	ReportCmd.PersistentFlags().StringVarP(&flags.goTemplate, "template", "t", "", "A Go template used to format the output")
-	ReportCmd.PersistentFlags().StringSliceVarP(&flags.filter, "filter", "f", nil, "Filters")
-	ReportCmd.PersistentFlags().BoolVarP(&flags.quiet, "quiet", "q", false, "Quiet")
-	ReportCmd.PersistentFlags().MarkHidden("quiet")
+	ReportCmd.PersistentFlags().StringVarP(&executionId, "executionid", "e", "", "All objects by Execution ID")
+	ReportCmd.PersistentFlags().Int32VarP(&pageSize, "pagesize", "s", 10, "Number of objects to get")
+	ReportCmd.PersistentFlags().Int32VarP(&page, "page", "p", 0, "The page number")
+	ReportCmd.PersistentFlags().StringVarP(&goTemplate, "template", "t", "", "A Go template used to format the output")
+	ReportCmd.PersistentFlags().StringSliceVarP(&filter, "filter", "f", nil, "Filters")
 }
 
 func applyFilter(filter []string) []*api.Filter {
@@ -73,13 +68,13 @@ func applyFilter(filter []string) []*api.Filter {
 func ApplyTemplate(msg interface{}, defaultTemplate string) {
 	var data []byte
 	var err error
-	if flags.goTemplate == "" {
+	if goTemplate == "" {
 		data, err = bindata.Asset(defaultTemplate)
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		data, err = ioutil.ReadFile(flags.goTemplate)
+		data, err = ioutil.ReadFile(goTemplate)
 		if err != nil {
 			panic(err)
 		}

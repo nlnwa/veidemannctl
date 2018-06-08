@@ -30,7 +30,6 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"text/template"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
-	"sync"
 )
 
 var jsonMarshaler = jsonpb.Marshaler{EmitDefaults: true}
@@ -39,72 +38,44 @@ var jsonUnMarshaler = jsonpb.Unmarshaler{}
 type MarshalSpec struct {
 	Filename string
 	Format   string
+	Msg      proto.Message
 	Template string
-	Writer   io.Writer
-
-	rFilename string
-	rFormat   string
-	rTemplate string
-	rWriter   io.Writer
-	resolved  bool
-	wg        sync.WaitGroup
+	writer   io.Writer
 }
 
 func (s *MarshalSpec) resolve() {
-	if !s.resolved {
-		if s.Writer == nil {
-			if s.Filename == "" {
-				s.rWriter = os.Stdout
-			} else {
-				f, err := os.Create(s.Filename)
-				if err != nil {
-					log.Fatalf("Could not create file '%s': %v", s.Filename, err)
-				}
-				defer f.Close()
-				s.rWriter = f
-			}
-		} else {
-			s.rWriter = s.Writer
+	if s.Filename == "" {
+		s.writer = os.Stdout
+	} else {
+		f, err := os.Create(s.Filename)
+		if err != nil {
+			log.Fatalf("Could not create file '%s': %v", s.Filename, err)
 		}
-
-		switch s.Format {
-		case "template":
-			if s.Template == "" {
-				log.Fatal("Format is 'template', but template is missing")
-			}
-			s.rTemplate = s.Template
-			s.rFormat = "json"
-			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, &s.wg)
-		case "template-file":
-			if s.Template == "" {
-				log.Fatal("Format is 'template-file', but template is missing")
-			}
-			data, err := ioutil.ReadFile(s.Template)
-			if err != nil {
-				log.Fatalf("Template not found: %v", err)
-			}
-			s.rTemplate = string(data)
-			s.rFormat = "json"
-			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, &s.wg)
-		case "yaml":
-			s.rTemplate = ""
-			s.rFormat = s.Format
-		default:
-			s.rTemplate = s.Template
-			s.rFormat = s.Format
-		}
+		defer f.Close()
+		s.writer = f
 	}
-	s.resolved = true
-}
 
-func (s *MarshalSpec) Close() error {
-	if t, ok := s.rWriter.(io.Closer); ok {
-		if err := t.Close(); err != nil {
-			return err
+	switch s.Format {
+	case "template":
+		if s.Template == "" {
+			log.Fatal("Format is 'template', but template is missing")
 		}
+		s.Format = "json"
+		s.writer = newTemplateWriter(s.writer, s.Template)
+	case "template-file":
+		if s.Template == "" {
+			log.Fatal("Format is 'template-file', but template is missing")
+		}
+		data, err := ioutil.ReadFile(s.Template)
+		if err != nil {
+			log.Fatalf("Template not found: %v", err)
+		}
+		s.Template = string(data)
+		s.Format = "json"
+		s.writer = newTemplateWriter(s.writer, s.Template)
+	default:
+		s.Template = ""
 	}
-	s.wg.Wait()
-	return nil
 }
 
 type templateWriter struct {
@@ -112,17 +83,15 @@ type templateWriter struct {
 	template string
 	pin      *io.PipeReader
 	pout     *io.PipeWriter
-	wg       *sync.WaitGroup
 }
 
-func newTemplateWriter(writer io.Writer, template string, wg *sync.WaitGroup) *templateWriter {
+func newTemplateWriter(writer io.Writer, template string) *templateWriter {
 	t := &templateWriter{}
 	t.writer = writer
 	t.template = template
 	t.pin, t.pout = io.Pipe()
-	t.wg = wg
-	t.wg.Add(1)
-	go t.unmarshalJson()
+	c := make(chan bool)
+	go t.unmarshalJson(c)
 	return t
 }
 
@@ -130,23 +99,15 @@ func (t *templateWriter) Write(p []byte) (n int, err error) {
 	return t.pout.Write(p)
 }
 
-func (t *templateWriter) Close() error {
-	return t.pout.Close()
-}
-
-func (t *templateWriter) unmarshalJson() {
-	defer t.wg.Done()
+func (t *templateWriter) unmarshalJson(c chan bool) {
 	dec := json.NewDecoder(t.pin)
 	for dec.More() {
 		var val interface{}
 		err := dec.Decode(&val)
 		if err != nil {
-			log.Fatal("Failed decoding json: ", err)
+			log.Fatal(err)
 		}
 		t.applyTemplate(val)
-	}
-	if c, ok := t.writer.(io.Closer); ok {
-		c.Close()
 	}
 }
 
@@ -200,51 +161,28 @@ func (t *templateWriter) applyTemplate(val interface{}) {
 	}
 }
 
-func Marshal(spec *MarshalSpec, msg proto.Message) error {
+func Marshal(spec *MarshalSpec) error {
 	spec.resolve()
 
-	switch spec.rFormat {
+	switch spec.Format {
 	case "json":
-		err := MarshalJson(spec.rWriter, msg)
+		err := MarshalJson(spec.writer, spec.Msg)
 		if err != nil {
 			return err
 		}
 	case "yaml":
-		err := MarshalYaml(spec.rWriter, msg)
+		err := MarshalYaml(spec.writer, spec.Msg)
 		if err != nil {
 			return err
 		}
 	case "table":
-		err := MarshalTable(spec.rWriter, msg)
+		err := MarshalTable(spec.writer, spec.Msg)
 		if err != nil {
 			return err
 		}
 	default:
-		log.Fatalf("Illegal format %s", spec.rFormat)
+		log.Fatalf("Illegal format %s", spec.Format)
 	}
-
-	return nil
-}
-
-func MarshalJsonString(spec *MarshalSpec, jsonString string) error {
-	spec.resolve()
-
-	switch spec.rFormat {
-	case "json":
-		fmt.Fprint(spec.rWriter, jsonString)
-	case "yaml":
-		final, err := yaml.JSONToYAML([]byte(jsonString))
-		if err != nil {
-			fmt.Printf("err: %v\n", err)
-			return err
-		}
-
-		fmt.Fprint(spec.rWriter, string(final))
-		fmt.Fprintln(spec.rWriter, "---")
-	default:
-		log.Fatalf("Illegal format %s", spec.rFormat)
-	}
-
 	return nil
 }
 
