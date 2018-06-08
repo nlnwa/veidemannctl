@@ -29,12 +29,13 @@ import (
 )
 
 var flags struct {
-	label    string
-	name     string
-	file     string
-	format   string
-	pageSize int32
-	page     int32
+	label      string
+	name       string
+	file       string
+	format     string
+	goTemplate string
+	pageSize   int32
+	page       int32
 }
 
 // getCmd represents the get command
@@ -65,6 +66,12 @@ var getCmd = &cobra.Command{
 				fmt.Println("ID: ", ids)
 			}
 
+			s := &format.MarshalSpec{
+				Filename:flags.file,
+				Format:flags.format,
+				Template:flags.goTemplate,
+			}
+
 			switch args[0] {
 			case "entity":
 				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
@@ -74,7 +81,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get entity: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "seed":
@@ -93,7 +101,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get seed: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "job":
@@ -104,7 +113,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get job: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "crawlconfig":
@@ -115,7 +125,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get crawl config: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "schedule":
@@ -126,7 +137,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get schedule config: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "browser":
@@ -137,7 +149,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get browser config: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "politeness":
@@ -148,7 +161,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get politeness config: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "script":
@@ -159,7 +173,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get browser script: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "group":
@@ -170,7 +185,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get crawl host group config: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "loglevel":
@@ -179,7 +195,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get log config: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "activerole":
@@ -188,7 +205,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get active role: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			case "role":
@@ -201,7 +219,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get active role: %v", err)
 				}
 
-				if format.Marshal(flags.file, flags.format, r) != nil {
+				s.Msg = r
+				if format.Marshal(s) != nil {
 					os.Exit(1)
 				}
 			default:
@@ -231,9 +250,15 @@ func init() {
 	// Here you will define your flags and configuration settings.
 
 	getCmd.PersistentFlags().StringVarP(&flags.label, "label", "l", "", "List objects by label (<type>:<value> | <value>)")
+
 	getCmd.PersistentFlags().StringVarP(&flags.name, "name", "n", "", "List objects by name (accepts regular expressions)")
-	getCmd.PersistentFlags().StringVarP(&flags.format, "format", "f", "table", "Output format (table|json|yaml)")
-	getCmd.PersistentFlags().StringVarP(&flags.file, "output", "o", "", "File name to write to")
+	annotation := make(map[string][]string)
+	annotation[cobra.BashCompCustom] = []string{"__veidemannctl_get_name"}
+
+	getCmd.PersistentFlags().Lookup("name").Annotations = annotation
+	getCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "table", "Output format (table|json|yaml|template|template-file)")
+	getCmd.PersistentFlags().StringVarP(&flags.goTemplate, "template", "t", "", "A Go template used to format the output")
+	getCmd.PersistentFlags().StringVarP(&flags.file, "filename", "f", "", "File name to write to")
 	getCmd.PersistentFlags().Int32VarP(&flags.pageSize, "pagesize", "s", 10, "Number of objects to get")
 	getCmd.PersistentFlags().Int32VarP(&flags.page, "page", "p", 0, "The page number")
 }

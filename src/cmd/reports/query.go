@@ -96,6 +96,7 @@ var queryCmd = &cobra.Command{
 			}
 		}
 	},
+	ValidArgs: listStoredQueryNames(),
 }
 
 func init() {
@@ -127,6 +128,7 @@ func getQueryDef(queryArg string) queryDef {
 			panic(err)
 		}
 		queryDef.Template = string(data)
+		queryDef.Header = ""
 	}
 
 	// If template is missing, use default json.template from bindata
@@ -136,6 +138,7 @@ func getQueryDef(queryArg string) queryDef {
 			panic(err)
 		}
 		queryDef.Template = string(data)
+		queryDef.Header = ""
 	}
 	return queryDef
 }
@@ -170,7 +173,7 @@ func readFile(name string, queryDef *queryDef) {
 		log.Fatalf("Query not found: %v", err)
 	}
 	// Found file
-	if strings.HasSuffix(name, ".yml") || strings.HasSuffix(name, ".yml") {
+	if strings.HasSuffix(name, ".yml") || strings.HasSuffix(name, ".yaml") {
 		yaml.Unmarshal(data, &queryDef)
 	} else {
 		queryDef.Query = string(data)
@@ -189,6 +192,17 @@ func listStoredQueries(path string) []queryDef {
 				r = append(r, q)
 			}
 		}
+	}
+	return r
+}
+
+func listStoredQueryNames() []string {
+	d := configutil.GetConfigDir("query")
+	q := listStoredQueries(d)
+
+	var r []string
+	for _, e := range q {
+		r = append(r, e.Name)
 	}
 	return r
 }

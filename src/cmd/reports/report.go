@@ -35,8 +35,6 @@ var (
 	page        int32
 	goTemplate  string
 	filter      []string
-	//validArgs      = []string{"crawllog", "pagelog", "screenshot", "crawlexecution", "jobexecution"}
-	//validArgs      = []string{"crawllog", "pagelog", "screenshot"}
 )
 
 // reportCmd represents the report command

@@ -22,50 +22,166 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"io"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"reflect"
 	"strings"
+	"io/ioutil"
+	"github.com/golang/protobuf/ptypes"
+	"text/template"
+	tspb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 var jsonMarshaler = jsonpb.Marshaler{EmitDefaults: true}
 var jsonUnMarshaler = jsonpb.Unmarshaler{}
 
-func Marshal(filename string, format string, msg proto.Message) error {
-	var w io.Writer
-	if filename == "" {
-		w = os.Stdout
+type MarshalSpec struct {
+	Filename string
+	Format   string
+	Msg      proto.Message
+	Template string
+	writer   io.Writer
+}
+
+func (s *MarshalSpec) resolve() {
+	if s.Filename == "" {
+		s.writer = os.Stdout
 	} else {
-		f, err := os.Create(filename)
+		f, err := os.Create(s.Filename)
 		if err != nil {
-			log.Fatalf("Could not create file '%s': %v", filename, err)
-			return err
+			log.Fatalf("Could not create file '%s': %v", s.Filename, err)
 		}
 		defer f.Close()
-		w = f
+		s.writer = f
 	}
 
-	switch format {
-	case "json":
-		err := MarshalJson(w, msg)
-		if err != nil {
-			return err
+	switch s.Format {
+	case "template":
+		if s.Template == "" {
+			log.Fatal("Format is 'template', but template is missing")
 		}
-		return nil
-	case "yaml":
-		err := MarshalYaml(w, msg)
-		if err != nil {
-			return err
+		s.Format = "json"
+		s.writer = newTemplateWriter(s.writer, s.Template)
+	case "template-file":
+		if s.Template == "" {
+			log.Fatal("Format is 'template-file', but template is missing")
 		}
-		return nil
-	case "table":
-		err := MarshalTable(w, msg)
+		data, err := ioutil.ReadFile(s.Template)
 		if err != nil {
-			return err
+			log.Fatalf("Template not found: %v", err)
 		}
-		return nil
+		s.Template = string(data)
+		s.Format = "json"
+		s.writer = newTemplateWriter(s.writer, s.Template)
 	default:
-		log.Fatalf("Illegal format %s", format)
+		s.Template = ""
+	}
+}
+
+type templateWriter struct {
+	writer   io.Writer
+	template string
+	pin      *io.PipeReader
+	pout     *io.PipeWriter
+}
+
+func newTemplateWriter(writer io.Writer, template string) *templateWriter {
+	t := &templateWriter{}
+	t.writer = writer
+	t.template = template
+	t.pin, t.pout = io.Pipe()
+	c := make(chan bool)
+	go t.unmarshalJson(c)
+	return t
+}
+
+func (t *templateWriter) Write(p []byte) (n int, err error) {
+	return t.pout.Write(p)
+}
+
+func (t *templateWriter) unmarshalJson(c chan bool) {
+	dec := json.NewDecoder(t.pin)
+	for dec.More() {
+		var val interface{}
+		err := dec.Decode(&val)
+		if err != nil {
+			log.Fatal(err)
+		}
+		t.applyTemplate(val)
+	}
+}
+
+func (t *templateWriter) applyTemplate(val interface{}) {
+	ESC := string(0x1b)
+	funcMap := template.FuncMap{
+		"reset":         func() string { return ESC + "[0m" },
+		"bold":          func() string { return ESC + "[1m" },
+		"inverse":       func() string { return ESC + "[7m" },
+		"red":           func() string { return ESC + "[31m" },
+		"green":         func() string { return ESC + "[32m" },
+		"yellow":        func() string { return ESC + "[33m" },
+		"blue":          func() string { return ESC + "[34m" },
+		"magenta":       func() string { return ESC + "[35m" },
+		"cyan":          func() string { return ESC + "[36m" },
+		"brightred":     func() string { return ESC + "[1;31m" },
+		"brightgreen":   func() string { return ESC + "[1;32m" },
+		"brightyellow":  func() string { return ESC + "[1;33m" },
+		"brightblue":    func() string { return ESC + "[1;34m" },
+		"brightmagenta": func() string { return ESC + "[1;35m" },
+		"brightcyan":    func() string { return ESC + "[1;36m" },
+		"bgwhite":       func() string { return ESC + "[47m" },
+		"bgbrightblack": func() string { return ESC + "[100m" },
+		"time": func(ts *tspb.Timestamp) string {
+			if ts == nil {
+				return "                        "
+			} else {
+				return fmt.Sprintf("%-24.24s", ptypes.TimestampString(ts))
+			}
+		},
+		"prettyJson": func(v interface{}) string {
+			if v == nil {
+				return ""
+			} else {
+				json, err := json.MarshalIndent(v, "", "  ")
+				if err != nil {
+					log.Fatal(err)
+				}
+				return string(json)
+			}
+		},
+	}
+
+	tmpl, err := template.New("Template").Funcs(funcMap).Parse(t.template)
+	if err != nil {
+		panic(err)
+	}
+	err = tmpl.Execute(t.writer, val)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func Marshal(spec *MarshalSpec) error {
+	spec.resolve()
+
+	switch spec.Format {
+	case "json":
+		err := MarshalJson(spec.writer, spec.Msg)
+		if err != nil {
+			return err
+		}
+	case "yaml":
+		err := MarshalYaml(spec.writer, spec.Msg)
+		if err != nil {
+			return err
+		}
+	case "table":
+		err := MarshalTable(spec.writer, spec.Msg)
+		if err != nil {
+			return err
+		}
+	default:
+		log.Fatalf("Illegal format %s", spec.Format)
 	}
 	return nil
 }
