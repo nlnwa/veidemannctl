@@ -88,7 +88,7 @@ func crawlexecutionTemplate() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "crawlexecution.template", size: 385, mode: os.FileMode(436), modTime: time.Unix(1526387162, 0)}
+	info := bindataFileInfo{name: "crawlexecution.template", size: 385, mode: os.FileMode(436), modTime: time.Unix(1528471708, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -128,12 +128,12 @@ func jobexecutionTemplate() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "jobexecution.template", size: 442, mode: os.FileMode(436), modTime: time.Unix(1526387213, 0)}
+	info := bindataFileInfo{name: "jobexecution.template", size: 442, mode: os.FileMode(436), modTime: time.Unix(1528471708, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _jsonTemplate = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xaa\xae\x2e\x28\x4a\x2d\x29\xa9\xf4\x2a\xce\xcf\x53\xd0\xab\xad\x05\x04\x00\x00\xff\xff\xf2\x11\x78\x40\x10\x00\x00\x00")
+var _jsonTemplate = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xaa\xae\x2e\x28\x4a\x2d\x29\xa9\xf4\x2a\xce\xcf\x53\xd0\xab\xad\xe5\x02\x04\x00\x00\xff\xff\xb2\xed\x24\x61\x11\x00\x00\x00")
 
 func jsonTemplateBytes() ([]byte, error) {
 	return bindataRead(
@@ -148,7 +148,7 @@ func jsonTemplate() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "json.template", size: 16, mode: os.FileMode(436), modTime: time.Unix(1527692765, 0)}
+	info := bindataFileInfo{name: "json.template", size: 17, mode: os.FileMode(436), modTime: time.Unix(1528724652, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -24,8 +24,8 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type ResolveRequest struct {
-	Host                 string   `protobuf:"bytes,1,opt,name=host" json:"host,omitempty"`
-	Port                 int32    `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
+	Host                 string   `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	Port                 int32    `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -70,9 +70,9 @@ func (m *ResolveRequest) GetPort() int32 {
 }
 
 type ResolveReply struct {
-	Host                 string   `protobuf:"bytes,1,opt,name=host" json:"host,omitempty"`
-	Port                 int32    `protobuf:"varint,2,opt,name=port" json:"port,omitempty"`
-	TextualIp            string   `protobuf:"bytes,3,opt,name=textual_ip,json=textualIp" json:"textual_ip,omitempty"`
+	Host                 string   `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	Port                 int32    `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+	TextualIp            string   `protobuf:"bytes,3,opt,name=textual_ip,json=textualIp,proto3" json:"textual_ip,omitempty"`
 	RawIp                []byte   `protobuf:"bytes,4,opt,name=raw_ip,json=rawIp,proto3" json:"raw_ip,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

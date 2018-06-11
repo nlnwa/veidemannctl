@@ -28,7 +28,7 @@ const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 // Request for getting an object by id
 type GetRequest struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -68,7 +68,7 @@ func (m *GetRequest) GetId() string {
 // Specification of wich entities to get.
 type ListRequest struct {
 	// Select objects by id
-	Id []string `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
+	Id []string `protobuf:"bytes,1,rep,name=id,proto3" json:"id,omitempty"`
 	// Select objects by name
 	// The name query is a case insensitive regular expresion search on name.
 	// <pre>
@@ -77,7 +77,7 @@ type ListRequest struct {
 	//   "^foo$"     - matches the exact name foo
 	//   "foo.*bar$" - matches names containing foo followed by zero or more tokens and ends with bar
 	// </pre>
-	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Select objects by label
 	// A string representing a label query. The query matches if at least one label matches the query.
 	// If there are multiple queries, then each query must match at least one label.
@@ -98,9 +98,9 @@ type ListRequest struct {
 	//   ":"        - matches every label
 	//   ""         - matches every label
 	// </pre>
-	LabelSelector        []string `protobuf:"bytes,3,rep,name=label_selector,json=labelSelector" json:"label_selector,omitempty"`
-	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	LabelSelector        []string `protobuf:"bytes,3,rep,name=label_selector,json=labelSelector,proto3" json:"label_selector,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -167,10 +167,10 @@ func (m *ListRequest) GetPage() int32 {
 
 // A list of entities
 type CrawlEntityListReply struct {
-	Value                []*CrawlEntity `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64          `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlEntity `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64          `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32          `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
 	XXX_sizecache        int32          `json:"-"`
@@ -230,7 +230,7 @@ func (m *CrawlEntityListReply) GetPage() int32 {
 
 type SeedListRequest struct {
 	// Select objects by id
-	Id []string `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
+	Id []string `protobuf:"bytes,1,rep,name=id,proto3" json:"id,omitempty"`
 	// Select objects by name
 	// The name query is a case insensitive regular expresion search on name.
 	// <pre>
@@ -239,7 +239,7 @@ type SeedListRequest struct {
 	//   "^foo$"     - matches the exact name foo
 	//   "foo.*bar$" - matches names containing foo followed by zero or more tokens and ends with bar
 	// </pre>
-	Name string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Select objects by label
 	// A string representing a label query. The query matches if at least one label matches the query.
 	// If there are multiple queries, then each query must match at least one label.
@@ -260,13 +260,13 @@ type SeedListRequest struct {
 	//   ":"        - matches every label
 	//   ""         - matches every label
 	// </pre>
-	LabelSelector []string `protobuf:"bytes,3,rep,name=label_selector,json=labelSelector" json:"label_selector,omitempty"`
+	LabelSelector []string `protobuf:"bytes,3,rep,name=label_selector,json=labelSelector,proto3" json:"label_selector,omitempty"`
 	// Select objects by crawl job id
-	CrawlJobId string `protobuf:"bytes,4,opt,name=crawl_job_id,json=crawlJobId" json:"crawl_job_id,omitempty"`
+	CrawlJobId string `protobuf:"bytes,4,opt,name=crawl_job_id,json=crawlJobId,proto3" json:"crawl_job_id,omitempty"`
 	// Select objects by entity id
-	EntityId             string   `protobuf:"bytes,5,opt,name=entity_id,json=entityId" json:"entity_id,omitempty"`
-	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	EntityId             string   `protobuf:"bytes,5,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -346,10 +346,10 @@ func (m *SeedListRequest) GetPage() int32 {
 }
 
 type SeedListReply struct {
-	Value                []*Seed  `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64    `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*Seed  `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64    `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -408,10 +408,10 @@ func (m *SeedListReply) GetPage() int32 {
 }
 
 type CrawlJobListReply struct {
-	Value                []*CrawlJob `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64       `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32       `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32       `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlJob `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64       `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32       `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32       `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -470,10 +470,10 @@ func (m *CrawlJobListReply) GetPage() int32 {
 }
 
 type CrawlConfigListReply struct {
-	Value                []*CrawlConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64          `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlConfig `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64          `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32          `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
 	XXX_sizecache        int32          `json:"-"`
@@ -532,10 +532,10 @@ func (m *CrawlConfigListReply) GetPage() int32 {
 }
 
 type CrawlScheduleConfigListReply struct {
-	Value                []*CrawlScheduleConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64                  `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32                  `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32                  `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlScheduleConfig `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32                  `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32                  `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
 	XXX_unrecognized     []byte                 `json:"-"`
 	XXX_sizecache        int32                  `json:"-"`
@@ -594,10 +594,10 @@ func (m *CrawlScheduleConfigListReply) GetPage() int32 {
 }
 
 type PolitenessConfigListReply struct {
-	Value                []*PolitenessConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64               `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32               `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32               `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*PolitenessConfig `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64               `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32               `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32               `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
 	XXX_unrecognized     []byte              `json:"-"`
 	XXX_sizecache        int32               `json:"-"`
@@ -656,10 +656,10 @@ func (m *PolitenessConfigListReply) GetPage() int32 {
 }
 
 type BrowserConfigListReply struct {
-	Value                []*BrowserConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64            `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32            `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32            `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*BrowserConfig `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64            `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32            `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32            `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
 	XXX_unrecognized     []byte           `json:"-"`
 	XXX_sizecache        int32            `json:"-"`
@@ -719,10 +719,10 @@ func (m *BrowserConfigListReply) GetPage() int32 {
 
 // A list of browserscripts
 type BrowserScriptListReply struct {
-	Value                []*BrowserScript `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64            `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32            `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32            `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*BrowserScript `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64            `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32            `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32            `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
 	XXX_unrecognized     []byte           `json:"-"`
 	XXX_sizecache        int32            `json:"-"`
@@ -782,10 +782,10 @@ func (m *BrowserScriptListReply) GetPage() int32 {
 
 // A list of CrawlHostGroupConfigs
 type CrawlHostGroupConfigListReply struct {
-	Value                []*CrawlHostGroupConfig `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64                   `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32                   `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32                   `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlHostGroupConfig `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64                   `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32                   `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32                   `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
 	XXX_unrecognized     []byte                  `json:"-"`
 	XXX_sizecache        int32                   `json:"-"`
@@ -845,10 +845,10 @@ func (m *CrawlHostGroupConfigListReply) GetPage() int32 {
 
 // Cick of a crawl job immediately
 type RunCrawlRequest struct {
-	JobId string `protobuf:"bytes,5,opt,name=job_id,json=jobId" json:"job_id,omitempty"`
+	JobId string `protobuf:"bytes,5,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
 	// If seed id is submitted, only this seed will be harvested.
 	// If empty, all seeds configured with the submitted job id will be harvested.
-	SeedId               string   `protobuf:"bytes,6,opt,name=seed_id,json=seedId" json:"seed_id,omitempty"`
+	SeedId               string   `protobuf:"bytes,6,opt,name=seed_id,json=seedId,proto3" json:"seed_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -893,7 +893,7 @@ func (m *RunCrawlRequest) GetSeedId() string {
 }
 
 type RunCrawlReply struct {
-	JobExecutionId       string   `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
+	JobExecutionId       string   `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId,proto3" json:"job_execution_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -931,7 +931,7 @@ func (m *RunCrawlReply) GetJobExecutionId() string {
 }
 
 type RoleList struct {
-	Role                 []Role   `protobuf:"varint,1,rep,packed,name=role,enum=veidemann.api.Role" json:"role,omitempty"`
+	Role                 []Role   `protobuf:"varint,1,rep,packed,name=role,proto3,enum=veidemann.api.Role" json:"role,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -969,9 +969,9 @@ func (m *RoleList) GetRole() []Role {
 }
 
 type RoleMappingsListRequest struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1023,10 +1023,10 @@ func (m *RoleMappingsListRequest) GetPage() int32 {
 }
 
 type RoleMappingsListReply struct {
-	Value                []*RoleMapping `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64          `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32          `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*RoleMapping `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64          `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32          `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32          `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
 	XXX_sizecache        int32          `json:"-"`
@@ -1085,7 +1085,7 @@ func (m *RoleMappingsListReply) GetPage() int32 {
 }
 
 type OpenIdConnectIssuerReply struct {
-	OpenIdConnectIssuer  string   `protobuf:"bytes,1,opt,name=open_id_connect_issuer,json=openIdConnectIssuer" json:"open_id_connect_issuer,omitempty"`
+	OpenIdConnectIssuer  string   `protobuf:"bytes,1,opt,name=open_id_connect_issuer,json=openIdConnectIssuer,proto3" json:"open_id_connect_issuer,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`

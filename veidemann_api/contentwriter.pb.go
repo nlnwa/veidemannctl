@@ -67,7 +67,7 @@ func (RecordType) EnumDescriptor() ([]byte, []int) {
 }
 
 type Data struct {
-	RecordNum            int32    `protobuf:"varint,1,opt,name=record_num,json=recordNum" json:"record_num,omitempty"`
+	RecordNum            int32    `protobuf:"varint,1,opt,name=record_num,json=recordNum,proto3" json:"record_num,omitempty"`
 	Data                 []byte   `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -113,13 +113,13 @@ func (m *Data) GetData() []byte {
 }
 
 type WriteRequestMeta struct {
-	ExecutionId    string                                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	TargetUri      string                                 `protobuf:"bytes,2,opt,name=target_uri,json=targetUri" json:"target_uri,omitempty"`
-	RecordMeta     map[int32]*WriteRequestMeta_RecordMeta `protobuf:"bytes,3,rep,name=record_meta,json=recordMeta" json:"record_meta,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	FetchTimeStamp *timestamp.Timestamp                   `protobuf:"bytes,4,opt,name=fetch_time_stamp,json=fetchTimeStamp" json:"fetch_time_stamp,omitempty"`
-	IpAddress      string                                 `protobuf:"bytes,5,opt,name=ip_address,json=ipAddress" json:"ip_address,omitempty"`
+	ExecutionId    string                                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	TargetUri      string                                 `protobuf:"bytes,2,opt,name=target_uri,json=targetUri,proto3" json:"target_uri,omitempty"`
+	RecordMeta     map[int32]*WriteRequestMeta_RecordMeta `protobuf:"bytes,3,rep,name=record_meta,json=recordMeta,proto3" json:"record_meta,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	FetchTimeStamp *timestamp.Timestamp                   `protobuf:"bytes,4,opt,name=fetch_time_stamp,json=fetchTimeStamp,proto3" json:"fetch_time_stamp,omitempty"`
+	IpAddress      string                                 `protobuf:"bytes,5,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
 	// The http status code. Only relevant for response records.
-	StatusCode           int32    `protobuf:"varint,6,opt,name=status_code,json=statusCode" json:"status_code,omitempty"`
+	StatusCode           int32    `protobuf:"varint,6,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -192,14 +192,14 @@ func (m *WriteRequestMeta) GetStatusCode() int32 {
 }
 
 type WriteRequestMeta_RecordMeta struct {
-	RecordNum            int32      `protobuf:"varint,1,opt,name=record_num,json=recordNum" json:"record_num,omitempty"`
-	Type                 RecordType `protobuf:"varint,2,opt,name=type,enum=veidemann.api.RecordType" json:"type,omitempty"`
-	RecordContentType    string     `protobuf:"bytes,3,opt,name=record_content_type,json=recordContentType" json:"record_content_type,omitempty"`
-	PayloadContentType   string     `protobuf:"bytes,4,opt,name=payload_content_type,json=payloadContentType" json:"payload_content_type,omitempty"`
-	BlockDigest          string     `protobuf:"bytes,5,opt,name=block_digest,json=blockDigest" json:"block_digest,omitempty"`
-	PayloadDigest        string     `protobuf:"bytes,6,opt,name=payload_digest,json=payloadDigest" json:"payload_digest,omitempty"`
-	Size                 int64      `protobuf:"varint,7,opt,name=size" json:"size,omitempty"`
-	WarcRefersTo         string     `protobuf:"bytes,8,opt,name=warc_refers_to,json=warcRefersTo" json:"warc_refers_to,omitempty"`
+	RecordNum            int32      `protobuf:"varint,1,opt,name=record_num,json=recordNum,proto3" json:"record_num,omitempty"`
+	Type                 RecordType `protobuf:"varint,2,opt,name=type,proto3,enum=veidemann.api.RecordType" json:"type,omitempty"`
+	RecordContentType    string     `protobuf:"bytes,3,opt,name=record_content_type,json=recordContentType,proto3" json:"record_content_type,omitempty"`
+	PayloadContentType   string     `protobuf:"bytes,4,opt,name=payload_content_type,json=payloadContentType,proto3" json:"payload_content_type,omitempty"`
+	BlockDigest          string     `protobuf:"bytes,5,opt,name=block_digest,json=blockDigest,proto3" json:"block_digest,omitempty"`
+	PayloadDigest        string     `protobuf:"bytes,6,opt,name=payload_digest,json=payloadDigest,proto3" json:"payload_digest,omitempty"`
+	Size                 int64      `protobuf:"varint,7,opt,name=size,proto3" json:"size,omitempty"`
+	WarcRefersTo         string     `protobuf:"bytes,8,opt,name=warc_refers_to,json=warcRefersTo,proto3" json:"warc_refers_to,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
 	XXX_unrecognized     []byte     `json:"-"`
 	XXX_sizecache        int32      `json:"-"`
@@ -326,16 +326,16 @@ type isWriteRequest_Value interface {
 }
 
 type WriteRequest_Meta struct {
-	Meta *WriteRequestMeta `protobuf:"bytes,1,opt,name=meta,oneof"`
+	Meta *WriteRequestMeta `protobuf:"bytes,1,opt,name=meta,proto3,oneof"`
 }
 type WriteRequest_Header struct {
-	Header *Data `protobuf:"bytes,2,opt,name=header,oneof"`
+	Header *Data `protobuf:"bytes,2,opt,name=header,proto3,oneof"`
 }
 type WriteRequest_Payload struct {
-	Payload *Data `protobuf:"bytes,3,opt,name=payload,oneof"`
+	Payload *Data `protobuf:"bytes,3,opt,name=payload,proto3,oneof"`
 }
 type WriteRequest_Cancel struct {
-	Cancel string `protobuf:"bytes,4,opt,name=cancel,oneof"`
+	Cancel string `protobuf:"bytes,4,opt,name=cancel,proto3,oneof"`
 }
 
 func (*WriteRequest_Meta) isWriteRequest_Value()    {}
@@ -487,7 +487,7 @@ func _WriteRequest_OneofSizer(msg proto.Message) (n int) {
 }
 
 type WriteResponseMeta struct {
-	RecordMeta           map[int32]*WriteResponseMeta_RecordMeta `protobuf:"bytes,1,rep,name=record_meta,json=recordMeta" json:"record_meta,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	RecordMeta           map[int32]*WriteResponseMeta_RecordMeta `protobuf:"bytes,1,rep,name=record_meta,json=recordMeta,proto3" json:"record_meta,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}                                `json:"-"`
 	XXX_unrecognized     []byte                                  `json:"-"`
 	XXX_sizecache        int32                                   `json:"-"`
@@ -525,13 +525,13 @@ func (m *WriteResponseMeta) GetRecordMeta() map[int32]*WriteResponseMeta_RecordM
 }
 
 type WriteResponseMeta_RecordMeta struct {
-	RecordNum            int32      `protobuf:"varint,1,opt,name=record_num,json=recordNum" json:"record_num,omitempty"`
-	Type                 RecordType `protobuf:"varint,2,opt,name=type,enum=veidemann.api.RecordType" json:"type,omitempty"`
-	WarcId               string     `protobuf:"bytes,3,opt,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	StorageRef           string     `protobuf:"bytes,4,opt,name=storage_ref,json=storageRef" json:"storage_ref,omitempty"`
-	BlockDigest          string     `protobuf:"bytes,5,opt,name=block_digest,json=blockDigest" json:"block_digest,omitempty"`
-	PayloadDigest        string     `protobuf:"bytes,6,opt,name=payload_digest,json=payloadDigest" json:"payload_digest,omitempty"`
-	WarcRefersTo         string     `protobuf:"bytes,7,opt,name=warc_refers_to,json=warcRefersTo" json:"warc_refers_to,omitempty"`
+	RecordNum            int32      `protobuf:"varint,1,opt,name=record_num,json=recordNum,proto3" json:"record_num,omitempty"`
+	Type                 RecordType `protobuf:"varint,2,opt,name=type,proto3,enum=veidemann.api.RecordType" json:"type,omitempty"`
+	WarcId               string     `protobuf:"bytes,3,opt,name=warc_id,json=warcId,proto3" json:"warc_id,omitempty"`
+	StorageRef           string     `protobuf:"bytes,4,opt,name=storage_ref,json=storageRef,proto3" json:"storage_ref,omitempty"`
+	BlockDigest          string     `protobuf:"bytes,5,opt,name=block_digest,json=blockDigest,proto3" json:"block_digest,omitempty"`
+	PayloadDigest        string     `protobuf:"bytes,6,opt,name=payload_digest,json=payloadDigest,proto3" json:"payload_digest,omitempty"`
+	WarcRefersTo         string     `protobuf:"bytes,7,opt,name=warc_refers_to,json=warcRefersTo,proto3" json:"warc_refers_to,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
 	XXX_unrecognized     []byte     `json:"-"`
 	XXX_sizecache        int32      `json:"-"`
@@ -611,7 +611,7 @@ func (m *WriteResponseMeta_RecordMeta) GetWarcRefersTo() string {
 }
 
 type WriteReply struct {
-	Meta                 *WriteResponseMeta `protobuf:"bytes,1,opt,name=meta" json:"meta,omitempty"`
+	Meta                 *WriteResponseMeta `protobuf:"bytes,1,opt,name=meta,proto3" json:"meta,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
 	XXX_unrecognized     []byte             `json:"-"`
 	XXX_sizecache        int32              `json:"-"`

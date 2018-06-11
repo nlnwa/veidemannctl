@@ -51,15 +51,15 @@ to quickly create a Cobra application.`,
 		if len(args) > 0 {
 			request.Id = args
 		}
-		if executionId != "" {
-			request.ExecutionId = executionId
+		if flags.executionId != "" {
+			request.ExecutionId = flags.executionId
 		}
 		if img || display {
 			request.ImgData = true
 		}
-		request.Filter = applyFilter(filter)
-		request.Page = page
-		request.PageSize = pageSize
+		request.Filter = applyFilter(flags.filter)
+		request.Page = flags.page
+		request.PageSize = flags.pageSize
 
 		r, err := client.ListScreenshots(context.Background(), &request)
 		if err != nil {

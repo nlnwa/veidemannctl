@@ -27,8 +27,8 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type RunningExecutionsRequest struct {
-	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -73,10 +73,10 @@ func (m *RunningExecutionsRequest) GetPage() int32 {
 }
 
 type RunningExecutionsListReply struct {
-	Value                []*StatusDetail `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64           `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32           `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32           `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*StatusDetail `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64           `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32           `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32           `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
 	XXX_unrecognized     []byte          `json:"-"`
 	XXX_sizecache        int32           `json:"-"`
@@ -135,21 +135,21 @@ func (m *RunningExecutionsListReply) GetPage() int32 {
 }
 
 type StatusDetail struct {
-	Id                   string                     `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	State                CrawlExecutionStatus_State `protobuf:"varint,2,opt,name=state,enum=veidemann.api.CrawlExecutionStatus_State" json:"state,omitempty"`
-	JobId                string                     `protobuf:"bytes,3,opt,name=jobId" json:"jobId,omitempty"`
-	Seed                 string                     `protobuf:"bytes,4,opt,name=seed" json:"seed,omitempty"`
-	StartTime            *timestamp.Timestamp       `protobuf:"bytes,5,opt,name=start_time,json=startTime" json:"start_time,omitempty"`
-	EndTime              *timestamp.Timestamp       `protobuf:"bytes,6,opt,name=end_time,json=endTime" json:"end_time,omitempty"`
-	DocumentsCrawled     int64                      `protobuf:"varint,7,opt,name=documents_crawled,json=documentsCrawled" json:"documents_crawled,omitempty"`
-	BytesCrawled         int64                      `protobuf:"varint,8,opt,name=bytes_crawled,json=bytesCrawled" json:"bytes_crawled,omitempty"`
-	UrisCrawled          int64                      `protobuf:"varint,9,opt,name=uris_crawled,json=urisCrawled" json:"uris_crawled,omitempty"`
-	DocumentsFailed      int64                      `protobuf:"varint,10,opt,name=documents_failed,json=documentsFailed" json:"documents_failed,omitempty"`
-	DocumentsOutOfScope  int64                      `protobuf:"varint,11,opt,name=documents_out_of_scope,json=documentsOutOfScope" json:"documents_out_of_scope,omitempty"`
-	DocumentsRetried     int64                      `protobuf:"varint,12,opt,name=documents_retried,json=documentsRetried" json:"documents_retried,omitempty"`
-	DocumentsDenied      int64                      `protobuf:"varint,13,opt,name=documents_denied,json=documentsDenied" json:"documents_denied,omitempty"`
-	QueueSize            int64                      `protobuf:"varint,14,opt,name=queue_size,json=queueSize" json:"queue_size,omitempty"`
-	CurrentUri           string                     `protobuf:"bytes,20,opt,name=current_uri,json=currentUri" json:"current_uri,omitempty"`
+	Id                   string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	State                CrawlExecutionStatus_State `protobuf:"varint,2,opt,name=state,proto3,enum=veidemann.api.CrawlExecutionStatus_State" json:"state,omitempty"`
+	JobId                string                     `protobuf:"bytes,3,opt,name=jobId,proto3" json:"jobId,omitempty"`
+	Seed                 string                     `protobuf:"bytes,4,opt,name=seed,proto3" json:"seed,omitempty"`
+	StartTime            *timestamp.Timestamp       `protobuf:"bytes,5,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime              *timestamp.Timestamp       `protobuf:"bytes,6,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	DocumentsCrawled     int64                      `protobuf:"varint,7,opt,name=documents_crawled,json=documentsCrawled,proto3" json:"documents_crawled,omitempty"`
+	BytesCrawled         int64                      `protobuf:"varint,8,opt,name=bytes_crawled,json=bytesCrawled,proto3" json:"bytes_crawled,omitempty"`
+	UrisCrawled          int64                      `protobuf:"varint,9,opt,name=uris_crawled,json=urisCrawled,proto3" json:"uris_crawled,omitempty"`
+	DocumentsFailed      int64                      `protobuf:"varint,10,opt,name=documents_failed,json=documentsFailed,proto3" json:"documents_failed,omitempty"`
+	DocumentsOutOfScope  int64                      `protobuf:"varint,11,opt,name=documents_out_of_scope,json=documentsOutOfScope,proto3" json:"documents_out_of_scope,omitempty"`
+	DocumentsRetried     int64                      `protobuf:"varint,12,opt,name=documents_retried,json=documentsRetried,proto3" json:"documents_retried,omitempty"`
+	DocumentsDenied      int64                      `protobuf:"varint,13,opt,name=documents_denied,json=documentsDenied,proto3" json:"documents_denied,omitempty"`
+	QueueSize            int64                      `protobuf:"varint,14,opt,name=queue_size,json=queueSize,proto3" json:"queue_size,omitempty"`
+	CurrentUri           string                     `protobuf:"bytes,20,opt,name=current_uri,json=currentUri,proto3" json:"current_uri,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
 	XXX_unrecognized     []byte                     `json:"-"`
 	XXX_sizecache        int32                      `json:"-"`
@@ -286,7 +286,7 @@ func (m *StatusDetail) GetCurrentUri() string {
 
 // Request for getting an execution by id
 type ExecutionId struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -326,17 +326,17 @@ func (m *ExecutionId) GetId() string {
 // Specification of wich executions to get.
 type ListExecutionsRequest struct {
 	// Select executions by id
-	Id []string `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
+	Id []string `protobuf:"bytes,1,rep,name=id,proto3" json:"id,omitempty"`
 	// Select executions by state
-	State []string `protobuf:"bytes,2,rep,name=state" json:"state,omitempty"`
+	State []string `protobuf:"bytes,2,rep,name=state,proto3" json:"state,omitempty"`
 	// Select executions by seed
-	SeedId string `protobuf:"bytes,3,opt,name=seed_id,json=seedId" json:"seed_id,omitempty"`
+	SeedId string `protobuf:"bytes,3,opt,name=seed_id,json=seedId,proto3" json:"seed_id,omitempty"`
 	// Select executions by crawl job
-	JobId string `protobuf:"bytes,4,opt,name=job_id,json=jobId" json:"job_id,omitempty"`
+	JobId string `protobuf:"bytes,4,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
 	// Select executions by job execution
-	JobExecutionId       string   `protobuf:"bytes,5,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
-	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	JobExecutionId       string   `protobuf:"bytes,5,opt,name=job_execution_id,json=jobExecutionId,proto3" json:"job_execution_id,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -418,13 +418,13 @@ func (m *ListExecutionsRequest) GetPage() int32 {
 // Specification of wich executions to get.
 type ListJobExecutionsRequest struct {
 	// Select job executions by id
-	Id []string `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
+	Id []string `protobuf:"bytes,1,rep,name=id,proto3" json:"id,omitempty"`
 	// Select job executions by state
-	State []string `protobuf:"bytes,2,rep,name=state" json:"state,omitempty"`
+	State []string `protobuf:"bytes,2,rep,name=state,proto3" json:"state,omitempty"`
 	// Select executions by crawl job
-	JobId                string   `protobuf:"bytes,4,opt,name=job_id,json=jobId" json:"job_id,omitempty"`
-	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32    `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	JobId                string   `protobuf:"bytes,4,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	PageSize             int32    `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32    `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -491,10 +491,10 @@ func (m *ListJobExecutionsRequest) GetPage() int32 {
 
 // A list of crawl executions
 type ExecutionsListReply struct {
-	Value                []*CrawlExecutionStatus `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64                   `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32                   `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32                   `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlExecutionStatus `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64                   `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32                   `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32                   `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
 	XXX_unrecognized     []byte                  `json:"-"`
 	XXX_sizecache        int32                   `json:"-"`
@@ -554,10 +554,10 @@ func (m *ExecutionsListReply) GetPage() int32 {
 
 // A list of job executions
 type JobExecutionsListReply struct {
-	Value                []*JobExecutionStatus `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64                 `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32                 `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32                 `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*JobExecutionStatus `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64                 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32                 `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32                 `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
 	XXX_unrecognized     []byte                `json:"-"`
 	XXX_sizecache        int32                 `json:"-"`
@@ -616,7 +616,7 @@ func (m *JobExecutionsListReply) GetPage() int32 {
 }
 
 type AbortCrawlRequest struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`

@@ -24,9 +24,9 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type CrawlSeedRequest struct {
-	JobExecutionId       string    `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
-	Job                  *CrawlJob `protobuf:"bytes,5,opt,name=job" json:"job,omitempty"`
-	Seed                 *Seed     `protobuf:"bytes,6,opt,name=seed" json:"seed,omitempty"`
+	JobExecutionId       string    `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId,proto3" json:"job_execution_id,omitempty"`
+	Job                  *CrawlJob `protobuf:"bytes,5,opt,name=job,proto3" json:"job,omitempty"`
+	Seed                 *Seed     `protobuf:"bytes,6,opt,name=seed,proto3" json:"seed,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
 	XXX_sizecache        int32     `json:"-"`
@@ -79,7 +79,7 @@ func (m *CrawlSeedRequest) GetSeed() *Seed {
 
 // The execution id for a seed crawl
 type CrawlExecutionId struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -163,16 +163,16 @@ type isPageHarvest_Msg interface {
 }
 
 type PageHarvest_RequestNextPage struct {
-	RequestNextPage bool `protobuf:"varint,1,opt,name=requestNextPage,oneof"`
+	RequestNextPage bool `protobuf:"varint,1,opt,name=requestNextPage,proto3,oneof"`
 }
 type PageHarvest_Metrics_ struct {
-	Metrics *PageHarvest_Metrics `protobuf:"bytes,2,opt,name=metrics,oneof"`
+	Metrics *PageHarvest_Metrics `protobuf:"bytes,2,opt,name=metrics,proto3,oneof"`
 }
 type PageHarvest_Outlink struct {
-	Outlink *QueuedUri `protobuf:"bytes,3,opt,name=outlink,oneof"`
+	Outlink *QueuedUri `protobuf:"bytes,3,opt,name=outlink,proto3,oneof"`
 }
 type PageHarvest_Error struct {
-	Error *Error `protobuf:"bytes,4,opt,name=error,oneof"`
+	Error *Error `protobuf:"bytes,4,opt,name=error,proto3,oneof"`
 }
 
 func (*PageHarvest_RequestNextPage) isPageHarvest_Msg() {}
@@ -328,9 +328,9 @@ func _PageHarvest_OneofSizer(msg proto.Message) (n int) {
 
 type PageHarvest_Metrics struct {
 	// The number of uri's downloaded. The requested uri + embedded resources
-	UriCount int32 `protobuf:"varint,1,opt,name=uri_count,json=uriCount" json:"uri_count,omitempty"`
+	UriCount int32 `protobuf:"varint,1,opt,name=uri_count,json=uriCount,proto3" json:"uri_count,omitempty"`
 	// Byte count for the resources downloaded. Includes embedded resources
-	BytesDownloaded      int64    `protobuf:"varint,2,opt,name=bytes_downloaded,json=bytesDownloaded" json:"bytes_downloaded,omitempty"`
+	BytesDownloaded      int64    `protobuf:"varint,2,opt,name=bytes_downloaded,json=bytesDownloaded,proto3" json:"bytes_downloaded,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -377,9 +377,9 @@ func (m *PageHarvest_Metrics) GetBytesDownloaded() int64 {
 // A specification of the page to fetch.
 type PageHarvestSpec struct {
 	// The URI to fetch
-	QueuedUri *QueuedUri `protobuf:"bytes,1,opt,name=queued_uri,json=queuedUri" json:"queued_uri,omitempty"`
+	QueuedUri *QueuedUri `protobuf:"bytes,1,opt,name=queued_uri,json=queuedUri,proto3" json:"queued_uri,omitempty"`
 	// The configuration for the fetch
-	CrawlConfig          *CrawlConfig `protobuf:"bytes,2,opt,name=crawl_config,json=crawlConfig" json:"crawl_config,omitempty"`
+	CrawlConfig          *CrawlConfig `protobuf:"bytes,2,opt,name=crawl_config,json=crawlConfig,proto3" json:"crawl_config,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
 	XXX_unrecognized     []byte       `json:"-"`
 	XXX_sizecache        int32        `json:"-"`

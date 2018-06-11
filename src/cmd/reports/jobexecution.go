@@ -53,8 +53,8 @@ to quickly create a Cobra application.`,
 			//	request.ExecutionId = executionId
 			//}
 			//request.Filter = applyFilter(filter)
-			request.Page = page
-			request.PageSize = pageSize
+			request.Page = flags.page
+			request.PageSize = flags.pageSize
 
 			l, err := client.ListJobExecutions(context.Background(), &request)
 			if err != nil {

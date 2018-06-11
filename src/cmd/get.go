@@ -26,6 +26,7 @@ import (
 	"github.com/nlnwa/veidemannctl/src/format"
 	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"golang.org/x/net/context"
+	"github.com/golang/protobuf/proto"
 )
 
 var flags struct {
@@ -67,10 +68,13 @@ var getCmd = &cobra.Command{
 			}
 
 			s := &format.MarshalSpec{
-				Filename:flags.file,
-				Format:flags.format,
-				Template:flags.goTemplate,
+				Filename: flags.file,
+				Format:   flags.format,
+				Template: flags.goTemplate,
 			}
+			defer s.Close()
+
+			var msg proto.Message
 
 			switch args[0] {
 			case "entity":
@@ -81,8 +85,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get entity: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "seed":
@@ -101,8 +105,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get seed: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "job":
@@ -113,8 +117,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get job: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "crawlconfig":
@@ -125,8 +129,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get crawl config: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "schedule":
@@ -137,8 +141,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get schedule config: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "browser":
@@ -149,8 +153,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get browser config: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "politeness":
@@ -161,8 +165,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get politeness config: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "script":
@@ -173,8 +177,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get browser script: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "group":
@@ -185,8 +189,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get crawl host group config: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "loglevel":
@@ -195,8 +199,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get log config: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "activerole":
@@ -205,8 +209,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get active role: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			case "role":
@@ -219,8 +223,8 @@ var getCmd = &cobra.Command{
 					log.Fatalf("could not get active role: %v", err)
 				}
 
-				s.Msg = r
-				if format.Marshal(s) != nil {
+				msg = r
+				if format.Marshal(s, msg) != nil {
 					os.Exit(1)
 				}
 			default:

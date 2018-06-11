@@ -40,12 +40,12 @@ to quickly create a Cobra application.`,
 		if len(args) > 0 {
 			request.WarcId = args
 		}
-		if executionId != "" {
-			request.ExecutionId = executionId
+		if flags.executionId != "" {
+			request.ExecutionId = flags.executionId
 		}
-		request.Filter = applyFilter(filter)
-		request.Page = page
-		request.PageSize = pageSize
+		request.Filter = applyFilter(flags.filter)
+		request.Page = flags.page
+		request.PageSize = flags.pageSize
 
 		r, err := client.ListPageLogs(context.Background(), &request)
 		if err != nil {

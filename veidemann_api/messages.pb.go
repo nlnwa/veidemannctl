@@ -107,23 +107,23 @@ func (JobExecutionStatus_State) EnumDescriptor() ([]byte, []int) {
 // Metadata about a crawl execution.
 // A crawl execution is the complete harvest of a seed as specified in the connected job's configuration.
 type CrawlExecutionStatus struct {
-	Id                   string                     `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	State                CrawlExecutionStatus_State `protobuf:"varint,2,opt,name=state,enum=veidemann.api.CrawlExecutionStatus_State" json:"state,omitempty"`
-	JobId                string                     `protobuf:"bytes,3,opt,name=job_id,json=jobId" json:"job_id,omitempty"`
-	SeedId               string                     `protobuf:"bytes,4,opt,name=seed_id,json=seedId" json:"seed_id,omitempty"`
-	Scope                *CrawlScope                `protobuf:"bytes,5,opt,name=scope" json:"scope,omitempty"`
-	StartTime            *timestamp.Timestamp       `protobuf:"bytes,6,opt,name=start_time,json=startTime" json:"start_time,omitempty"`
-	EndTime              *timestamp.Timestamp       `protobuf:"bytes,7,opt,name=end_time,json=endTime" json:"end_time,omitempty"`
-	DocumentsCrawled     int64                      `protobuf:"varint,8,opt,name=documents_crawled,json=documentsCrawled" json:"documents_crawled,omitempty"`
-	BytesCrawled         int64                      `protobuf:"varint,9,opt,name=bytes_crawled,json=bytesCrawled" json:"bytes_crawled,omitempty"`
-	UrisCrawled          int64                      `protobuf:"varint,10,opt,name=uris_crawled,json=urisCrawled" json:"uris_crawled,omitempty"`
-	DocumentsFailed      int64                      `protobuf:"varint,11,opt,name=documents_failed,json=documentsFailed" json:"documents_failed,omitempty"`
-	DocumentsOutOfScope  int64                      `protobuf:"varint,12,opt,name=documents_out_of_scope,json=documentsOutOfScope" json:"documents_out_of_scope,omitempty"`
-	DocumentsRetried     int64                      `protobuf:"varint,13,opt,name=documents_retried,json=documentsRetried" json:"documents_retried,omitempty"`
-	DocumentsDenied      int64                      `protobuf:"varint,14,opt,name=documents_denied,json=documentsDenied" json:"documents_denied,omitempty"`
-	CurrentUri           string                     `protobuf:"bytes,20,opt,name=current_uri,json=currentUri" json:"current_uri,omitempty"`
-	JobExecutionId       string                     `protobuf:"bytes,21,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
-	Error                *Error                     `protobuf:"bytes,22,opt,name=error" json:"error,omitempty"`
+	Id                   string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	State                CrawlExecutionStatus_State `protobuf:"varint,2,opt,name=state,proto3,enum=veidemann.api.CrawlExecutionStatus_State" json:"state,omitempty"`
+	JobId                string                     `protobuf:"bytes,3,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	SeedId               string                     `protobuf:"bytes,4,opt,name=seed_id,json=seedId,proto3" json:"seed_id,omitempty"`
+	Scope                *CrawlScope                `protobuf:"bytes,5,opt,name=scope,proto3" json:"scope,omitempty"`
+	StartTime            *timestamp.Timestamp       `protobuf:"bytes,6,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime              *timestamp.Timestamp       `protobuf:"bytes,7,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	DocumentsCrawled     int64                      `protobuf:"varint,8,opt,name=documents_crawled,json=documentsCrawled,proto3" json:"documents_crawled,omitempty"`
+	BytesCrawled         int64                      `protobuf:"varint,9,opt,name=bytes_crawled,json=bytesCrawled,proto3" json:"bytes_crawled,omitempty"`
+	UrisCrawled          int64                      `protobuf:"varint,10,opt,name=uris_crawled,json=urisCrawled,proto3" json:"uris_crawled,omitempty"`
+	DocumentsFailed      int64                      `protobuf:"varint,11,opt,name=documents_failed,json=documentsFailed,proto3" json:"documents_failed,omitempty"`
+	DocumentsOutOfScope  int64                      `protobuf:"varint,12,opt,name=documents_out_of_scope,json=documentsOutOfScope,proto3" json:"documents_out_of_scope,omitempty"`
+	DocumentsRetried     int64                      `protobuf:"varint,13,opt,name=documents_retried,json=documentsRetried,proto3" json:"documents_retried,omitempty"`
+	DocumentsDenied      int64                      `protobuf:"varint,14,opt,name=documents_denied,json=documentsDenied,proto3" json:"documents_denied,omitempty"`
+	CurrentUri           string                     `protobuf:"bytes,20,opt,name=current_uri,json=currentUri,proto3" json:"current_uri,omitempty"`
+	JobExecutionId       string                     `protobuf:"bytes,21,opt,name=job_execution_id,json=jobExecutionId,proto3" json:"job_execution_id,omitempty"`
+	Error                *Error                     `protobuf:"bytes,22,opt,name=error,proto3" json:"error,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
 	XXX_unrecognized     []byte                     `json:"-"`
 	XXX_sizecache        int32                      `json:"-"`
@@ -275,20 +275,20 @@ func (m *CrawlExecutionStatus) GetError() *Error {
 // Metadata about an execution of a job.
 // A job execution is the sum of all crawl executions for a job at a specific time.
 type JobExecutionStatus struct {
-	Id                   string                   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	JobId                string                   `protobuf:"bytes,2,opt,name=job_id,json=jobId" json:"job_id,omitempty"`
-	State                JobExecutionStatus_State `protobuf:"varint,3,opt,name=state,enum=veidemann.api.JobExecutionStatus_State" json:"state,omitempty"`
-	ExecutionsState      map[string]int32         `protobuf:"bytes,4,rep,name=executions_state,json=executionsState" json:"executions_state,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
-	StartTime            *timestamp.Timestamp     `protobuf:"bytes,6,opt,name=start_time,json=startTime" json:"start_time,omitempty"`
-	EndTime              *timestamp.Timestamp     `protobuf:"bytes,7,opt,name=end_time,json=endTime" json:"end_time,omitempty"`
-	DocumentsCrawled     int64                    `protobuf:"varint,8,opt,name=documents_crawled,json=documentsCrawled" json:"documents_crawled,omitempty"`
-	BytesCrawled         int64                    `protobuf:"varint,9,opt,name=bytes_crawled,json=bytesCrawled" json:"bytes_crawled,omitempty"`
-	UrisCrawled          int64                    `protobuf:"varint,10,opt,name=uris_crawled,json=urisCrawled" json:"uris_crawled,omitempty"`
-	DocumentsFailed      int64                    `protobuf:"varint,11,opt,name=documents_failed,json=documentsFailed" json:"documents_failed,omitempty"`
-	DocumentsOutOfScope  int64                    `protobuf:"varint,12,opt,name=documents_out_of_scope,json=documentsOutOfScope" json:"documents_out_of_scope,omitempty"`
-	DocumentsRetried     int64                    `protobuf:"varint,13,opt,name=documents_retried,json=documentsRetried" json:"documents_retried,omitempty"`
-	DocumentsDenied      int64                    `protobuf:"varint,14,opt,name=documents_denied,json=documentsDenied" json:"documents_denied,omitempty"`
-	Error                *Error                   `protobuf:"bytes,15,opt,name=error" json:"error,omitempty"`
+	Id                   string                   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	JobId                string                   `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	State                JobExecutionStatus_State `protobuf:"varint,3,opt,name=state,proto3,enum=veidemann.api.JobExecutionStatus_State" json:"state,omitempty"`
+	ExecutionsState      map[string]int32         `protobuf:"bytes,4,rep,name=executions_state,json=executionsState,proto3" json:"executions_state,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+	StartTime            *timestamp.Timestamp     `protobuf:"bytes,6,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime              *timestamp.Timestamp     `protobuf:"bytes,7,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	DocumentsCrawled     int64                    `protobuf:"varint,8,opt,name=documents_crawled,json=documentsCrawled,proto3" json:"documents_crawled,omitempty"`
+	BytesCrawled         int64                    `protobuf:"varint,9,opt,name=bytes_crawled,json=bytesCrawled,proto3" json:"bytes_crawled,omitempty"`
+	UrisCrawled          int64                    `protobuf:"varint,10,opt,name=uris_crawled,json=urisCrawled,proto3" json:"uris_crawled,omitempty"`
+	DocumentsFailed      int64                    `protobuf:"varint,11,opt,name=documents_failed,json=documentsFailed,proto3" json:"documents_failed,omitempty"`
+	DocumentsOutOfScope  int64                    `protobuf:"varint,12,opt,name=documents_out_of_scope,json=documentsOutOfScope,proto3" json:"documents_out_of_scope,omitempty"`
+	DocumentsRetried     int64                    `protobuf:"varint,13,opt,name=documents_retried,json=documentsRetried,proto3" json:"documents_retried,omitempty"`
+	DocumentsDenied      int64                    `protobuf:"varint,14,opt,name=documents_denied,json=documentsDenied,proto3" json:"documents_denied,omitempty"`
+	Error                *Error                   `protobuf:"bytes,15,opt,name=error,proto3" json:"error,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
 	XXX_unrecognized     []byte                   `json:"-"`
 	XXX_sizecache        int32                    `json:"-"`
@@ -417,13 +417,13 @@ func (m *JobExecutionStatus) GetError() *Error {
 }
 
 type CrawlLog struct {
-	WarcId       string               `protobuf:"bytes,1,opt,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	TimeStamp    *timestamp.Timestamp `protobuf:"bytes,2,opt,name=time_stamp,json=timeStamp" json:"time_stamp,omitempty"`
-	Surt         string               `protobuf:"bytes,3,opt,name=surt" json:"surt,omitempty"`
-	StatusCode   int32                `protobuf:"varint,4,opt,name=status_code,json=statusCode" json:"status_code,omitempty"`
-	Size         int64                `protobuf:"varint,5,opt,name=size" json:"size,omitempty"`
-	RequestedUri string               `protobuf:"bytes,6,opt,name=requested_uri,json=requestedUri" json:"requested_uri,omitempty"`
-	ResponseUri  string               `protobuf:"bytes,7,opt,name=response_uri,json=responseUri" json:"response_uri,omitempty"`
+	WarcId       string               `protobuf:"bytes,1,opt,name=warc_id,json=warcId,proto3" json:"warc_id,omitempty"`
+	TimeStamp    *timestamp.Timestamp `protobuf:"bytes,2,opt,name=time_stamp,json=timeStamp,proto3" json:"time_stamp,omitempty"`
+	Surt         string               `protobuf:"bytes,3,opt,name=surt,proto3" json:"surt,omitempty"`
+	StatusCode   int32                `protobuf:"varint,4,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
+	Size         int64                `protobuf:"varint,5,opt,name=size,proto3" json:"size,omitempty"`
+	RequestedUri string               `protobuf:"bytes,6,opt,name=requested_uri,json=requestedUri,proto3" json:"requested_uri,omitempty"`
+	ResponseUri  string               `protobuf:"bytes,7,opt,name=response_uri,json=responseUri,proto3" json:"response_uri,omitempty"`
 	// *
 	// Get the discoveryPath,
 	//  R - Redirect
@@ -431,21 +431,21 @@ type CrawlLog struct {
 	//  X - Speculative embed (aggressive/Javascript link extraction)
 	//  L - Link
 	//  P - Prerequisite (as for DNS or robots.txt before another URI)
-	DiscoveryPath        string               `protobuf:"bytes,8,opt,name=discovery_path,json=discoveryPath" json:"discovery_path,omitempty"`
-	Referrer             string               `protobuf:"bytes,9,opt,name=referrer" json:"referrer,omitempty"`
-	ContentType          string               `protobuf:"bytes,10,opt,name=content_type,json=contentType" json:"content_type,omitempty"`
-	FetchTimeStamp       *timestamp.Timestamp `protobuf:"bytes,11,opt,name=fetch_time_stamp,json=fetchTimeStamp" json:"fetch_time_stamp,omitempty"`
-	FetchTimeMs          int64                `protobuf:"varint,12,opt,name=fetch_time_ms,json=fetchTimeMs" json:"fetch_time_ms,omitempty"`
-	BlockDigest          string               `protobuf:"bytes,13,opt,name=block_digest,json=blockDigest" json:"block_digest,omitempty"`
-	PayloadDigest        string               `protobuf:"bytes,14,opt,name=payload_digest,json=payloadDigest" json:"payload_digest,omitempty"`
-	StorageRef           string               `protobuf:"bytes,15,opt,name=storage_ref,json=storageRef" json:"storage_ref,omitempty"`
-	RecordType           string               `protobuf:"bytes,16,opt,name=record_type,json=recordType" json:"record_type,omitempty"`
-	WarcRefersTo         string               `protobuf:"bytes,17,opt,name=warc_refers_to,json=warcRefersTo" json:"warc_refers_to,omitempty"`
-	IpAddress            string               `protobuf:"bytes,18,opt,name=ip_address,json=ipAddress" json:"ip_address,omitempty"`
-	ExecutionId          string               `protobuf:"bytes,19,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Retries              int32                `protobuf:"varint,20,opt,name=retries" json:"retries,omitempty"`
-	Error                *Error               `protobuf:"bytes,21,opt,name=error" json:"error,omitempty"`
-	JobExecutionId       string               `protobuf:"bytes,22,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
+	DiscoveryPath        string               `protobuf:"bytes,8,opt,name=discovery_path,json=discoveryPath,proto3" json:"discovery_path,omitempty"`
+	Referrer             string               `protobuf:"bytes,9,opt,name=referrer,proto3" json:"referrer,omitempty"`
+	ContentType          string               `protobuf:"bytes,10,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
+	FetchTimeStamp       *timestamp.Timestamp `protobuf:"bytes,11,opt,name=fetch_time_stamp,json=fetchTimeStamp,proto3" json:"fetch_time_stamp,omitempty"`
+	FetchTimeMs          int64                `protobuf:"varint,12,opt,name=fetch_time_ms,json=fetchTimeMs,proto3" json:"fetch_time_ms,omitempty"`
+	BlockDigest          string               `protobuf:"bytes,13,opt,name=block_digest,json=blockDigest,proto3" json:"block_digest,omitempty"`
+	PayloadDigest        string               `protobuf:"bytes,14,opt,name=payload_digest,json=payloadDigest,proto3" json:"payload_digest,omitempty"`
+	StorageRef           string               `protobuf:"bytes,15,opt,name=storage_ref,json=storageRef,proto3" json:"storage_ref,omitempty"`
+	RecordType           string               `protobuf:"bytes,16,opt,name=record_type,json=recordType,proto3" json:"record_type,omitempty"`
+	WarcRefersTo         string               `protobuf:"bytes,17,opt,name=warc_refers_to,json=warcRefersTo,proto3" json:"warc_refers_to,omitempty"`
+	IpAddress            string               `protobuf:"bytes,18,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
+	ExecutionId          string               `protobuf:"bytes,19,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	Retries              int32                `protobuf:"varint,20,opt,name=retries,proto3" json:"retries,omitempty"`
+	Error                *Error               `protobuf:"bytes,21,opt,name=error,proto3" json:"error,omitempty"`
+	JobExecutionId       string               `protobuf:"bytes,22,opt,name=job_execution_id,json=jobExecutionId,proto3" json:"job_execution_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
@@ -631,13 +631,13 @@ func (m *CrawlLog) GetJobExecutionId() string {
 
 // Log for each page including discovered resources and links
 type PageLog struct {
-	WarcId               string              `protobuf:"bytes,1,opt,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	Uri                  string              `protobuf:"bytes,2,opt,name=uri" json:"uri,omitempty"`
-	ExecutionId          string              `protobuf:"bytes,3,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Referrer             string              `protobuf:"bytes,4,opt,name=referrer" json:"referrer,omitempty"`
-	JobExecutionId       string              `protobuf:"bytes,5,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
-	Resource             []*PageLog_Resource `protobuf:"bytes,10,rep,name=resource" json:"resource,omitempty"`
-	Outlink              []string            `protobuf:"bytes,11,rep,name=outlink" json:"outlink,omitempty"`
+	WarcId               string              `protobuf:"bytes,1,opt,name=warc_id,json=warcId,proto3" json:"warc_id,omitempty"`
+	Uri                  string              `protobuf:"bytes,2,opt,name=uri,proto3" json:"uri,omitempty"`
+	ExecutionId          string              `protobuf:"bytes,3,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	Referrer             string              `protobuf:"bytes,4,opt,name=referrer,proto3" json:"referrer,omitempty"`
+	JobExecutionId       string              `protobuf:"bytes,5,opt,name=job_execution_id,json=jobExecutionId,proto3" json:"job_execution_id,omitempty"`
+	Resource             []*PageLog_Resource `protobuf:"bytes,10,rep,name=resource,proto3" json:"resource,omitempty"`
+	Outlink              []string            `protobuf:"bytes,11,rep,name=outlink,proto3" json:"outlink,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
 	XXX_unrecognized     []byte              `json:"-"`
 	XXX_sizecache        int32               `json:"-"`
@@ -718,16 +718,16 @@ func (m *PageLog) GetOutlink() []string {
 
 // A resource used to complete a page. It might be embedded images, javascripts, stylesheets etc.
 type PageLog_Resource struct {
-	Uri                  string   `protobuf:"bytes,1,opt,name=uri" json:"uri,omitempty"`
-	FromCache            bool     `protobuf:"varint,2,opt,name=from_cache,json=fromCache" json:"from_cache,omitempty"`
-	Renderable           bool     `protobuf:"varint,3,opt,name=renderable" json:"renderable,omitempty"`
-	ResourceType         string   `protobuf:"bytes,4,opt,name=resource_type,json=resourceType" json:"resource_type,omitempty"`
-	MimeType             string   `protobuf:"bytes,5,opt,name=mime_type,json=mimeType" json:"mime_type,omitempty"`
-	StatusCode           int32    `protobuf:"varint,6,opt,name=status_code,json=statusCode" json:"status_code,omitempty"`
-	DiscoveryPath        string   `protobuf:"bytes,7,opt,name=discovery_path,json=discoveryPath" json:"discovery_path,omitempty"`
-	WarcId               string   `protobuf:"bytes,8,opt,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	Referrer             string   `protobuf:"bytes,9,opt,name=referrer" json:"referrer,omitempty"`
-	Error                *Error   `protobuf:"bytes,10,opt,name=error" json:"error,omitempty"`
+	Uri                  string   `protobuf:"bytes,1,opt,name=uri,proto3" json:"uri,omitempty"`
+	FromCache            bool     `protobuf:"varint,2,opt,name=from_cache,json=fromCache,proto3" json:"from_cache,omitempty"`
+	Renderable           bool     `protobuf:"varint,3,opt,name=renderable,proto3" json:"renderable,omitempty"`
+	ResourceType         string   `protobuf:"bytes,4,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
+	MimeType             string   `protobuf:"bytes,5,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
+	StatusCode           int32    `protobuf:"varint,6,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
+	DiscoveryPath        string   `protobuf:"bytes,7,opt,name=discovery_path,json=discoveryPath,proto3" json:"discovery_path,omitempty"`
+	WarcId               string   `protobuf:"bytes,8,opt,name=warc_id,json=warcId,proto3" json:"warc_id,omitempty"`
+	Referrer             string   `protobuf:"bytes,9,opt,name=referrer,proto3" json:"referrer,omitempty"`
+	Error                *Error   `protobuf:"bytes,10,opt,name=error,proto3" json:"error,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -828,8 +828,8 @@ func (m *PageLog_Resource) GetError() *Error {
 }
 
 type CrawledContent struct {
-	Digest               string   `protobuf:"bytes,1,opt,name=digest" json:"digest,omitempty"`
-	WarcId               string   `protobuf:"bytes,2,opt,name=warc_id,json=warcId" json:"warc_id,omitempty"`
+	Digest               string   `protobuf:"bytes,1,opt,name=digest,proto3" json:"digest,omitempty"`
+	WarcId               string   `protobuf:"bytes,2,opt,name=warc_id,json=warcId,proto3" json:"warc_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -874,14 +874,14 @@ func (m *CrawledContent) GetWarcId() string {
 }
 
 type ExtractedText struct {
-	WarcId               string   `protobuf:"bytes,1,opt,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	Text                 string   `protobuf:"bytes,2,opt,name=text" json:"text,omitempty"`
-	SentenceCount        int64    `protobuf:"varint,3,opt,name=sentence_count,json=sentenceCount" json:"sentence_count,omitempty"`
-	WordCount            int64    `protobuf:"varint,4,opt,name=word_count,json=wordCount" json:"word_count,omitempty"`
-	LongWordCount        int64    `protobuf:"varint,5,opt,name=long_word_count,json=longWordCount" json:"long_word_count,omitempty"`
-	CharacterCount       int64    `protobuf:"varint,6,opt,name=character_count,json=characterCount" json:"character_count,omitempty"`
-	Lix                  int64    `protobuf:"varint,7,opt,name=lix" json:"lix,omitempty"`
-	Language             string   `protobuf:"bytes,8,opt,name=language" json:"language,omitempty"`
+	WarcId               string   `protobuf:"bytes,1,opt,name=warc_id,json=warcId,proto3" json:"warc_id,omitempty"`
+	Text                 string   `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
+	SentenceCount        int64    `protobuf:"varint,3,opt,name=sentence_count,json=sentenceCount,proto3" json:"sentence_count,omitempty"`
+	WordCount            int64    `protobuf:"varint,4,opt,name=word_count,json=wordCount,proto3" json:"word_count,omitempty"`
+	LongWordCount        int64    `protobuf:"varint,5,opt,name=long_word_count,json=longWordCount,proto3" json:"long_word_count,omitempty"`
+	CharacterCount       int64    `protobuf:"varint,6,opt,name=character_count,json=characterCount,proto3" json:"character_count,omitempty"`
+	Lix                  int64    `protobuf:"varint,7,opt,name=lix,proto3" json:"lix,omitempty"`
+	Language             string   `protobuf:"bytes,8,opt,name=language,proto3" json:"language,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -968,11 +968,11 @@ func (m *ExtractedText) GetLanguage() string {
 }
 
 type CrawlHostGroup struct {
-	Id                   string               `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	PolitenessId         string               `protobuf:"bytes,2,opt,name=politeness_id,json=politenessId" json:"politeness_id,omitempty"`
-	NextFetchTime        *timestamp.Timestamp `protobuf:"bytes,3,opt,name=next_fetch_time,json=nextFetchTime" json:"next_fetch_time,omitempty"`
-	Busy                 bool                 `protobuf:"varint,4,opt,name=busy" json:"busy,omitempty"`
-	QueuedUriCount       int64                `protobuf:"varint,5,opt,name=queued_uri_count,json=queuedUriCount" json:"queued_uri_count,omitempty"`
+	Id                   string               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	PolitenessId         string               `protobuf:"bytes,2,opt,name=politeness_id,json=politenessId,proto3" json:"politeness_id,omitempty"`
+	NextFetchTime        *timestamp.Timestamp `protobuf:"bytes,3,opt,name=next_fetch_time,json=nextFetchTime,proto3" json:"next_fetch_time,omitempty"`
+	Busy                 bool                 `protobuf:"varint,4,opt,name=busy,proto3" json:"busy,omitempty"`
+	QueuedUriCount       int64                `protobuf:"varint,5,opt,name=queued_uri_count,json=queuedUriCount,proto3" json:"queued_uri_count,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
@@ -1038,9 +1038,9 @@ func (m *CrawlHostGroup) GetQueuedUriCount() int64 {
 }
 
 type Error struct {
-	Code                 int32    `protobuf:"varint,1,opt,name=code" json:"code,omitempty"`
-	Msg                  string   `protobuf:"bytes,2,opt,name=msg" json:"msg,omitempty"`
-	Detail               string   `protobuf:"bytes,3,opt,name=detail" json:"detail,omitempty"`
+	Code                 int32    `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Msg                  string   `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+	Detail               string   `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1092,14 +1092,14 @@ func (m *Error) GetDetail() string {
 }
 
 type QueuedUri struct {
-	Id                  string               `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	ExecutionId         string               `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	DiscoveredTimeStamp *timestamp.Timestamp `protobuf:"bytes,3,opt,name=discovered_time_stamp,json=discoveredTimeStamp" json:"discovered_time_stamp,omitempty"`
+	Id                  string               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ExecutionId         string               `protobuf:"bytes,2,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	DiscoveredTimeStamp *timestamp.Timestamp `protobuf:"bytes,3,opt,name=discovered_time_stamp,json=discoveredTimeStamp,proto3" json:"discovered_time_stamp,omitempty"`
 	// Sequence number to order the fetch of uris from a seed
-	Sequence int64  `protobuf:"varint,4,opt,name=sequence" json:"sequence,omitempty"`
-	Uri      string `protobuf:"bytes,5,opt,name=uri" json:"uri,omitempty"`
-	Surt     string `protobuf:"bytes,6,opt,name=surt" json:"surt,omitempty"`
-	Ip       string `protobuf:"bytes,7,opt,name=ip" json:"ip,omitempty"`
+	Sequence int64  `protobuf:"varint,4,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	Uri      string `protobuf:"bytes,5,opt,name=uri,proto3" json:"uri,omitempty"`
+	Surt     string `protobuf:"bytes,6,opt,name=surt,proto3" json:"surt,omitempty"`
+	Ip       string `protobuf:"bytes,7,opt,name=ip,proto3" json:"ip,omitempty"`
 	// *
 	// Get the discoveryPath,
 	//  R - Redirect
@@ -1107,17 +1107,17 @@ type QueuedUri struct {
 	//  X - Speculative embed (aggressive/Javascript link extraction)
 	//  L - Link
 	//  P - Prerequisite (as for DNS or robots.txt before another URI)
-	DiscoveryPath          string               `protobuf:"bytes,8,opt,name=discovery_path,json=discoveryPath" json:"discovery_path,omitempty"`
-	Referrer               string               `protobuf:"bytes,9,opt,name=referrer" json:"referrer,omitempty"`
-	Cookies                []*Cookie            `protobuf:"bytes,10,rep,name=cookies" json:"cookies,omitempty"`
-	PageFetchTimeMs        int64                `protobuf:"varint,11,opt,name=page_fetch_time_ms,json=pageFetchTimeMs" json:"page_fetch_time_ms,omitempty"`
-	Retries                int32                `protobuf:"varint,12,opt,name=retries" json:"retries,omitempty"`
-	EarliestFetchTimeStamp *timestamp.Timestamp `protobuf:"bytes,13,opt,name=earliest_fetch_time_stamp,json=earliestFetchTimeStamp" json:"earliest_fetch_time_stamp,omitempty"`
-	CrawlHostGroupId       string               `protobuf:"bytes,14,opt,name=crawl_host_group_id,json=crawlHostGroupId" json:"crawl_host_group_id,omitempty"`
-	PolitenessId           string               `protobuf:"bytes,15,opt,name=politeness_id,json=politenessId" json:"politeness_id,omitempty"`
-	Error                  *Error               `protobuf:"bytes,16,opt,name=error" json:"error,omitempty"`
-	JobExecutionId         string               `protobuf:"bytes,17,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
-	Unresolved             bool                 `protobuf:"varint,18,opt,name=unresolved" json:"unresolved,omitempty"`
+	DiscoveryPath          string               `protobuf:"bytes,8,opt,name=discovery_path,json=discoveryPath,proto3" json:"discovery_path,omitempty"`
+	Referrer               string               `protobuf:"bytes,9,opt,name=referrer,proto3" json:"referrer,omitempty"`
+	Cookies                []*Cookie            `protobuf:"bytes,10,rep,name=cookies,proto3" json:"cookies,omitempty"`
+	PageFetchTimeMs        int64                `protobuf:"varint,11,opt,name=page_fetch_time_ms,json=pageFetchTimeMs,proto3" json:"page_fetch_time_ms,omitempty"`
+	Retries                int32                `protobuf:"varint,12,opt,name=retries,proto3" json:"retries,omitempty"`
+	EarliestFetchTimeStamp *timestamp.Timestamp `protobuf:"bytes,13,opt,name=earliest_fetch_time_stamp,json=earliestFetchTimeStamp,proto3" json:"earliest_fetch_time_stamp,omitempty"`
+	CrawlHostGroupId       string               `protobuf:"bytes,14,opt,name=crawl_host_group_id,json=crawlHostGroupId,proto3" json:"crawl_host_group_id,omitempty"`
+	PolitenessId           string               `protobuf:"bytes,15,opt,name=politeness_id,json=politenessId,proto3" json:"politeness_id,omitempty"`
+	Error                  *Error               `protobuf:"bytes,16,opt,name=error,proto3" json:"error,omitempty"`
+	JobExecutionId         string               `protobuf:"bytes,17,opt,name=job_execution_id,json=jobExecutionId,proto3" json:"job_execution_id,omitempty"`
+	Unresolved             bool                 `protobuf:"varint,18,opt,name=unresolved,proto3" json:"unresolved,omitempty"`
 	XXX_NoUnkeyedLiteral   struct{}             `json:"-"`
 	XXX_unrecognized       []byte               `json:"-"`
 	XXX_sizecache          int32                `json:"-"`
@@ -1275,25 +1275,25 @@ func (m *QueuedUri) GetUnresolved() bool {
 
 type Cookie struct {
 	// Cookie name.
-	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// Cookie value.
-	Value string `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+	Value string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	// Cookie domain.
-	Domain string `protobuf:"bytes,3,opt,name=domain" json:"domain,omitempty"`
+	Domain string `protobuf:"bytes,3,opt,name=domain,proto3" json:"domain,omitempty"`
 	// Cookie path.
-	Path string `protobuf:"bytes,4,opt,name=path" json:"path,omitempty"`
+	Path string `protobuf:"bytes,4,opt,name=path,proto3" json:"path,omitempty"`
 	// Cookie expiration date as the number of seconds since the UNIX epoch.
-	Expires float64 `protobuf:"fixed64,5,opt,name=expires" json:"expires,omitempty"`
+	Expires float64 `protobuf:"fixed64,5,opt,name=expires,proto3" json:"expires,omitempty"`
 	// Cookie size.
-	Size int32 `protobuf:"varint,6,opt,name=size" json:"size,omitempty"`
+	Size int32 `protobuf:"varint,6,opt,name=size,proto3" json:"size,omitempty"`
 	// True if cookie is http-only.
-	HttpOnly bool `protobuf:"varint,7,opt,name=http_only,json=httpOnly" json:"http_only,omitempty"`
+	HttpOnly bool `protobuf:"varint,7,opt,name=http_only,json=httpOnly,proto3" json:"http_only,omitempty"`
 	// True if cookie is secure.
-	Secure bool `protobuf:"varint,8,opt,name=secure" json:"secure,omitempty"`
+	Secure bool `protobuf:"varint,8,opt,name=secure,proto3" json:"secure,omitempty"`
 	// True in case of session cookie.
-	Session bool `protobuf:"varint,9,opt,name=session" json:"session,omitempty"`
+	Session bool `protobuf:"varint,9,opt,name=session,proto3" json:"session,omitempty"`
 	// Cookie SameSite type.
-	SameSite             string   `protobuf:"bytes,10,opt,name=same_site,json=sameSite" json:"same_site,omitempty"`
+	SameSite             string   `protobuf:"bytes,10,opt,name=same_site,json=sameSite,proto3" json:"same_site,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1394,9 +1394,9 @@ func (m *Cookie) GetSameSite() string {
 }
 
 type Screenshot struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	ExecutionId          string   `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Uri                  string   `protobuf:"bytes,3,opt,name=uri" json:"uri,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ExecutionId          string   `protobuf:"bytes,2,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	Uri                  string   `protobuf:"bytes,3,opt,name=uri,proto3" json:"uri,omitempty"`
 	Img                  []byte   `protobuf:"bytes,4,opt,name=img,proto3" json:"img,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

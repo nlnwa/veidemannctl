@@ -127,13 +127,13 @@ func (LogLevels_Level) EnumDescriptor() ([]byte, []int) {
 }
 
 type Meta struct {
-	Name                 string               `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Description          string               `protobuf:"bytes,2,opt,name=description" json:"description,omitempty"`
-	Created              *timestamp.Timestamp `protobuf:"bytes,3,opt,name=created" json:"created,omitempty"`
-	CreatedBy            string               `protobuf:"bytes,4,opt,name=created_by,json=createdBy" json:"created_by,omitempty"`
-	LastModified         *timestamp.Timestamp `protobuf:"bytes,5,opt,name=last_modified,json=lastModified" json:"last_modified,omitempty"`
-	LastModifiedBy       string               `protobuf:"bytes,6,opt,name=last_modified_by,json=lastModifiedBy" json:"last_modified_by,omitempty"`
-	Label                []*Label             `protobuf:"bytes,7,rep,name=label" json:"label,omitempty"`
+	Name                 string               `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description          string               `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Created              *timestamp.Timestamp `protobuf:"bytes,3,opt,name=created,proto3" json:"created,omitempty"`
+	CreatedBy            string               `protobuf:"bytes,4,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	LastModified         *timestamp.Timestamp `protobuf:"bytes,5,opt,name=last_modified,json=lastModified,proto3" json:"last_modified,omitempty"`
+	LastModifiedBy       string               `protobuf:"bytes,6,opt,name=last_modified_by,json=lastModifiedBy,proto3" json:"last_modified_by,omitempty"`
+	Label                []*Label             `protobuf:"bytes,7,rep,name=label,proto3" json:"label,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
@@ -213,8 +213,8 @@ func (m *Meta) GetLabel() []*Label {
 }
 
 type Label struct {
-	Key                  string   `protobuf:"bytes,1,opt,name=key" json:"key,omitempty"`
-	Value                string   `protobuf:"bytes,2,opt,name=value" json:"value,omitempty"`
+	Key                  string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value                string   `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -260,8 +260,8 @@ func (m *Label) GetValue() string {
 
 // A crawl entity (might be an organisation with one or more seeds)
 type CrawlEntity struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Meta                 *Meta    `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Meta                 *Meta    `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -306,12 +306,12 @@ func (m *CrawlEntity) GetMeta() *Meta {
 }
 
 type Seed struct {
-	Id                   string      `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Meta                 *Meta       `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
-	EntityId             string      `protobuf:"bytes,3,opt,name=entity_id,json=entityId" json:"entity_id,omitempty"`
-	Scope                *CrawlScope `protobuf:"bytes,4,opt,name=scope" json:"scope,omitempty"`
-	JobId                []string    `protobuf:"bytes,5,rep,name=job_id,json=jobId" json:"job_id,omitempty"`
-	Disabled             bool        `protobuf:"varint,18,opt,name=disabled" json:"disabled,omitempty"`
+	Id                   string      `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Meta                 *Meta       `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	EntityId             string      `protobuf:"bytes,3,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	Scope                *CrawlScope `protobuf:"bytes,4,opt,name=scope,proto3" json:"scope,omitempty"`
+	JobId                []string    `protobuf:"bytes,5,rep,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	Disabled             bool        `protobuf:"varint,18,opt,name=disabled,proto3" json:"disabled,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -384,12 +384,12 @@ func (m *Seed) GetDisabled() bool {
 }
 
 type CrawlJob struct {
-	Id                   string             `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Meta                 *Meta              `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
-	ScheduleId           string             `protobuf:"bytes,3,opt,name=schedule_id,json=scheduleId" json:"schedule_id,omitempty"`
-	Limits               *CrawlLimitsConfig `protobuf:"bytes,4,opt,name=limits" json:"limits,omitempty"`
-	CrawlConfigId        string             `protobuf:"bytes,5,opt,name=crawl_config_id,json=crawlConfigId" json:"crawl_config_id,omitempty"`
-	Disabled             bool               `protobuf:"varint,18,opt,name=disabled" json:"disabled,omitempty"`
+	Id                   string             `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Meta                 *Meta              `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	ScheduleId           string             `protobuf:"bytes,3,opt,name=schedule_id,json=scheduleId,proto3" json:"schedule_id,omitempty"`
+	Limits               *CrawlLimitsConfig `protobuf:"bytes,4,opt,name=limits,proto3" json:"limits,omitempty"`
+	CrawlConfigId        string             `protobuf:"bytes,5,opt,name=crawl_config_id,json=crawlConfigId,proto3" json:"crawl_config_id,omitempty"`
+	Disabled             bool               `protobuf:"varint,18,opt,name=disabled,proto3" json:"disabled,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
 	XXX_unrecognized     []byte             `json:"-"`
 	XXX_sizecache        int32              `json:"-"`
@@ -462,13 +462,13 @@ func (m *CrawlJob) GetDisabled() bool {
 }
 
 type CrawlConfig struct {
-	Id                   string       `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Meta                 *Meta        `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
-	BrowserConfigId      string       `protobuf:"bytes,7,opt,name=browser_config_id,json=browserConfigId" json:"browser_config_id,omitempty"`
-	PolitenessId         string       `protobuf:"bytes,8,opt,name=politeness_id,json=politenessId" json:"politeness_id,omitempty"`
-	Extra                *ExtraConfig `protobuf:"bytes,9,opt,name=extra" json:"extra,omitempty"`
-	MinimumDnsTtlS       int32        `protobuf:"varint,10,opt,name=minimum_dns_ttl_s,json=minimumDnsTtlS" json:"minimum_dns_ttl_s,omitempty"`
-	DepthFirst           bool         `protobuf:"varint,20,opt,name=depth_first,json=depthFirst" json:"depth_first,omitempty"`
+	Id                   string       `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Meta                 *Meta        `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	BrowserConfigId      string       `protobuf:"bytes,7,opt,name=browser_config_id,json=browserConfigId,proto3" json:"browser_config_id,omitempty"`
+	PolitenessId         string       `protobuf:"bytes,8,opt,name=politeness_id,json=politenessId,proto3" json:"politeness_id,omitempty"`
+	Extra                *ExtraConfig `protobuf:"bytes,9,opt,name=extra,proto3" json:"extra,omitempty"`
+	MinimumDnsTtlS       int32        `protobuf:"varint,10,opt,name=minimum_dns_ttl_s,json=minimumDnsTtlS,proto3" json:"minimum_dns_ttl_s,omitempty"`
+	DepthFirst           bool         `protobuf:"varint,20,opt,name=depth_first,json=depthFirst,proto3" json:"depth_first,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
 	XXX_unrecognized     []byte       `json:"-"`
 	XXX_sizecache        int32        `json:"-"`
@@ -548,11 +548,11 @@ func (m *CrawlConfig) GetDepthFirst() bool {
 }
 
 type CrawlScheduleConfig struct {
-	Id                   string               `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Meta                 *Meta                `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
-	CronExpression       string               `protobuf:"bytes,3,opt,name=cron_expression,json=cronExpression" json:"cron_expression,omitempty"`
-	ValidFrom            *timestamp.Timestamp `protobuf:"bytes,4,opt,name=valid_from,json=validFrom" json:"valid_from,omitempty"`
-	ValidTo              *timestamp.Timestamp `protobuf:"bytes,5,opt,name=valid_to,json=validTo" json:"valid_to,omitempty"`
+	Id                   string               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Meta                 *Meta                `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	CronExpression       string               `protobuf:"bytes,3,opt,name=cron_expression,json=cronExpression,proto3" json:"cron_expression,omitempty"`
+	ValidFrom            *timestamp.Timestamp `protobuf:"bytes,4,opt,name=valid_from,json=validFrom,proto3" json:"valid_from,omitempty"`
+	ValidTo              *timestamp.Timestamp `protobuf:"bytes,5,opt,name=valid_to,json=validTo,proto3" json:"valid_to,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
@@ -618,7 +618,7 @@ func (m *CrawlScheduleConfig) GetValidTo() *timestamp.Timestamp {
 }
 
 type CrawlScope struct {
-	SurtPrefix           string   `protobuf:"bytes,1,opt,name=surt_prefix,json=surtPrefix" json:"surt_prefix,omitempty"`
+	SurtPrefix           string   `protobuf:"bytes,1,opt,name=surt_prefix,json=surtPrefix,proto3" json:"surt_prefix,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -657,11 +657,11 @@ func (m *CrawlScope) GetSurtPrefix() string {
 
 type CrawlLimitsConfig struct {
 	// How deep from a seed to crawl
-	Depth int32 `protobuf:"varint,1,opt,name=depth" json:"depth,omitempty"`
+	Depth int32 `protobuf:"varint,1,opt,name=depth,proto3" json:"depth,omitempty"`
 	// Maximum time in seconds allowed for crawl to finish
-	MaxDurationS int64 `protobuf:"varint,2,opt,name=max_duration_s,json=maxDurationS" json:"max_duration_s,omitempty"`
+	MaxDurationS int64 `protobuf:"varint,2,opt,name=max_duration_s,json=maxDurationS,proto3" json:"max_duration_s,omitempty"`
 	// Maximum number of bytes to fetch before ending crawl
-	MaxBytes             int64    `protobuf:"varint,3,opt,name=max_bytes,json=maxBytes" json:"max_bytes,omitempty"`
+	MaxBytes             int64    `protobuf:"varint,3,opt,name=max_bytes,json=maxBytes,proto3" json:"max_bytes,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -713,12 +713,12 @@ func (m *CrawlLimitsConfig) GetMaxBytes() int64 {
 }
 
 type BrowserConfig struct {
-	Id                string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Meta              *Meta  `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
-	UserAgent         string `protobuf:"bytes,3,opt,name=user_agent,json=userAgent" json:"user_agent,omitempty"`
-	WindowWidth       int32  `protobuf:"varint,4,opt,name=window_width,json=windowWidth" json:"window_width,omitempty"`
-	WindowHeight      int32  `protobuf:"varint,5,opt,name=window_height,json=windowHeight" json:"window_height,omitempty"`
-	PageLoadTimeoutMs int64  `protobuf:"varint,6,opt,name=page_load_timeout_ms,json=pageLoadTimeoutMs" json:"page_load_timeout_ms,omitempty"`
+	Id                string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Meta              *Meta  `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	UserAgent         string `protobuf:"bytes,3,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	WindowWidth       int32  `protobuf:"varint,4,opt,name=window_width,json=windowWidth,proto3" json:"window_width,omitempty"`
+	WindowHeight      int32  `protobuf:"varint,5,opt,name=window_height,json=windowHeight,proto3" json:"window_height,omitempty"`
+	PageLoadTimeoutMs int64  `protobuf:"varint,6,opt,name=page_load_timeout_ms,json=pageLoadTimeoutMs,proto3" json:"page_load_timeout_ms,omitempty"`
 	// Select scripts by label
 	// A string representing a label query. The query matches if at least one label matches the query.
 	// If there are multiple queries, then each query must match at least one label.
@@ -739,11 +739,11 @@ type BrowserConfig struct {
 	//   ":"        - matches every label
 	//   ""         - matches every label
 	// </pre>
-	ScriptSelector       []string          `protobuf:"bytes,7,rep,name=script_selector,json=scriptSelector" json:"script_selector,omitempty"`
-	ScriptId             []string          `protobuf:"bytes,8,rep,name=script_id,json=scriptId" json:"script_id,omitempty"`
-	Headers              map[string]string `protobuf:"bytes,16,rep,name=headers" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ScriptParameters     map[string]string `protobuf:"bytes,17,rep,name=script_parameters,json=scriptParameters" json:"script_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	SleepAfterPageloadMs int64             `protobuf:"varint,18,opt,name=sleep_after_pageload_ms,json=sleepAfterPageloadMs" json:"sleep_after_pageload_ms,omitempty"`
+	ScriptSelector       []string          `protobuf:"bytes,7,rep,name=script_selector,json=scriptSelector,proto3" json:"script_selector,omitempty"`
+	ScriptId             []string          `protobuf:"bytes,8,rep,name=script_id,json=scriptId,proto3" json:"script_id,omitempty"`
+	Headers              map[string]string `protobuf:"bytes,16,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	ScriptParameters     map[string]string `protobuf:"bytes,17,rep,name=script_parameters,json=scriptParameters,proto3" json:"script_parameters,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	SleepAfterPageloadMs int64             `protobuf:"varint,18,opt,name=sleep_after_pageload_ms,json=sleepAfterPageloadMs,proto3" json:"sleep_after_pageload_ms,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
@@ -851,22 +851,22 @@ func (m *BrowserConfig) GetSleepAfterPageloadMs() int64 {
 }
 
 type PolitenessConfig struct {
-	Id                             string                        `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Meta                           *Meta                         `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
-	RobotsPolicy                   PolitenessConfig_RobotsPolicy `protobuf:"varint,3,opt,name=robots_policy,json=robotsPolicy,enum=veidemann.api.PolitenessConfig_RobotsPolicy" json:"robots_policy,omitempty"`
-	MinimumRobotsValidityDurationS int32                         `protobuf:"varint,11,opt,name=minimum_robots_validity_duration_s,json=minimumRobotsValidityDurationS" json:"minimum_robots_validity_duration_s,omitempty"`
-	CustomRobots                   string                        `protobuf:"bytes,20,opt,name=custom_robots,json=customRobots" json:"custom_robots,omitempty"`
-	MinTimeBetweenPageLoadMs       int64                         `protobuf:"varint,4,opt,name=min_time_between_page_load_ms,json=minTimeBetweenPageLoadMs" json:"min_time_between_page_load_ms,omitempty"`
-	MaxTimeBetweenPageLoadMs       int64                         `protobuf:"varint,5,opt,name=max_time_between_page_load_ms,json=maxTimeBetweenPageLoadMs" json:"max_time_between_page_load_ms,omitempty"`
+	Id                             string                        `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Meta                           *Meta                         `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	RobotsPolicy                   PolitenessConfig_RobotsPolicy `protobuf:"varint,3,opt,name=robots_policy,json=robotsPolicy,proto3,enum=veidemann.api.PolitenessConfig_RobotsPolicy" json:"robots_policy,omitempty"`
+	MinimumRobotsValidityDurationS int32                         `protobuf:"varint,11,opt,name=minimum_robots_validity_duration_s,json=minimumRobotsValidityDurationS,proto3" json:"minimum_robots_validity_duration_s,omitempty"`
+	CustomRobots                   string                        `protobuf:"bytes,20,opt,name=custom_robots,json=customRobots,proto3" json:"custom_robots,omitempty"`
+	MinTimeBetweenPageLoadMs       int64                         `protobuf:"varint,4,opt,name=min_time_between_page_load_ms,json=minTimeBetweenPageLoadMs,proto3" json:"min_time_between_page_load_ms,omitempty"`
+	MaxTimeBetweenPageLoadMs       int64                         `protobuf:"varint,5,opt,name=max_time_between_page_load_ms,json=maxTimeBetweenPageLoadMs,proto3" json:"max_time_between_page_load_ms,omitempty"`
 	// *
 	// The fetch time of the URI is multiplied with this value to get the delay time before fetching the next URI.
 	// If min_time_between_page_load_ms and/or max_time_between_page_load_ms are set, then those values are used as
 	// the upper/lower limits for delay.
 	// If delay_factor is unset or zero, then a delay_facor of one is assumed. If delay_factor is negative,
 	// a delay_factor of zero is assumed.
-	DelayFactor       float32 `protobuf:"fixed32,6,opt,name=delay_factor,json=delayFactor" json:"delay_factor,omitempty"`
-	MaxRetries        int32   `protobuf:"varint,7,opt,name=max_retries,json=maxRetries" json:"max_retries,omitempty"`
-	RetryDelaySeconds int32   `protobuf:"varint,8,opt,name=retry_delay_seconds,json=retryDelaySeconds" json:"retry_delay_seconds,omitempty"`
+	DelayFactor       float32 `protobuf:"fixed32,6,opt,name=delay_factor,json=delayFactor,proto3" json:"delay_factor,omitempty"`
+	MaxRetries        int32   `protobuf:"varint,7,opt,name=max_retries,json=maxRetries,proto3" json:"max_retries,omitempty"`
+	RetryDelaySeconds int32   `protobuf:"varint,8,opt,name=retry_delay_seconds,json=retryDelaySeconds,proto3" json:"retry_delay_seconds,omitempty"`
 	// Select crawl host groups by label
 	// A string representing a label query. The query matches if at least one label matches the query.
 	// If there are multiple queries, then each query must match at least one label.
@@ -887,7 +887,7 @@ type PolitenessConfig struct {
 	//   ":"        - matches every label
 	//   ""         - matches every label
 	// </pre>
-	CrawlHostGroupSelector []string `protobuf:"bytes,9,rep,name=crawl_host_group_selector,json=crawlHostGroupSelector" json:"crawl_host_group_selector,omitempty"`
+	CrawlHostGroupSelector []string `protobuf:"bytes,9,rep,name=crawl_host_group_selector,json=crawlHostGroupSelector,proto3" json:"crawl_host_group_selector,omitempty"`
 	XXX_NoUnkeyedLiteral   struct{} `json:"-"`
 	XXX_unrecognized       []byte   `json:"-"`
 	XXX_sizecache          int32    `json:"-"`
@@ -995,8 +995,8 @@ func (m *PolitenessConfig) GetCrawlHostGroupSelector() []string {
 }
 
 type ExtraConfig struct {
-	ExtractText          bool     `protobuf:"varint,5,opt,name=extract_text,json=extractText" json:"extract_text,omitempty"`
-	CreateSnapshot       bool     `protobuf:"varint,6,opt,name=create_snapshot,json=createSnapshot" json:"create_snapshot,omitempty"`
+	ExtractText          bool     `protobuf:"varint,5,opt,name=extract_text,json=extractText,proto3" json:"extract_text,omitempty"`
+	CreateSnapshot       bool     `protobuf:"varint,6,opt,name=create_snapshot,json=createSnapshot,proto3" json:"create_snapshot,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1042,10 +1042,10 @@ func (m *ExtraConfig) GetCreateSnapshot() bool {
 
 // Message containing a javascript to be run in a browser
 type BrowserScript struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Meta                 *Meta    `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
-	Script               string   `protobuf:"bytes,3,opt,name=script" json:"script,omitempty"`
-	UrlRegexp            string   `protobuf:"bytes,4,opt,name=url_regexp,json=urlRegexp" json:"url_regexp,omitempty"`
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Meta                 *Meta    `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	Script               string   `protobuf:"bytes,3,opt,name=script,proto3" json:"script,omitempty"`
+	UrlRegexp            string   `protobuf:"bytes,4,opt,name=url_regexp,json=urlRegexp,proto3" json:"url_regexp,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1104,9 +1104,9 @@ func (m *BrowserScript) GetUrlRegexp() string {
 }
 
 type CrawlHostGroupConfig struct {
-	Id                   string                          `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Meta                 *Meta                           `protobuf:"bytes,2,opt,name=meta" json:"meta,omitempty"`
-	IpRange              []*CrawlHostGroupConfig_IpRange `protobuf:"bytes,3,rep,name=ip_range,json=ipRange" json:"ip_range,omitempty"`
+	Id                   string                          `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Meta                 *Meta                           `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	IpRange              []*CrawlHostGroupConfig_IpRange `protobuf:"bytes,3,rep,name=ip_range,json=ipRange,proto3" json:"ip_range,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                        `json:"-"`
 	XXX_unrecognized     []byte                          `json:"-"`
 	XXX_sizecache        int32                           `json:"-"`
@@ -1158,8 +1158,8 @@ func (m *CrawlHostGroupConfig) GetIpRange() []*CrawlHostGroupConfig_IpRange {
 }
 
 type CrawlHostGroupConfig_IpRange struct {
-	IpFrom               string   `protobuf:"bytes,1,opt,name=ip_from,json=ipFrom" json:"ip_from,omitempty"`
-	IpTo                 string   `protobuf:"bytes,2,opt,name=ip_to,json=ipTo" json:"ip_to,omitempty"`
+	IpFrom               string   `protobuf:"bytes,1,opt,name=ip_from,json=ipFrom,proto3" json:"ip_from,omitempty"`
+	IpTo                 string   `protobuf:"bytes,2,opt,name=ip_to,json=ipTo,proto3" json:"ip_to,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1204,7 +1204,7 @@ func (m *CrawlHostGroupConfig_IpRange) GetIpTo() string {
 }
 
 type LogLevels struct {
-	LogLevel             []*LogLevels_LogLevel `protobuf:"bytes,1,rep,name=log_level,json=logLevel" json:"log_level,omitempty"`
+	LogLevel             []*LogLevels_LogLevel `protobuf:"bytes,1,rep,name=log_level,json=logLevel,proto3" json:"log_level,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
 	XXX_unrecognized     []byte                `json:"-"`
 	XXX_sizecache        int32                 `json:"-"`
@@ -1242,8 +1242,8 @@ func (m *LogLevels) GetLogLevel() []*LogLevels_LogLevel {
 }
 
 type LogLevels_LogLevel struct {
-	Logger               string          `protobuf:"bytes,1,opt,name=logger" json:"logger,omitempty"`
-	Level                LogLevels_Level `protobuf:"varint,2,opt,name=level,enum=veidemann.api.LogLevels_Level" json:"level,omitempty"`
+	Logger               string          `protobuf:"bytes,1,opt,name=logger,proto3" json:"logger,omitempty"`
+	Level                LogLevels_Level `protobuf:"varint,2,opt,name=level,proto3,enum=veidemann.api.LogLevels_Level" json:"level,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
 	XXX_unrecognized     []byte          `json:"-"`
 	XXX_sizecache        int32           `json:"-"`
@@ -1288,12 +1288,12 @@ func (m *LogLevels_LogLevel) GetLevel() LogLevels_Level {
 }
 
 type RoleMapping struct {
-	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// Types that are valid to be assigned to EmailOrGroup:
 	//	*RoleMapping_Email
 	//	*RoleMapping_Group
 	EmailOrGroup         isRoleMapping_EmailOrGroup `protobuf_oneof:"email_or_group"`
-	Role                 []Role                     `protobuf:"varint,4,rep,packed,name=role,enum=veidemann.api.Role" json:"role,omitempty"`
+	Role                 []Role                     `protobuf:"varint,4,rep,packed,name=role,proto3,enum=veidemann.api.Role" json:"role,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
 	XXX_unrecognized     []byte                     `json:"-"`
 	XXX_sizecache        int32                      `json:"-"`
@@ -1328,10 +1328,10 @@ type isRoleMapping_EmailOrGroup interface {
 }
 
 type RoleMapping_Email struct {
-	Email string `protobuf:"bytes,2,opt,name=email,oneof"`
+	Email string `protobuf:"bytes,2,opt,name=email,proto3,oneof"`
 }
 type RoleMapping_Group struct {
-	Group string `protobuf:"bytes,3,opt,name=group,oneof"`
+	Group string `protobuf:"bytes,3,opt,name=group,proto3,oneof"`
 }
 
 func (*RoleMapping_Email) isRoleMapping_EmailOrGroup() {}
