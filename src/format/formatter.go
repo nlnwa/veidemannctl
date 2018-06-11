@@ -30,10 +30,12 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"text/template"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
+	"sync"
 )
 
 var jsonMarshaler = jsonpb.Marshaler{EmitDefaults: true}
 var jsonUnMarshaler = jsonpb.Unmarshaler{}
+var wg sync.WaitGroup
 
 type MarshalSpec struct {
 	Filename string
@@ -90,8 +92,8 @@ func newTemplateWriter(writer io.Writer, template string) *templateWriter {
 	t.writer = writer
 	t.template = template
 	t.pin, t.pout = io.Pipe()
-	c := make(chan bool)
-	go t.unmarshalJson(c)
+	wg.Add(1)
+	go t.unmarshalJson()
 	return t
 }
 
@@ -99,7 +101,12 @@ func (t *templateWriter) Write(p []byte) (n int, err error) {
 	return t.pout.Write(p)
 }
 
-func (t *templateWriter) unmarshalJson(c chan bool) {
+func (t *templateWriter) Close() error {
+	return t.pout.Close()
+}
+
+func (t *templateWriter) unmarshalJson() {
+	defer wg.Done()
 	dec := json.NewDecoder(t.pin)
 	for dec.More() {
 		var val interface{}
@@ -108,6 +115,9 @@ func (t *templateWriter) unmarshalJson(c chan bool) {
 			log.Fatal(err)
 		}
 		t.applyTemplate(val)
+	}
+	if c, ok := t.writer.(io.Closer); ok {
+		c.Close()
 	}
 }
 
@@ -183,6 +193,11 @@ func Marshal(spec *MarshalSpec) error {
 	default:
 		log.Fatalf("Illegal format %s", spec.Format)
 	}
+
+	if t, ok := spec.writer.(io.Closer); ok {
+		t.Close()
+	}
+	wg.Wait()
 	return nil
 }
 
