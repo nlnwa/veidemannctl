@@ -78,18 +78,24 @@ var queryCmd = &cobra.Command{
 				format.MarshalJsonString(queryDef.marshalSpec, value.GetRecord())
 			}
 		} else {
-			fmt.Println("Missing query.\nSee 'veidemannctl report query -h' for help")
 			d := configutil.GetConfigDir("query")
-			q := listStoredQueries(d)
-			if len(q) > 0 {
-				fmt.Printf("\nStored queries in '%s':\n", d)
+			if flags.quiet {
+				q := listStoredQueries(d)
 				for _, s := range q {
-					fmt.Printf(" * %-20s - %s", s.Name, s.Description)
+					fmt.Println(s.Name)
+				}
+			} else {
+				fmt.Println("Missing query.\nSee 'veidemannctl report query -h' for help")
+				q := listStoredQueries(d)
+				if len(q) > 0 {
+					fmt.Printf("\nStored queries in '%s':\n", d)
+					for _, s := range q {
+						fmt.Printf(" * %-20s - %s", s.Name, s.Description)
+					}
 				}
 			}
 		}
 	},
-	ValidArgs: listStoredQueryNames(),
 }
 
 func init() {
@@ -198,17 +204,6 @@ func listStoredQueries(path string) []queryDef {
 				r = append(r, q)
 			}
 		}
-	}
-	return r
-}
-
-func listStoredQueryNames() []string {
-	d := configutil.GetConfigDir("query")
-	q := listStoredQueries(d)
-
-	var r []string
-	for _, e := range q {
-		r = append(r, e.Name)
 	}
 	return r
 }
