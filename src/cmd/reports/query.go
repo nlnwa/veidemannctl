@@ -22,7 +22,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"fmt"
 	"io"
-	"encoding/json"
 	"strings"
 	"io/ioutil"
 	"github.com/ghodss/yaml"
@@ -30,6 +29,7 @@ import (
 	"path/filepath"
 	"os"
 	"github.com/nlnwa/veidemannctl/src/configutil"
+	"github.com/nlnwa/veidemannctl/src/format"
 )
 
 // queryCmd represents the query command
@@ -45,6 +45,8 @@ var queryCmd = &cobra.Command{
 			request := api.ExecuteDbQueryRequest{}
 
 			queryDef := getQueryDef(args[0])
+			defer queryDef.marshalSpec.Close()
+
 			var params []interface{}
 
 			for _, v := range args[1:] {
@@ -53,7 +55,7 @@ var queryCmd = &cobra.Command{
 
 			request.Query = fmt.Sprintf(queryDef.Query, params...)
 
-			request.Limit = pageSize
+			request.Limit = flags.pageSize
 			log.Debugf("Executing query: %s", request.GetQuery())
 
 			stream, err := client.ExecuteDbQuery(context.Background(), &request)
@@ -71,27 +73,25 @@ var queryCmd = &cobra.Command{
 					break
 				}
 				if err != nil {
-					log.Fatalf("%v.ListFeatures(_) = _, %v", client, err)
+					log.Fatalf("Query error: %v", err)
 				}
-
-				if queryDef.Template != "" {
-					var js interface{}
-					json.Unmarshal([]byte(value.GetRecord()), &js)
-					//fmt.Printf("%v\n%v\n\n", js, value.GetRecord())
-					RunTemplate(js, queryDef.Template)
-					fmt.Println()
-				} else {
-					fmt.Println(value.GetRecord())
-				}
+				format.MarshalJsonString(queryDef.marshalSpec, value.GetRecord())
 			}
 		} else {
-			fmt.Println("Missing query.\nSee 'veidemannctl report query -h' for help")
 			d := configutil.GetConfigDir("query")
-			q := listStoredQueries(d)
-			if len(q) > 0 {
-				fmt.Printf("\nStored queries in '%s':\n", d)
+			if flags.quiet {
+				q := listStoredQueries(d)
 				for _, s := range q {
-					fmt.Printf(" * %-20s - %s", s.Name, s.Description)
+					fmt.Println(s.Name)
+				}
+			} else {
+				fmt.Println("Missing query.\nSee 'veidemannctl report query -h' for help")
+				q := listStoredQueries(d)
+				if len(q) > 0 {
+					fmt.Printf("\nStored queries in '%s':\n", d)
+					for _, s := range q {
+						fmt.Printf(" * %-20s - %s", s.Name, s.Description)
+					}
 				}
 			}
 		}
@@ -108,10 +108,12 @@ type queryDef struct {
 	Query       string
 	Header      string
 	Template    string
+	marshalSpec *format.MarshalSpec
 }
 
 func getQueryDef(queryArg string) queryDef {
 	var queryDef queryDef
+
 	if strings.HasPrefix(queryArg, "r.") {
 		queryDef.Query = queryArg
 	} else {
@@ -120,22 +122,35 @@ func getQueryDef(queryArg string) queryDef {
 		readFile(filename, &queryDef)
 	}
 
+	queryDef.marshalSpec = &format.MarshalSpec{}
 	// If template is set as command line option (option -t), then overwrite what was eventually found from file
-	if goTemplate != "" {
-		data, err := ioutil.ReadFile(goTemplate)
-		if err != nil {
-			panic(err)
-		}
-		queryDef.Template = string(data)
+	switch flags.format {
+	case "template":
+		queryDef.marshalSpec.Template = flags.goTemplate
+		queryDef.marshalSpec.Format = flags.format
+	case "template-file":
+		queryDef.marshalSpec.Template = flags.goTemplate
+		queryDef.marshalSpec.Format = flags.format
+	case "yaml":
+		queryDef.marshalSpec.Template = ""
+		queryDef.marshalSpec.Format = flags.format
+	case "json":
+		queryDef.marshalSpec.Template = ""
+		queryDef.marshalSpec.Format = flags.format
+	default:
+		queryDef.marshalSpec.Template = queryDef.Template
+		queryDef.marshalSpec.Format = "template"
 	}
 
 	// If template is missing, use default json.template from bindata
-	if queryDef.Template == "" {
+	if queryDef.marshalSpec.Template == "" && queryDef.marshalSpec.Format != "yaml" {
 		data, err := bindata.Asset("json.template")
 		if err != nil {
 			panic(err)
 		}
-		queryDef.Template = string(data)
+		queryDef.marshalSpec.Template = string(data)
+		queryDef.marshalSpec.Format = "template"
+		queryDef.Header = ""
 	}
 	return queryDef
 }
@@ -170,7 +185,7 @@ func readFile(name string, queryDef *queryDef) {
 		log.Fatalf("Query not found: %v", err)
 	}
 	// Found file
-	if strings.HasSuffix(name, ".yml") || strings.HasSuffix(name, ".yml") {
+	if strings.HasSuffix(name, ".yml") || strings.HasSuffix(name, ".yaml") {
 		yaml.Unmarshal(data, &queryDef)
 	} else {
 		queryDef.Query = string(data)

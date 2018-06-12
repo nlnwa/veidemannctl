@@ -24,11 +24,11 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type IsAllowedRequest struct {
-	JobExecutionId       string            `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId" json:"job_execution_id,omitempty"`
-	ExecutionId          string            `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Uri                  string            `protobuf:"bytes,3,opt,name=uri" json:"uri,omitempty"`
-	UserAgent            string            `protobuf:"bytes,4,opt,name=user_agent,json=userAgent" json:"user_agent,omitempty"`
-	Politeness           *PolitenessConfig `protobuf:"bytes,5,opt,name=politeness" json:"politeness,omitempty"`
+	JobExecutionId       string            `protobuf:"bytes,1,opt,name=job_execution_id,json=jobExecutionId,proto3" json:"job_execution_id,omitempty"`
+	ExecutionId          string            `protobuf:"bytes,2,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	Uri                  string            `protobuf:"bytes,3,opt,name=uri,proto3" json:"uri,omitempty"`
+	UserAgent            string            `protobuf:"bytes,4,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	Politeness           *PolitenessConfig `protobuf:"bytes,5,opt,name=politeness,proto3" json:"politeness,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
@@ -94,7 +94,7 @@ func (m *IsAllowedRequest) GetPoliteness() *PolitenessConfig {
 }
 
 type IsAllowedReply struct {
-	IsAllowed            bool     `protobuf:"varint,1,opt,name=is_allowed,json=isAllowed" json:"is_allowed,omitempty"`
+	IsAllowed            bool     `protobuf:"varint,1,opt,name=is_allowed,json=isAllowed,proto3" json:"is_allowed,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`

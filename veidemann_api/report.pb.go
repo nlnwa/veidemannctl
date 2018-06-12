@@ -58,9 +58,9 @@ func (Filter_Operator) EnumDescriptor() ([]byte, []int) {
 }
 
 type Filter struct {
-	FieldName            string          `protobuf:"bytes,1,opt,name=field_name,json=fieldName" json:"field_name,omitempty"`
-	Op                   Filter_Operator `protobuf:"varint,2,opt,name=op,enum=veidemann.api.Filter_Operator" json:"op,omitempty"`
-	Value                string          `protobuf:"bytes,3,opt,name=value" json:"value,omitempty"`
+	FieldName            string          `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
+	Op                   Filter_Operator `protobuf:"varint,2,opt,name=op,proto3,enum=veidemann.api.Filter_Operator" json:"op,omitempty"`
+	Value                string          `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
 	XXX_unrecognized     []byte          `json:"-"`
 	XXX_sizecache        int32           `json:"-"`
@@ -112,11 +112,11 @@ func (m *Filter) GetValue() string {
 }
 
 type CrawlLogListRequest struct {
-	WarcId               []string  `protobuf:"bytes,1,rep,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	ExecutionId          string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Filter               []*Filter `protobuf:"bytes,3,rep,name=filter" json:"filter,omitempty"`
-	PageSize             int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32     `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	WarcId               []string  `protobuf:"bytes,1,rep,name=warc_id,json=warcId,proto3" json:"warc_id,omitempty"`
+	ExecutionId          string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	Filter               []*Filter `protobuf:"bytes,3,rep,name=filter,proto3" json:"filter,omitempty"`
+	PageSize             int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32     `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
 	XXX_sizecache        int32     `json:"-"`
@@ -182,10 +182,10 @@ func (m *CrawlLogListRequest) GetPage() int32 {
 }
 
 type CrawlLogListReply struct {
-	Value                []*CrawlLog `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64       `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32       `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32       `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*CrawlLog `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64       `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32       `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32       `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -244,11 +244,11 @@ func (m *CrawlLogListReply) GetPage() int32 {
 }
 
 type PageLogListRequest struct {
-	WarcId               []string  `protobuf:"bytes,1,rep,name=warc_id,json=warcId" json:"warc_id,omitempty"`
-	ExecutionId          string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Filter               []*Filter `protobuf:"bytes,3,rep,name=filter" json:"filter,omitempty"`
-	PageSize             int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32     `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	WarcId               []string  `protobuf:"bytes,1,rep,name=warc_id,json=warcId,proto3" json:"warc_id,omitempty"`
+	ExecutionId          string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	Filter               []*Filter `protobuf:"bytes,3,rep,name=filter,proto3" json:"filter,omitempty"`
+	PageSize             int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32     `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
 	XXX_sizecache        int32     `json:"-"`
@@ -314,10 +314,10 @@ func (m *PageLogListRequest) GetPage() int32 {
 }
 
 type PageLogListReply struct {
-	Value                []*PageLog `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64      `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32      `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32      `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*PageLog `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64      `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32      `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32      `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
 	XXX_unrecognized     []byte     `json:"-"`
 	XXX_sizecache        int32      `json:"-"`
@@ -376,12 +376,12 @@ func (m *PageLogListReply) GetPage() int32 {
 }
 
 type ScreenshotListRequest struct {
-	Id                   []string  `protobuf:"bytes,1,rep,name=id" json:"id,omitempty"`
-	ExecutionId          string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId" json:"execution_id,omitempty"`
-	Filter               []*Filter `protobuf:"bytes,3,rep,name=filter" json:"filter,omitempty"`
-	ImgData              bool      `protobuf:"varint,4,opt,name=img_data,json=imgData" json:"img_data,omitempty"`
-	PageSize             int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32     `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Id                   []string  `protobuf:"bytes,1,rep,name=id,proto3" json:"id,omitempty"`
+	ExecutionId          string    `protobuf:"bytes,2,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	Filter               []*Filter `protobuf:"bytes,3,rep,name=filter,proto3" json:"filter,omitempty"`
+	ImgData              bool      `protobuf:"varint,4,opt,name=img_data,json=imgData,proto3" json:"img_data,omitempty"`
+	PageSize             int32     `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32     `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
 	XXX_sizecache        int32     `json:"-"`
@@ -454,10 +454,10 @@ func (m *ScreenshotListRequest) GetPage() int32 {
 }
 
 type ScreenshotListReply struct {
-	Value                []*Screenshot `protobuf:"bytes,1,rep,name=value" json:"value,omitempty"`
-	Count                int64         `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
-	PageSize             int32         `protobuf:"varint,14,opt,name=page_size,json=pageSize" json:"page_size,omitempty"`
-	Page                 int32         `protobuf:"varint,15,opt,name=page" json:"page,omitempty"`
+	Value                []*Screenshot `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
+	Count                int64         `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	PageSize             int32         `protobuf:"varint,14,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Page                 int32         `protobuf:"varint,15,opt,name=page,proto3" json:"page,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
 	XXX_unrecognized     []byte        `json:"-"`
 	XXX_sizecache        int32         `json:"-"`
@@ -517,9 +517,9 @@ func (m *ScreenshotListReply) GetPage() int32 {
 
 type ExecuteDbQueryRequest struct {
 	// The query to execute
-	Query string `protobuf:"bytes,1,opt,name=query" json:"query,omitempty"`
+	Query string `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
 	// Maximum number of rows to return. A limit of -1 indicates no limit. If unset or zero, use default limit.
-	Limit                int32    `protobuf:"varint,14,opt,name=limit" json:"limit,omitempty"`
+	Limit                int32    `protobuf:"varint,14,opt,name=limit,proto3" json:"limit,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -564,7 +564,7 @@ func (m *ExecuteDbQueryRequest) GetLimit() int32 {
 }
 
 type ExecuteDbQueryReply struct {
-	Record               string   `protobuf:"bytes,1,opt,name=record" json:"record,omitempty"`
+	Record               string   `protobuf:"bytes,1,opt,name=record,proto3" json:"record,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`

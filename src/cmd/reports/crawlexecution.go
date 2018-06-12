@@ -56,8 +56,8 @@ to quickly create a Cobra application.`,
 			request.SeedId = seedId
 		}
 
-		request.Page = page
-		request.PageSize = pageSize
+		request.Page = flags.page
+		request.PageSize = flags.pageSize
 
 		r, err := client.ListExecutions(context.Background(), &request)
 		if err != nil {

@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
+	"github.com/nlnwa/veidemannctl/bindata"
 )
 
 var (
@@ -49,6 +50,12 @@ var RootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	RootCmd.Version = version.Version.GetVersionString()
+
+	data, err := bindata.Asset("completion.sh")
+	if err != nil {
+		panic(err)
+	}
+	RootCmd.BashCompletionFunction = string(data)
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
