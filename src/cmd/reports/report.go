@@ -35,7 +35,8 @@ var flags struct {
 	page        int32
 	goTemplate  string
 	filter      []string
-	format string
+	format      string
+	quiet       bool
 }
 
 // reportCmd represents the report command
@@ -55,6 +56,8 @@ func init() {
 	ReportCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "table", "Output format (json|yaml|template|template-file)")
 	ReportCmd.PersistentFlags().StringVarP(&flags.goTemplate, "template", "t", "", "A Go template used to format the output")
 	ReportCmd.PersistentFlags().StringSliceVarP(&flags.filter, "filter", "f", nil, "Filters")
+	ReportCmd.PersistentFlags().BoolVarP(&flags.quiet, "quiet", "q", false, "Quiet")
+	ReportCmd.PersistentFlags().MarkHidden("quiet")
 }
 
 func applyFilter(filter []string) []*api.Filter {

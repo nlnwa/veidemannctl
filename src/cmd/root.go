@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
+	"github.com/nlnwa/veidemannctl/bindata"
 )
 
 var (
@@ -35,52 +36,6 @@ var (
 	debug              bool
 )
 
-const (
-	bash_completion_func = `__veidemannctl_parse_get() {
-    local template
-    template="{{println .id}}"
-    local veidemannctl_out
-    if mapfile -t veidemannctl_out < <( veidemannctl get "$1" -o template -t "${template}" 2>/dev/null ); then
-        mapfile -t COMPREPLY < <( compgen -W "$( printf '%q ' "${veidemannctl_out[@]}" )" -- "$cur" | awk '/ / { print "\""$0"\"" } /^[^ ]+$/ { print $0 }' )
-    fi
-}
-
-__veidemannctl_get_resource() {
-    if [[ ${#nouns[@]} -eq 0 ]]; then
-        return 1
-    fi
-    __veidemannctl_parse_get ${nouns[${#nouns[@]} -1]}
-    if [[ $? -eq 0 ]]; then
-        return 0
-    fi
-}
-
-__custom_func() {
-    case ${last_command} in
-        veidemannctl_get)
-            __veidemannctl_get_resource
-            return
-            ;;
-        *)
-            ;;
-    esac
-}
-
-__veidemannctl_get_name() {
-    if [[ ${#nouns[@]} -eq 0 ]]; then
-        return 1
-    fi
-	local noun
-	noun=${nouns[${#nouns[@]} -1]}
-    local template
-    template="{{println .meta.name}}"
-    local veidemannctl_out
-    if mapfile -t veidemannctl_out < <( veidemannctl get "$noun" -n "^${cur}" -s20 -o template -t "${template}" 2>/dev/null ); then
-	    mapfile -t COMPREPLY < <( printf '%q\n' "${veidemannctl_out[@]}" | awk -v IGNORECASE=1 -v p="$cur" '{p==substr($0,0,length(p))} / / {print "\""$0"\"" } /^[^ ]+$/ { print $0 }' )
-    fi
-}`
-)
-
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "veidemannctl",
@@ -89,13 +44,18 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
-	BashCompletionFunction: bash_completion_func,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	RootCmd.Version = version.Version.GetVersionString()
+
+	data, err := bindata.Asset("completion.sh")
+	if err != nil {
+		panic(err)
+	}
+	RootCmd.BashCompletionFunction = string(data)
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
