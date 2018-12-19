@@ -16,7 +16,7 @@ package cmd
 import (
 	"log"
 
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
 	"golang.org/x/net/context"
 
 	"github.com/nlnwa/veidemannctl/src/connection"

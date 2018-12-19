@@ -17,7 +17,7 @@ import (
 	"reflect"
 	"testing"
 
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
 )
 
 func TestCreateSelector(t *testing.T) {

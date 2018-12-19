@@ -14,19 +14,19 @@
 package reports
 
 import (
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	"fmt"
+	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	"io/ioutil"
+	"os"
 
+	"encoding/json"
 	"github.com/golang/protobuf/ptypes"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/nlnwa/veidemannctl/bindata"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"os"
 	"strings"
 	"text/template"
-	"fmt"
-	log "github.com/sirupsen/logrus"
-	"encoding/json"
 )
 
 var flags struct {
@@ -53,7 +53,7 @@ func init() {
 	ReportCmd.PersistentFlags().StringVarP(&flags.executionId, "executionid", "e", "", "All objects by Execution ID")
 	ReportCmd.PersistentFlags().Int32VarP(&flags.pageSize, "pagesize", "s", 10, "Number of objects to get")
 	ReportCmd.PersistentFlags().Int32VarP(&flags.page, "page", "p", 0, "The page number")
-	ReportCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "table", "Output format (json|yaml|template|template-file)")
+	ReportCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "json", "Output format (json|yaml|template|template-file)")
 	ReportCmd.PersistentFlags().StringVarP(&flags.goTemplate, "template", "t", "", "A Go template used to format the output")
 	ReportCmd.PersistentFlags().StringSliceVarP(&flags.filter, "filter", "f", nil, "Filters")
 	ReportCmd.PersistentFlags().BoolVarP(&flags.quiet, "quiet", "q", false, "Quiet")

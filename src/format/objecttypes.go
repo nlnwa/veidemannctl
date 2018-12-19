@@ -14,58 +14,40 @@
 package format
 
 import (
-	"github.com/golang/protobuf/proto"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
-	"reflect"
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"strings"
 )
 
 var objectTypes = []struct {
-	vType  reflect.Type
 	vName  string
 	tabDef []string
 }{
-	{reflect.TypeOf(&api.CrawlEntity{}), "entity", []string{"Id", "Meta.Name", "Meta.Description"}},
-	{reflect.TypeOf(&api.Seed{}), "seed", []string{"Id", "Meta.Name", "EntityId", "Scope.SurtPrefix", "JobId", "Disabled"}},
-	{reflect.TypeOf(&api.CrawlJob{}), "job", []string{"Id", "Meta.Name", "Meta.Description", "ScheduleId", "Limits", "CrawlConfigId", "Disabled"}},
-	{reflect.TypeOf(&api.CrawlConfig{}), "crawlconfig", []string{"Id", "Meta.Name", "Meta.Description", "BrowserConfigId", "PolitenessId", "Extra"}},
-	{reflect.TypeOf(&api.CrawlScheduleConfig{}), "schedule", []string{"Id", "Meta.Name", "Meta.Description", "CronExpression", "ValidFrom", "ValidTo"}},
-	{reflect.TypeOf(&api.BrowserConfig{}), "browser", []string{"Id", "Meta.Name", "Meta.Description", "UserAgent", "WindowWidth", "WindowHeight", "PageLoadTimeoutMs", "SleepAfterPageloadMs"}},
-	{reflect.TypeOf(&api.PolitenessConfig{}), "politeness", []string{"Id", "Meta.Name", "Meta.Description", "RobotsPolicy", "MinTimeBetweenPageLoadMs", "MaxTimeBetweenPageLoadMs", "DelayFactor", "MaxRetries", "RetryDelaySeconds", "CrawlHostGroupSelector"}},
-	{reflect.TypeOf(&api.BrowserScript{}), "script", []string{"Id", "Meta.Name", "Meta.Description", "Script", "UrlRegexp"}},
-	{reflect.TypeOf(&api.CrawlHostGroupConfig{}), "group", []string{"Id", "Meta.Name", "Meta.Description", "IpRange"}},
-	{reflect.TypeOf(&api.LogLevels{}), "loglevel", []string{"LogLevel"}},
-	{reflect.TypeOf(&api.RoleMapping{}), "role", []string{"Id", "EmailOrGroup.Email", "EmailOrGroup.Group", "Role"}},
-	{reflect.TypeOf(&api.RoleList{}), "activerole", []string{"Role"}},
+	{"crawlEntity", []string{"Id", "Meta.Name", "Meta.Description"}},
+	{"seed", []string{"Id", "Meta.Name", "Spec.Seed.EntityId", "Spec.Seed.Scope.SurtPrefix", "Spec.Seed.JobId", "Spec.Seed.Disabled"}},
+	{"crawlConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlConfig.BrowserConfigId", "Spec.CrawlConfig.PolitenessId", "Spec.CrawlConfig.Extra"}},
+	{"crawlJob", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlJob.ScheduleId", "Spec.CrawlJob.Limits", "Spec.CrawlJob.CrawlConfigId", "Spec.CrawlJob.Disabled"}},
+	{"crawlScheduleConfig", []string{"Id", "Meta.Name", "Meta.Description", "CronExpression", "ValidFrom", "ValidTo"}},
+	{"browserConfig", []string{"Id", "Meta.Name", "Meta.Description", "UserAgent", "WindowWidth", "WindowHeight", "PageLoadTimeoutMs", "SleepAfterPageloadMs"}},
+	{"politenessConfig", []string{"Id", "Meta.Name", "Meta.Description", "RobotsPolicy", "MinTimeBetweenPageLoadMs", "MaxTimeBetweenPageLoadMs", "DelayFactor", "MaxRetries", "RetryDelaySeconds", "CrawlHostGroupSelector"}},
+	{"browserScript", []string{"Id", "Meta.Name", "Meta.Description", "Script", "UrlRegexp"}},
+	{"crawlHostGroup", []string{"Id", "Meta.Name", "Meta.Description", "IpRange"}},
+	{"roleMapping", []string{"Id", "Spec.RoleMapping.EmailOrGroup.Email", "Spec.RoleMapping.EmailOrGroup.Group", "Spec.RoleMapping.Role"}},
 }
 
-// Get mapping from 'kind' to 'type'
-func GetObjectType(Name string) reflect.Type {
+// Get kind for string
+func GetKind(Name string) configV1.Kind {
 	Name = strings.ToLower(Name)
-	for _, ot := range objectTypes {
-		if ot.vName == Name {
-			return ot.vType
+	for _, k := range configV1.Kind_name {
+		if strings.ToLower(k) == Name {
+			return configV1.Kind(configV1.Kind_value[k])
 		}
 	}
-	return nil
+	return configV1.Kind_undefined
 }
 
-// Get mapping from 'type' to 'kind'
-func GetObjectName(msg proto.Message) string {
-	t := reflect.TypeOf(msg)
+func GetTableDefForKind(kind configV1.Kind) []string {
 	for _, ot := range objectTypes {
-		if ot.vType == t {
-			return ot.vName
-		}
-	}
-	return ""
-}
-
-// Get definitions for columns in table format
-func GetTableDef(msg proto.Message) []string {
-	t := reflect.TypeOf(msg)
-	for _, ot := range objectTypes {
-		if ot.vType == t {
+		if ot.vName == kind.String() {
 			return ot.tabDef
 		}
 	}

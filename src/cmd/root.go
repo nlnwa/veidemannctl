@@ -21,6 +21,7 @@ import (
 	"github.com/nlnwa/veidemannctl/src/cmd/reports"
 	"github.com/nlnwa/veidemannctl/src/configutil"
 	"github.com/nlnwa/veidemannctl/src/version"
+	"github.com/nlnwa/veidemannctl/src/cmd/logconfig"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -83,6 +84,7 @@ func init() {
 	RootCmd.SetVersionTemplate("{{.Version}}")
 
 	RootCmd.AddCommand(reports.ReportCmd)
+	RootCmd.AddCommand(logconfig.LogconfigCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.

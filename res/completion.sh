@@ -37,7 +37,7 @@ __veidemannctl_query_resource() {
     fi
 }
 
-__custom_func() {
+__veidemannctl_custom_func() {
     case ${last_command} in
         veidemannctl_get)
             __veidemannctl_get_resource
@@ -62,6 +62,6 @@ __veidemannctl_get_name() {
     template="{{println .meta.name}}"
     local veidemannctl_out
     if mapfile -t veidemannctl_out < <( veidemannctl get "$noun" -n "^${cur}" -s20 -o template -t "${template}" 2>/dev/null ); then
-	    mapfile -t COMPREPLY < <( printf '%q\n' "${veidemannctl_out[@]}" | awk -v IGNORECASE=1 -v p="$cur" '{p==substr($0,0,length(p))} / / {print "\""$0"\"" } /^[^ ]+$/ { print $0 }' )
+	    mapfile -t COMPREPLY < <( printf '%q\n' "${veidemannctl_out[@]}" | awk -v IGNORECASE=1 -v p="$cur" '{p==substr($0,0,length(p))} { print $0 }' )
     fi
 }

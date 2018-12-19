@@ -11,40 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package logconfig
 
 import (
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
-
 	"context"
+	"fmt"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/nlnwa/veidemannctl/src/connection"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"log"
 )
 
-// abortCmd represents the abort command
-var abortJobExecutionCmd = &cobra.Command{
-	Use:   "abortjobexecution",
-	Short: "Abort one or more job executions",
-	Long:  `Abort one or more job executions.`,
+// reportCmd represents the report command
+var ListLoggersCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List configured loggers",
+	Long:  `List configured loggers.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			client, conn := connection.NewStatusClient()
-			defer conn.Close()
+		client, conn := connection.NewControllerClient()
+		defer conn.Close()
 
-			for _, arg := range args {
-				request := api.ExecutionId{Id: arg}
-				_, err := client.AbortJobExecution(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not abort job execution '%v': %v", arg, err)
-				}
-			}
-		} else {
-			cmd.Usage()
+		r, err := client.GetLogConfig(context.Background(), &empty.Empty{})
+		if err != nil {
+			log.Fatalf("could not get log config: %v", err)
+		}
+
+		fmt.Printf("%-45s %s\n", "Logger", "Level")
+		fmt.Println("---------------------------------------------------")
+		for _, l := range r.LogLevel {
+			fmt.Printf("%-45s %s\n", l.Logger, l.Level)
 		}
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(abortJobExecutionCmd)
+	LogconfigCmd.AddCommand(ListLoggersCmd)
 }

@@ -22,36 +22,64 @@ import (
 	"reflect"
 )
 
-func MarshalYaml(w io.Writer, msg proto.Message) error {
-	var values reflect.Value
-	values = reflect.ValueOf(msg).Elem().FieldByName("Value")
-	if values.IsValid() {
-		if values.Len() == 0 {
-			fmt.Println("Empty result")
-			return nil
+type yamlFormatter struct {
+	*MarshalSpec
+}
+
+func newYamlFormatter(s *MarshalSpec) Formatter {
+	return &yamlFormatter{
+		MarshalSpec: s,
+	}
+}
+
+func (yf *yamlFormatter) WriteHeader() error {
+	return nil
+}
+
+func (yf *yamlFormatter) WriteRecord(record interface{}) error {
+	switch v := record.(type) {
+	case string:
+		final, err := yaml.JSONToYAML([]byte(v))
+		if err != nil {
+			fmt.Printf("err: %v\n", err)
+			return err
 		}
 
-		for i := 0; i < values.Len(); i++ {
-			if i > 0 {
-				w.Write([]byte("---\n"))
+		fmt.Fprint(yf.rWriter, string(final))
+		fmt.Fprintln(yf.rWriter, "---")
+	case proto.Message:
+		var values reflect.Value
+		values = reflect.ValueOf(v).Elem().FieldByName("Value")
+		if values.IsValid() {
+			if values.Len() == 0 {
+				fmt.Println("Empty result")
+				return nil
 			}
 
-			m := values.Index(i).Interface().(proto.Message)
+			for i := 0; i < values.Len(); i++ {
+				if i > 0 {
+					yf.rWriter.Write([]byte("---\n"))
+				}
 
-			err := marshalElementYaml(w, m)
+				m := values.Index(i).Interface().(proto.Message)
+
+				err := marshalElementYaml(yf.rWriter, m)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			m := reflect.ValueOf(v).Interface().(proto.Message)
+
+			err := marshalElementYaml(yf.rWriter, m)
 			if err != nil {
 				return err
 			}
+			yf.rWriter.Write([]byte("---\n"))
 		}
-	} else {
-		m := reflect.ValueOf(msg).Interface().(proto.Message)
-
-		err := marshalElementYaml(w, m)
-		if err != nil {
-			return err
-		}
+	default:
+		log.Fatalf("Illegal format %s", yf.rFormat)
 	}
-
 	return nil
 }
 

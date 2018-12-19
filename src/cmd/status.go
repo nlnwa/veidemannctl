@@ -19,7 +19,7 @@ import (
 	tm "github.com/buger/goterm"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/nlnwa/veidemannctl/src/connection"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"io"

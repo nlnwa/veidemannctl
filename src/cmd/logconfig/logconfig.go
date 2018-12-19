@@ -11,40 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package logconfig
 
 import (
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
-
-	"context"
-	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/spf13/cobra"
-	"log"
 )
 
-// abortCmd represents the abort command
-var abortCmd = &cobra.Command{
-	Use:   "abort",
-	Short: "Abort one or more crawl executions",
-	Long:  `Abort one or more crawl executions.`,
+// reportCmd represents the report command
+var LogconfigCmd = &cobra.Command{
+	Use:   "logconfig",
+	Short: "Configure logging",
+	Long:  `Configure logging.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			client, conn := connection.NewStatusClient()
-			defer conn.Close()
-
-			for _, arg := range args {
-				request := api.ExecutionId{Id: arg}
-				_, err := client.AbortExecution(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not abort execution '%v': %v", arg, err)
-				}
-			}
-		} else {
-			cmd.Usage()
-		}
+		cmd.Help()
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(abortCmd)
 }

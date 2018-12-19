@@ -15,23 +15,23 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/nlnwa/veidemannctl/src/apiutil"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
 
-	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/nlnwa/veidemannctl/src/apiutil"
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
 	"golang.org/x/net/context"
-	"github.com/golang/protobuf/proto"
 )
 
 var flags struct {
 	label      string
 	name       string
+	filter     string
 	file       string
 	format     string
 	goTemplate string
@@ -56,180 +56,48 @@ var getCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			client, conn := connection.NewControllerClient()
+			configClient, conn := connection.NewConfigClient()
 			defer conn.Close()
 
-			var selector []string
+			k := format.GetKind(args[0])
+
 			var ids []string
 
 			if len(args) == 2 {
 				ids = args[1:]
-				fmt.Println("ID: ", ids)
 			}
 
-			s := &format.MarshalSpec{
-				Filename: flags.file,
-				Format:   flags.format,
-				Template: flags.goTemplate,
-			}
-			defer s.Close()
-
-			var msg proto.Message
-
-			switch args[0] {
-			case "entity":
-				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
-
-				r, err := client.ListCrawlEntities(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get entity: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "seed":
-				request := api.SeedListRequest{}
-
-				selector = apiutil.CreateSelector(flags.label)
-
-				request.Id = ids
-				request.Name = flags.name
-				request.LabelSelector = selector
-				request.Page = flags.page
-				request.PageSize = flags.pageSize
-
-				r, err := client.ListSeeds(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get seed: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "job":
-				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
-
-				r, err := client.ListCrawlJobs(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get job: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "crawlconfig":
-				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
-
-				r, err := client.ListCrawlConfigs(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get crawl config: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "schedule":
-				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
-
-				r, err := client.ListCrawlScheduleConfigs(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get schedule config: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "browser":
-				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
-
-				r, err := client.ListBrowserConfigs(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get browser config: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "politeness":
-				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
-
-				r, err := client.ListPolitenessConfigs(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get politeness config: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "script":
-				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
-
-				r, err := client.ListBrowserScripts(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get browser script: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "group":
-				request := apiutil.CreateListRequest(ids, flags.name, flags.label, flags.pageSize, flags.page)
-
-				r, err := client.ListCrawlHostGroupConfigs(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get crawl host group config: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "loglevel":
-				r, err := client.GetLogConfig(context.Background(), &empty.Empty{})
-				if err != nil {
-					log.Fatalf("could not get log config: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "activerole":
-				r, err := client.GetRolesForActiveUser(context.Background(), &empty.Empty{})
-				if err != nil {
-					log.Fatalf("could not get active role: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			case "role":
-				request := api.RoleMappingsListRequest{}
-				request.Page = flags.page
-				request.PageSize = flags.pageSize
-
-				r, err := client.ListRoleMappings(context.Background(), &request)
-				if err != nil {
-					log.Fatalf("could not get active role: %v", err)
-				}
-
-				msg = r
-				if format.Marshal(s, msg) != nil {
-					os.Exit(1)
-				}
-			default:
+			if k == configV1.Kind_undefined {
 				fmt.Printf("Unknown object type\n")
 				cmd.Usage()
+				return
+			}
+
+			request, err := apiutil.CreateListRequest(k, ids, flags.name, flags.label, flags.filter, flags.pageSize, flags.page)
+			if err != nil {
+				log.Fatalf("Error creating request: %v", err)
+			}
+
+			r, err := configClient.ListConfigObjects(context.Background(), request)
+			if err != nil {
+				log.Fatalf("Error from controller: %v", err)
+			}
+
+			s := format.NewFormatter(k, flags.file, flags.format, flags.goTemplate, "")
+			defer s.Close()
+
+			s.WriteHeader()
+			for {
+				msg, err := r.Recv()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					log.Fatalf("Error getting object: %v", err)
+				}
+				if s.WriteRecord(msg) != nil {
+					os.Exit(1)
+				}
 			}
 		} else {
 			fmt.Print("You must specify the object type to get. ")
@@ -258,8 +126,9 @@ func init() {
 	getCmd.PersistentFlags().StringVarP(&flags.name, "name", "n", "", "List objects by name (accepts regular expressions)")
 	annotation := make(map[string][]string)
 	annotation[cobra.BashCompCustom] = []string{"__veidemannctl_get_name"}
-
 	getCmd.PersistentFlags().Lookup("name").Annotations = annotation
+
+	getCmd.PersistentFlags().StringVarP(&flags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
 	getCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "table", "Output format (table|json|yaml|template|template-file)")
 	getCmd.PersistentFlags().StringVarP(&flags.goTemplate, "template", "t", "", "A Go template used to format the output")
 	getCmd.PersistentFlags().StringVarP(&flags.file, "filename", "f", "", "File name to write to")

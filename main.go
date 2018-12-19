@@ -21,7 +21,6 @@ import (
 
 var version = "master"
 
-//go:generate scripts/build-protobuf.sh
 //go:generate go get github.com/golang/dep/cmd/dep
 //go:generate dep ensure -vendor-only
 //go:generate go get github.com/jteeuwen/go-bindata/...
