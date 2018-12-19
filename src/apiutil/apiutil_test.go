@@ -17,7 +17,7 @@ import (
 	"reflect"
 	"testing"
 
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	api "github.com/nlnwa/veidemann-api-go/config/v1"
 )
 
 func TestCreateSelector(t *testing.T) {
@@ -47,7 +47,7 @@ func TestCreateSelector(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CreateSelector(tt.args.labelString); !reflect.DeepEqual(got, tt.want) {
+			if got := createSelector(tt.args.labelString); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CreateSelector() = %v, want %v", got, tt.want)
 			}
 		})
@@ -65,7 +65,7 @@ func TestCreateListRequest(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want api.ListRequest
+		want *api.ListRequest
 	}{
 		{
 			name: "One Id",
@@ -76,12 +76,16 @@ func TestCreateListRequest(t *testing.T) {
 				0,
 				0,
 			},
-			want: api.ListRequest{Id: []string{"id1"}},
+			want: &api.ListRequest{Kind: api.Kind_browserConfig, Id: []string{"id1"}},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CreateListRequest(tt.args.ids, tt.args.name, tt.args.labelString, tt.args.pageSize, tt.args.page); !reflect.DeepEqual(got, tt.want) {
+			got, err := CreateListRequest(api.Kind_browserConfig, tt.args.ids, tt.args.name, tt.args.labelString, "", tt.args.pageSize, tt.args.page)
+			if err != nil {
+				t.Errorf("Error in CreateListRequest(): %v", err)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CreateListRequest() = %v, want %v", got, tt.want)
 			}
 		})

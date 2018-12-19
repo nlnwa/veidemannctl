@@ -21,26 +21,36 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	"io"
-	log "github.com/sirupsen/logrus"
-	"os"
-	"reflect"
-	"strings"
-	"io/ioutil"
 	"github.com/golang/protobuf/ptypes"
-	"text/template"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/nlnwa/veidemann-api-go/config/v1"
+	"github.com/nlnwa/veidemannctl/bindata"
+	log "github.com/sirupsen/logrus"
+	"io"
+	"io/ioutil"
+	"os"
+	"strings"
 	"sync"
+	"text/template"
 )
 
 var jsonMarshaler = jsonpb.Marshaler{EmitDefaults: true}
 var jsonUnMarshaler = jsonpb.Unmarshaler{}
 
+type Formatter interface {
+	WriteHeader() error
+	WriteRecord(record interface{}) error
+	Close() error
+}
+
 type MarshalSpec struct {
-	Filename string
-	Format   string
-	Template string
-	Writer   io.Writer
+	Kind                config.Kind
+	Filename            string
+	Format              string
+	Template            string
+	HeaderTemplate      string
+	defaultTemplateName string
+	Writer              io.Writer
 
 	rFilename string
 	rFormat   string
@@ -48,6 +58,37 @@ type MarshalSpec struct {
 	rWriter   io.Writer
 	resolved  bool
 	wg        sync.WaitGroup
+}
+
+func NewFormatter(kind config.Kind, filename string, format string, template string, headerTemplate string) Formatter {
+	s := &MarshalSpec{
+		Kind:           kind,
+		Filename:       filename,
+		Format:         format,
+		Template:       template,
+		HeaderTemplate: headerTemplate,
+	}
+
+	s.resolve()
+
+	var formatter Formatter
+
+	switch s.rFormat {
+	case "json":
+		formatter = newJsonFormatter(s)
+	case "yaml":
+		formatter = newYamlFormatter(s)
+	case "table":
+		formatter = newTableFormatter(s)
+	default:
+		log.Fatalf("Illegal format %s", s.rFormat)
+	}
+	return formatter
+}
+
+func (s *MarshalSpec) WriteHeaderForKind(kind config.Kind) error {
+	fmt.Println("HEAD")
+	return nil
 }
 
 func (s *MarshalSpec) resolve() {
@@ -70,11 +111,20 @@ func (s *MarshalSpec) resolve() {
 		switch s.Format {
 		case "template":
 			if s.Template == "" {
-				log.Fatal("Format is 'template', but template is missing")
+				if (s.defaultTemplateName != "") {
+					data, err := bindata.Asset(s.defaultTemplateName)
+					if err != nil {
+						panic(err)
+					}
+					s.rTemplate = string(data)
+				} else {
+					log.Fatal("Format is 'template', but template is missing")
+				}
+			} else {
+				s.rTemplate = s.Template
 			}
-			s.rTemplate = s.Template
 			s.rFormat = "json"
-			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, &s.wg)
+			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, s.HeaderTemplate, &s.wg)
 		case "template-file":
 			if s.Template == "" {
 				log.Fatal("Format is 'template-file', but template is missing")
@@ -85,7 +135,16 @@ func (s *MarshalSpec) resolve() {
 			}
 			s.rTemplate = string(data)
 			s.rFormat = "json"
-			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, &s.wg)
+			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, s.HeaderTemplate, &s.wg)
+		case "json":
+			s.rFormat = s.Format
+			data, err := bindata.Asset("json.template")
+			if err != nil {
+				panic(err)
+			}
+			s.rTemplate = string(data)
+			s.HeaderTemplate = ""
+			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, s.HeaderTemplate, &s.wg)
 		case "yaml":
 			s.rTemplate = ""
 			s.rFormat = s.Format
@@ -98,9 +157,11 @@ func (s *MarshalSpec) resolve() {
 }
 
 func (s *MarshalSpec) Close() error {
-	if t, ok := s.rWriter.(io.Closer); ok {
-		if err := t.Close(); err != nil {
-			return err
+	if nil != s {
+		if t, ok := s.rWriter.(io.Closer); ok {
+			if err := t.Close(); err != nil {
+				return err
+			}
 		}
 	}
 	s.wg.Wait()
@@ -108,17 +169,19 @@ func (s *MarshalSpec) Close() error {
 }
 
 type templateWriter struct {
-	writer   io.Writer
-	template string
-	pin      *io.PipeReader
-	pout     *io.PipeWriter
-	wg       *sync.WaitGroup
+	writer         io.Writer
+	template       string
+	headerTemplate string
+	pin            *io.PipeReader
+	pout           *io.PipeWriter
+	wg             *sync.WaitGroup
 }
 
-func newTemplateWriter(writer io.Writer, template string, wg *sync.WaitGroup) *templateWriter {
+func newTemplateWriter(writer io.Writer, template string, headerTemplate string, wg *sync.WaitGroup) *templateWriter {
 	t := &templateWriter{}
 	t.writer = writer
 	t.template = template
+	t.headerTemplate = headerTemplate
 	t.pin, t.pout = io.Pipe()
 	t.wg = wg
 	t.wg.Add(1)
@@ -143,14 +206,23 @@ func (t *templateWriter) unmarshalJson() {
 		if err != nil {
 			log.Fatal("Failed decoding json: ", err)
 		}
-		t.applyTemplate(val)
+		//t.applyTemplate(val, "json.template")
+		t.applyRecordTemplate(val)
 	}
 	if c, ok := t.writer.(io.Closer); ok {
 		c.Close()
 	}
 }
 
-func (t *templateWriter) applyTemplate(val interface{}) {
+func (t *templateWriter) applyHeaderTemplate(msg interface{}) {
+	t.applyTemplate(nil, t.headerTemplate)
+}
+
+func (t *templateWriter) applyRecordTemplate(val interface{}) {
+	t.applyTemplate(val, t.template)
+}
+
+func (t *templateWriter) applyTemplate(val interface{}, templateString string) {
 	ESC := string(0x1b)
 	funcMap := template.FuncMap{
 		"reset":         func() string { return ESC + "[0m" },
@@ -177,6 +249,16 @@ func (t *templateWriter) applyTemplate(val interface{}) {
 				return fmt.Sprintf("%-24.24s", ptypes.TimestampString(ts))
 			}
 		},
+		"rethinktime": func(ts map[string]interface{}) string {
+			if ts == nil {
+				return "                        "
+			} else {
+				dateTime := ts["dateTime"].(map[string]interface{})
+				date := dateTime["date"].(map[string]interface{})
+				time := dateTime["time"].(map[string]interface{})
+				return fmt.Sprintf("%04.f-%02.f-%02.fT%02.f:%02.f:%02.f", date["year"], date["month"], date["day"], time["hour"], time["minute"], time["second"])
+			}
+		},
 		"prettyJson": func(v interface{}) string {
 			if v == nil {
 				return ""
@@ -188,9 +270,10 @@ func (t *templateWriter) applyTemplate(val interface{}) {
 				return string(json)
 			}
 		},
+		"nl": func() string { return "\n" },
 	}
 
-	tmpl, err := template.New("Template").Funcs(funcMap).Parse(t.template)
+	tmpl, err := template.New("Template").Funcs(funcMap).Parse(templateString)
 	if err != nil {
 		panic(err)
 	}
@@ -198,54 +281,6 @@ func (t *templateWriter) applyTemplate(val interface{}) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func Marshal(spec *MarshalSpec, msg proto.Message) error {
-	spec.resolve()
-
-	switch spec.rFormat {
-	case "json":
-		err := MarshalJson(spec.rWriter, msg)
-		if err != nil {
-			return err
-		}
-	case "yaml":
-		err := MarshalYaml(spec.rWriter, msg)
-		if err != nil {
-			return err
-		}
-	case "table":
-		err := MarshalTable(spec.rWriter, msg)
-		if err != nil {
-			return err
-		}
-	default:
-		log.Fatalf("Illegal format %s", spec.rFormat)
-	}
-
-	return nil
-}
-
-func MarshalJsonString(spec *MarshalSpec, jsonString string) error {
-	spec.resolve()
-
-	switch spec.rFormat {
-	case "json":
-		fmt.Fprint(spec.rWriter, jsonString)
-	case "yaml":
-		final, err := yaml.JSONToYAML([]byte(jsonString))
-		if err != nil {
-			fmt.Printf("err: %v\n", err)
-			return err
-		}
-
-		fmt.Fprint(spec.rWriter, string(final))
-		fmt.Fprintln(spec.rWriter, "---")
-	default:
-		log.Fatalf("Illegal format %s", spec.rFormat)
-	}
-
-	return nil
 }
 
 func Unmarshal(filename string) ([]proto.Message, error) {
@@ -331,30 +366,13 @@ func UnmarshalYaml(r io.Reader, result []proto.Message) ([]proto.Message, error)
 			return nil, readErr
 		}
 
-		var val interface{}
-		err := yaml.Unmarshal(data, &val)
+		b, err := yaml.YAMLToJSON(data)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Error decoding: %v, %v", err, data)
 		}
-
-		v := val.(map[string]interface{})
-		k := v["kind"]
-		if k == nil {
-			return nil, fmt.Errorf("Missing kind")
-		}
-		kind := k.(string)
-		delete(v, "kind")
-
-		b, _ := json.Marshal(&v)
-
 		buf := bytes.NewBuffer(b)
-		t := GetObjectType(kind)
-		if t == nil {
-			return nil, fmt.Errorf("Unknown kind '%v'", kind)
-		}
 
-		target := reflect.New(t.Elem()).Interface().(proto.Message)
-
+		target := &config.ConfigObject{}
 		jsonUnMarshaler.Unmarshal(buf, target)
 		result = append(result, target)
 	}
@@ -364,23 +382,8 @@ func UnmarshalYaml(r io.Reader, result []proto.Message) ([]proto.Message, error)
 func UnmarshalJson(r io.Reader, result []proto.Message) ([]proto.Message, error) {
 	dec := json.NewDecoder(r)
 	for dec.More() {
-		var val interface{}
-		err := dec.Decode(&val)
-		if err != nil {
-			log.Fatal(err)
-		}
-		v := val.(map[string]interface{})
-		kind := v["kind"].(string)
-		delete(v, "kind")
-
-		b, _ := json.Marshal(&v)
-
-		buf := bytes.NewBuffer(b)
-		t := GetObjectType(kind)
-
-		target := reflect.New(t.Elem()).Interface().(proto.Message)
-
-		jsonUnMarshaler.Unmarshal(buf, target)
+		target := &config.ConfigObject{}
+		jsonUnMarshaler.UnmarshalNext(dec, target)
 		result = append(result, target)
 	}
 

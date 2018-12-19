@@ -23,32 +23,56 @@ import (
 	"reflect"
 )
 
-func MarshalJson(w io.Writer, msg proto.Message) error {
-	var values reflect.Value
-	values = reflect.ValueOf(msg).Elem().FieldByName("Value")
-	if values.IsValid() {
-		if values.Len() == 0 {
-			fmt.Println("Empty result")
-			return nil
-		}
+type jsonFormatter struct {
+	*MarshalSpec
+}
 
-		for i := 0; i < values.Len(); i++ {
-			m := values.Index(i).Interface().(proto.Message)
+func newJsonFormatter(s *MarshalSpec) Formatter {
+	return &jsonFormatter{
+		MarshalSpec: s,
+	}
+}
 
-			err := marshalElementJson(w, m)
+func (jf *jsonFormatter) WriteHeader() error {
+	t, ok := jf.rWriter.(*templateWriter)
+	if ok && jf.HeaderTemplate != "" {
+		t.applyHeaderTemplate(jf.HeaderTemplate)
+	}
+	return nil
+}
+
+func (jf *jsonFormatter) WriteRecord(record interface{}) error {
+	switch v := record.(type) {
+	case string:
+		fmt.Fprint(jf.rWriter, v)
+	case proto.Message:
+		var values reflect.Value
+		values = reflect.ValueOf(v).Elem().FieldByName("Value")
+		if values.IsValid() {
+			if values.Len() == 0 {
+				fmt.Println("Empty result")
+				return nil
+			}
+
+			for i := 0; i < values.Len(); i++ {
+				m := values.Index(i).Interface().(proto.Message)
+
+				err := marshalElementJson(jf.rWriter, m)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			m := reflect.ValueOf(v).Interface().(proto.Message)
+
+			err := marshalElementJson(jf.rWriter, m)
 			if err != nil {
 				return err
 			}
 		}
-	} else {
-		m := reflect.ValueOf(msg).Interface().(proto.Message)
-
-		err := marshalElementJson(w, m)
-		if err != nil {
-			return err
-		}
+	default:
+		log.Fatalf("Illegal format %s", jf.rFormat)
 	}
-
 	return nil
 }
 
@@ -76,9 +100,6 @@ func EncodeJson(msg proto.Message) ([]byte, error) {
 	values := make(map[string]interface{})
 	json.Unmarshal(buf.Bytes(), &values)
 
-	kind := GetObjectName(msg)
-
-	values["kind"] = kind
 	b, _ := json.Marshal(values)
 
 	return b, nil

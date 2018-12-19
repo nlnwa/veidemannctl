@@ -16,7 +16,8 @@ package connection
 import (
 	"crypto/x509"
 	"github.com/golang/protobuf/ptypes/empty"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -42,6 +43,12 @@ func NewStatusClient() (api.StatusClient, *grpc.ClientConn) {
 func NewReportClient() (api.ReportClient, *grpc.ClientConn) {
 	conn := newConnection()
 	c := api.NewReportClient(conn)
+	return c, conn
+}
+
+func NewConfigClient() (configV1.ConfigClient, *grpc.ClientConn) {
+	conn := newConnection()
+	c := configV1.NewConfigClient(conn)
 	return c, conn
 }
 

@@ -16,8 +16,9 @@ package reports
 
 import (
 	"context"
+	"github.com/nlnwa/veidemann-api-go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
-	api "github.com/nlnwa/veidemannctl/veidemann_api"
+	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
 	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
 	"fmt"
@@ -25,7 +26,7 @@ import (
 	"strings"
 	"io/ioutil"
 	"github.com/ghodss/yaml"
-	"github.com/nlnwa/veidemannctl/bindata"
+	//"github.com/nlnwa/veidemannctl/bindata"
 	"path/filepath"
 	"os"
 	"github.com/nlnwa/veidemannctl/src/configutil"
@@ -63,9 +64,9 @@ var queryCmd = &cobra.Command{
 				log.Fatalf("Failed executing query: %v", err)
 			}
 
-			if queryDef.Header != "" {
-				RunTemplate(nil, queryDef.Header)
-			}
+			//if queryDef.Header != "" {
+			//	RunTemplate(nil, queryDef.Header)
+			//}
 
 			for {
 				value, err := stream.Recv()
@@ -75,7 +76,7 @@ var queryCmd = &cobra.Command{
 				if err != nil {
 					log.Fatalf("Query error: %v", err)
 				}
-				format.MarshalJsonString(queryDef.marshalSpec, value.GetRecord())
+				queryDef.marshalSpec.WriteRecord(value.GetRecord())
 			}
 		} else {
 			d := configutil.GetConfigDir("query")
@@ -108,7 +109,7 @@ type queryDef struct {
 	Query       string
 	Header      string
 	Template    string
-	marshalSpec *format.MarshalSpec
+	marshalSpec format.Formatter
 }
 
 func getQueryDef(queryArg string) queryDef {
@@ -122,36 +123,7 @@ func getQueryDef(queryArg string) queryDef {
 		readFile(filename, &queryDef)
 	}
 
-	queryDef.marshalSpec = &format.MarshalSpec{}
-	// If template is set as command line option (option -t), then overwrite what was eventually found from file
-	switch flags.format {
-	case "template":
-		queryDef.marshalSpec.Template = flags.goTemplate
-		queryDef.marshalSpec.Format = flags.format
-	case "template-file":
-		queryDef.marshalSpec.Template = flags.goTemplate
-		queryDef.marshalSpec.Format = flags.format
-	case "yaml":
-		queryDef.marshalSpec.Template = ""
-		queryDef.marshalSpec.Format = flags.format
-	case "json":
-		queryDef.marshalSpec.Template = ""
-		queryDef.marshalSpec.Format = flags.format
-	default:
-		queryDef.marshalSpec.Template = queryDef.Template
-		queryDef.marshalSpec.Format = "template"
-	}
-
-	// If template is missing, use default json.template from bindata
-	if queryDef.marshalSpec.Template == "" && queryDef.marshalSpec.Format != "yaml" {
-		data, err := bindata.Asset("json.template")
-		if err != nil {
-			panic(err)
-		}
-		queryDef.marshalSpec.Template = string(data)
-		queryDef.marshalSpec.Format = "template"
-		queryDef.Header = ""
-	}
+	queryDef.marshalSpec = format.NewFormatter(config.Kind_undefined, "", flags.format, flags.goTemplate, queryDef.Header)
 	return queryDef
 }
 
