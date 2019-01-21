@@ -15,10 +15,6 @@ package cmd
 
 import (
 	"fmt"
-	"reflect"
-
-	"github.com/golang/protobuf/proto"
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
 	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"
@@ -52,70 +48,23 @@ var createCmd = &cobra.Command{
 		client, conn := connection.NewConfigClient()
 		defer conn.Close()
 
-		for _, v := range result {
-			switch t := v.(type) {
-			case *configV1.ConfigObject:
-				fmt.Println(v)
-				if t.ApiVersion == "" {
-					handleError(t, fmt.Errorf("Missing apiVersion"))
-				}
-				if t.Kind == configV1.Kind_undefined {
-					handleError(t, fmt.Errorf("Missing kind"))
-				}
-				r, err := client.SaveConfigObject(context.Background(), t)
-				handleError(v, err)
-				fmt.Printf("Saved %T: %v\n", r, r.Meta.Name)
-			//case *api.Seed:
-			//	r, err := client.SaveSeed(context.Background(), v.(*api.Seed))
-			//	handleError(v, err)
-			//	fmt.Printf("Saved %T: %v\n", r, r.Meta.Name)
-			//case *api.CrawlJob:
-			//	r, err := client.SaveCrawlJob(context.Background(), v.(*api.CrawlJob))
-			//	handleError(v, err)
-			//	fmt.Printf("Saved %T: %v\n", r, r.Meta.Name)
-			//case *api.CrawlConfig:
-			//	r, err := client.SaveCrawlConfig(context.Background(), v.(*api.CrawlConfig))
-			//	handleError(v, err)
-			//	fmt.Printf("Saved %T: %v\n", r, r.Meta.Name)
-			//case *api.CrawlScheduleConfig:
-			//	r, err := client.SaveCrawlScheduleConfig(context.Background(), v.(*api.CrawlScheduleConfig))
-			//	handleError(v, err)
-			//	fmt.Printf("Saved %T: %v\n", r, r.Meta.Name)
-			//case *api.BrowserConfig:
-			//	r, err := client.SaveBrowserConfig(context.Background(), v.(*api.BrowserConfig))
-			//	handleError(v, err)
-			//	fmt.Printf("Saved %T: %v\n", r, r.Meta.Name)
-			//case *api.PolitenessConfig:
-			//	r, err := client.SavePolitenessConfig(context.Background(), v.(*api.PolitenessConfig))
-			//	handleError(v, err)
-			//	fmt.Printf("Saved %T: %v\n", r, r.Meta.Name)
-			//case *api.BrowserScript:
-			//	r, err := client.SaveBrowserScript(context.Background(), v.(*api.BrowserScript))
-			//	handleError(v, err)
-			//	fmt.Printf("Saved %T: %v\n", r, r.Meta.Name)
-			//case *api.CrawlHostGroupConfig:
-			//	r, err := client.SaveCrawlHostGroupConfig(context.Background(), v.(*api.CrawlHostGroupConfig))
-			//	handleError(v, err)
-			//	fmt.Printf("Saved %T: %v\n", r, r.Meta.Name)
-
-			case *api.LogLevels:
-				client, conn := connection.NewControllerClient()
-				defer conn.Close()
-
-				r, err := client.SaveLogConfig(context.Background(), v.(*api.LogLevels))
-				handleError(v, err)
-				fmt.Printf("Saved %T: Loglevels\n", r)
-
-			default:
-				fmt.Println(v, reflect.TypeOf(v))
+		for _, co := range result {
+			if co.ApiVersion == "" {
+				handleError(co, fmt.Errorf("Missing apiVersion"))
 			}
+			if co.Kind == configV1.Kind_undefined {
+				handleError(co, fmt.Errorf("Missing kind"))
+			}
+			r, err := client.SaveConfigObject(context.Background(), co)
+			handleError(co, err)
+			fmt.Printf("Saved %v: %v %v\n", co.Kind, r.Meta.Name, r.Id)
 		}
 	},
 }
 
-func handleError(msg proto.Message, err error) {
+func handleError(msg *configV1.ConfigObject, err error) {
 	if err != nil {
-		log.Fatalf("Could not save %T: %v", msg, err)
+		log.Fatalf("Could not save %v: %v", msg, err)
 		os.Exit(2)
 	}
 }
@@ -123,6 +72,6 @@ func handleError(msg proto.Message, err error) {
 func init() {
 	RootCmd.AddCommand(createCmd)
 
-	createCmd.PersistentFlags().StringVarP(&filename, "input", "i", "", "File name to read from. "+
+	createCmd.PersistentFlags().StringVarP(&filename, "filename", "f", "", "Filename or directory to read from. "+
 		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
 }

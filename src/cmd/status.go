@@ -68,12 +68,12 @@ var statusCmd = &cobra.Command{
 				s, _ := ptypes.Timestamp(e.StartTime)
 				start := s.Format("02.01.06 15:04:05Z")
 				color := tm.BLACK
-				switch e.State {
-				case api.CrawlExecutionStatus_FETCHING:
-					color = tm.GREEN
-				case api.CrawlExecutionStatus_SLEEPING:
-					color = tm.BLUE
-				}
+				//switch e.State {
+				//case api.CrawlExecutionStatus_FETCHING:
+				//	color = tm.GREEN
+				//case api.CrawlExecutionStatus_SLEEPING:
+				//	color = tm.BLUE
+				//}
 				tm.Println(tm.Background(
 					fmt.Sprintf("%-36.36s %18s %-10.10s %5d %5d %10d %6d %5d %5d %5d %5d %-20.20s %-*.*s",
 						e.Id, start, e.State, e.DocumentsCrawled, e.UrisCrawled, e.BytesCrawled, e.DocumentsFailed,

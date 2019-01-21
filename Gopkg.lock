@@ -127,15 +127,17 @@
   version = "v1.1.2"
 
 [[projects]]
-  digest = "1:0404a03cce97c2f710fcf3911b448577ceb1a4cea427b5974689e7be6065900b"
+  digest = "1:664b60788dc8cb78e8cb28fdfe927b44dd5a437073acf8c928b24462971599f6"
   name = "github.com/nlnwa/veidemann-api-go"
   packages = [
+    "commons/v1",
     "config/v1",
+    "frontier/v1",
     "veidemann_api",
   ]
   pruneopts = "UT"
-  revision = "e11ca94c8af94305f9efd8aa72d250a89a64a614"
-  version = "v1.0.0-beta1"
+  revision = "0da56c3f6021952baebcbd1f04ba2f5b47ecf5ad"
+  version = "v1.0.0-beta2"
 
 [[projects]]
   digest = "1:95741de3af260a92cc5c7f3f3061e85273f5a81b5db20d4bd68da74bd521675e"

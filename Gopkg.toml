@@ -24,7 +24,7 @@ required = ["github.com/jteeuwen/go-bindata"]
 
 [[constraint]]
   name = "github.com/nlnwa/veidemann-api-go"
-  version = "1.0.0-beta1"
+  version = "=1.0.0-beta2"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"

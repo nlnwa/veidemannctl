@@ -64,9 +64,9 @@ var queryCmd = &cobra.Command{
 				log.Fatalf("Failed executing query: %v", err)
 			}
 
-			//if queryDef.Header != "" {
-			//	RunTemplate(nil, queryDef.Header)
-			//}
+			if queryDef.Header != "" {
+				queryDef.marshalSpec.WriteHeader()
+			}
 
 			for {
 				value, err := stream.Recv()
@@ -123,7 +123,11 @@ func getQueryDef(queryArg string) queryDef {
 		readFile(filename, &queryDef)
 	}
 
-	queryDef.marshalSpec = format.NewFormatter(config.Kind_undefined, "", flags.format, flags.goTemplate, queryDef.Header)
+	if queryDef.Template == "" {
+		queryDef.marshalSpec = format.NewFormatter(config.Kind_undefined, "", flags.format, flags.goTemplate, queryDef.Header)
+	} else {
+		queryDef.marshalSpec = format.NewFormatter(config.Kind_undefined, "", "template", queryDef.Template, queryDef.Header)
+	}
 	return queryDef
 }
 
