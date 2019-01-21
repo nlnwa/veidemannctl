@@ -21,6 +21,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var manualLogin bool
+
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
@@ -34,15 +36,7 @@ var loginCmd = &cobra.Command{
 
 		a := connection.NewAuth(idp)
 
-		authCodeURL := a.CreateAuthCodeURL()
-		fmt.Println("A login screen should now open in your browser. Follow the login steps and paste the code here.")
-		fmt.Println("In case the browser window won't open, paste this uri in a browser window:")
-		fmt.Println(authCodeURL)
-		a.Openbrowser(authCodeURL)
-		fmt.Print("Code: ")
-		var code string
-		fmt.Scan(&code)
-		a.VerifyCode(code)
+		a.Login(manualLogin)
 		claims := a.Claims()
 		configutil.WriteConfig()
 		fmt.Printf("Hello %s\n", claims.Name)
@@ -51,4 +45,6 @@ var loginCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(loginCmd)
+	loginCmd.PersistentFlags().BoolVarP(&manualLogin, "manual", "m", false,
+		"Manually copy and paste login url and code. Use this to log in from a remote terminal.")
 }

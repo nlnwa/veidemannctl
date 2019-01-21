@@ -33,7 +33,7 @@ var deleteCmd = &cobra.Command{
 ` +
 		printValidObjectTypes() +
 		`Examples:
-  #List all seeds.
+  #Delete a seed.
   veidemannctl delete seed 407a9600-4f25-4f17-8cff-ee1b8ee950f6`,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -54,9 +54,6 @@ var deleteCmd = &cobra.Command{
 
 			if len(args) > 1 {
 				ids = args[1:]
-				fmt.Println("ID: ", ids)
-
-				fmt.Println("KIND: ", k, args[0], flags.format)
 				for _, id := range ids {
 					request := &configV1.ConfigObject{
 						ApiVersion: "v1",
@@ -66,16 +63,20 @@ var deleteCmd = &cobra.Command{
 
 					r, err := configClient.DeleteConfigObject(context.Background(), request)
 					if err != nil {
-						log.Fatalf("could not get crawl config: %v", err)
+						log.Fatalf("could delete '%v': %v\n", id, err)
 					}
-					fmt.Println(r)
+					if r.Deleted {
+						fmt.Printf("Deleted %v: %v\n", k, id)
+					} else {
+						fmt.Printf("Could not delete %v: %v\n", k, id)
+					}
 				}
 			} else {
 				fmt.Println("Missing id(s)")
 				fmt.Println("See 'veidemannctl get -h' for help")
 			}
 		} else {
-			fmt.Println("You must specify the object type to get. ")
+			fmt.Println("You must specify the object type to delete. ")
 			//fmt.Println(printValidObjectTypes())
 			for _, k := range configV1.Kind_name {
 				fmt.Println(k)

@@ -95,6 +95,7 @@ var getCmd = &cobra.Command{
 				if err != nil {
 					log.Fatalf("Error getting object: %v", err)
 				}
+				log.Debugf("Outputing record of kind '%s' with name '%s'", msg.Kind, msg.Meta.Name)
 				if s.WriteRecord(msg) != nil {
 					os.Exit(1)
 				}

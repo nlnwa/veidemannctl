@@ -32,6 +32,11 @@ import (
 	"time"
 )
 
+const (
+	manualRedirectURI = "urn:ietf:wg:oauth:2.0:oob"
+	autoRedirectURI = "http://localhost:9876"
+)
+
 // return an HTTP client which trusts the provided root CAs.
 func httpClientForRootCAs() *http.Client {
 	// Create a pool with systems CAs
@@ -91,7 +96,6 @@ func NewAuth(idp string) *auth {
 	a.offlineAsScope = true
 	a.clientID = "veidemann-cli"
 	a.clientSecret = "cli-app-secret"
-	a.redirectURI = "urn:ietf:wg:oauth:2.0:oob"
 
 	a.client = httpClientForRootCAs()
 
@@ -119,6 +123,25 @@ func NewAuth(idp string) *auth {
 	return &a
 }
 
+func (a *auth) Login(manual bool) {
+	authCodeURL := a.CreateAuthCodeURL(manual)
+	var code string
+	var state string
+
+	if manual {
+		fmt.Println("Paste this uri in a browser window. Follow the login steps and paste the code here.")
+		fmt.Println(authCodeURL)
+
+		fmt.Print("Code: ")
+		fmt.Scan(&code)
+		state = a.state
+	} else {
+		a.Openbrowser(authCodeURL)
+		code, state = a.listen()
+	}
+	a.VerifyCode(code, state)
+}
+
 func (a *auth) oauth2Config() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     a.clientID,
@@ -129,7 +152,7 @@ func (a *auth) oauth2Config() *oauth2.Config {
 	}
 }
 
-func (a *auth) CreateAuthCodeURL() string {
+func (a *auth) CreateAuthCodeURL(manual bool) string {
 	if !a.enabled {
 		log.Fatal("Cannot create authentication URL since authentication is not enabled")
 	}
@@ -138,6 +161,11 @@ func (a *auth) CreateAuthCodeURL() string {
 	viper.Set("nonce", a.state)
 
 	nonce := oidc.Nonce(a.state)
+	if manual {
+		a.redirectURI = manualRedirectURI
+	} else {
+		a.redirectURI = autoRedirectURI
+	}
 	return a.oauth2Config().AuthCodeURL(a.state, nonce)
 }
 
@@ -159,7 +187,11 @@ func (a *auth) Openbrowser(authCodeURL string) {
 	}
 }
 
-func (a *auth) VerifyCode(code string) {
+func (a *auth) VerifyCode(code string, state string) {
+	if a.state != state {
+		log.Fatal("State is not equal")
+	}
+
 	oauth2Token, err := a.oauth2Config().Exchange(a.ctx, code)
 	if err != nil {
 		log.Fatal(err)
