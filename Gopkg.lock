@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
+  name = "github.com/Sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
+  version = "v1.3.0"
+
+[[projects]]
   branch = "master"
   digest = "1:c307799fe01c92c8049378347b93b658a0f3be2d10a5dab8cc0798f45ee6759a"
   name = "github.com/buger/goterm"
@@ -383,6 +391,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/Sirupsen/logrus",
     "github.com/buger/goterm",
     "github.com/coreos/go-oidc",
     "github.com/ghodss/yaml",
@@ -402,6 +411,7 @@
     "golang.org/x/oauth2",
     "google.golang.org/grpc",
     "google.golang.org/grpc/credentials",
+    "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
