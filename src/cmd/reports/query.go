@@ -26,7 +26,6 @@ import (
 	"strings"
 	"io/ioutil"
 	"github.com/ghodss/yaml"
-	//"github.com/nlnwa/veidemannctl/bindata"
 	"path/filepath"
 	"os"
 	"github.com/nlnwa/veidemannctl/src/configutil"

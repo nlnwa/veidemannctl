@@ -59,10 +59,11 @@ func httpClientForRootCAs() *http.Client {
 		Transport: &http.Transport{
 			TLSClientConfig: &tlsConfig,
 			Proxy:           http.ProxyFromEnvironment,
-			Dial: (&net.Dialer{
+			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,
 				KeepAlive: 30 * time.Second,
-			}).Dial,
+				DualStack: true,
+			}).DialContext,
 			TLSHandshakeTimeout:   10 * time.Second,
 			ExpectContinueTimeout: 1 * time.Second,
 		},

@@ -115,6 +115,17 @@ func RunTemplate(msg interface{}, templateString string) {
 				return fmt.Sprintf("%-24.24s", ptypes.TimestampString(ts))
 			}
 		},
+		"json": func(v interface{}) string {
+			if v == nil {
+				return ""
+			} else {
+				json, err := json.Marshal(v)
+				if err != nil {
+					log.Fatal(err)
+				}
+				return string(json)
+			}
+		},
 		"prettyJson": func(v interface{}) string {
 			if v == nil {
 				return ""

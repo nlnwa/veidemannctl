@@ -15,6 +15,7 @@ package cmd
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/nlnwa/veidemannctl/src/configutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
@@ -34,6 +35,7 @@ var loginCmd = &cobra.Command{
 			return
 		}
 
+		log.Debugf("login using idp at %v", idp)
 		a := connection.NewAuth(idp)
 
 		a.Login(manualLogin)

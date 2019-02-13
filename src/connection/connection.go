@@ -70,6 +70,7 @@ func connect(idp string, tls bool) (*grpc.ClientConn, bool) {
 
 	// Set up a connection to the server.
 	creds := ClientTransportCredentials(tls)
+	log.Debugf("connecting to %v", address)
 	conn, err := BlockingDial(context.Background(), address, creds, dialOptions...)
 	if err != nil {
 		if strings.Contains(err.Error(), "first record does not look like a TLS handshake") {
@@ -117,12 +118,16 @@ func GetIdp() (string, bool) {
 	defer conn.Close()
 
 	c := api.NewControllerClient(conn)
-	reply, err := c.GetOpenIdConnectIssuer(context.Background(), &empty.Empty{})
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	defer cancel()
+	log.Debug("requesting OpenIdConnectIssuer")
+	reply, err := c.GetOpenIdConnectIssuer(ctx, &empty.Empty{})
 	if err != nil {
 		log.Fatalf("Could not get idp address: %v", err)
 	}
 
 	idp := reply.GetOpenIdConnectIssuer()
+	log.Debugf("using OpenIdConnectIssuer %v", idp)
 	if idp == "" {
 		log.Warn("Server was not configured with an idp. Proceeding without authentication")
 	}
