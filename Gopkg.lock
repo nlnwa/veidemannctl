@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
-  name = "github.com/Sirupsen/logrus"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
-  version = "v1.3.0"
-
-[[projects]]
   branch = "master"
   digest = "1:c307799fe01c92c8049378347b93b658a0f3be2d10a5dab8cc0798f45ee6759a"
   name = "github.com/buger/goterm"
@@ -144,8 +136,8 @@
     "veidemann_api",
   ]
   pruneopts = "UT"
-  revision = "0da56c3f6021952baebcbd1f04ba2f5b47ecf5ad"
-  version = "v1.0.0-beta2"
+  revision = "d655e4335039b342a138a2c6616e407f1bb078e2"
+  version = "v1.0.0-beta3"
 
 [[projects]]
   digest = "1:95741de3af260a92cc5c7f3f3061e85273f5a81b5db20d4bd68da74bd521675e"
@@ -391,7 +383,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Sirupsen/logrus",
     "github.com/buger/goterm",
     "github.com/coreos/go-oidc",
     "github.com/ghodss/yaml",
