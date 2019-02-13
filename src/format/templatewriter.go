@@ -1,6 +1,7 @@
 package format
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
@@ -101,15 +102,33 @@ func (t *templateWriter) applyTemplate(val interface{}, templateString string) {
 				return fmt.Sprintf("%04.f-%02.f-%02.fT%02.f:%02.f:%02.f", date["year"], date["month"], date["day"], time["hour"], time["minute"], time["second"])
 			}
 		},
+		"json": func(v interface{}) string {
+			if v == nil {
+				return ""
+			} else {
+				var buf bytes.Buffer
+				encoder := json.NewEncoder(&buf)
+				encoder.SetEscapeHTML(false)
+				err := encoder.Encode(v)
+				if err != nil {
+					log.Fatal(err)
+				}
+				return string(buf.Bytes())
+			}
+		},
 		"prettyJson": func(v interface{}) string {
 			if v == nil {
 				return ""
 			} else {
-				json, err := json.MarshalIndent(v, "", "  ")
+				var buf bytes.Buffer
+				encoder := json.NewEncoder(&buf)
+				encoder.SetEscapeHTML(false)
+				encoder.SetIndent("", "  ")
+				err := encoder.Encode(v)
 				if err != nil {
 					log.Fatal(err)
 				}
-				return string(json)
+				return buf.String()
 			}
 		},
 		"nl": func() string { return "\n" },

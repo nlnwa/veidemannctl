@@ -31,13 +31,14 @@ func createSelector(labelString string) []string {
 	return result
 }
 
-func createTemplateFilter(filterString string) (*api.FieldMask, *api.ConfigObject, error) {
+func CreateTemplateFilter(filterString string) (*api.FieldMask, *api.ConfigObject, error) {
 	q := strings.Split(filterString, "=")
 	mask := &api.FieldMask{}
 	mask.Paths = append(mask.Paths, q[0])
-	fmt.Println(mask)
 	obj := &api.ConfigObject{}
-	tokens := strings.Split(q[0], ".")
+	path := strings.TrimRight(q[0], "+-")
+	value := q[1]
+	tokens := strings.Split(path, ".")
 
 	t := reflect.TypeOf(obj)
 	v := reflect.ValueOf(obj)
@@ -70,19 +71,70 @@ func createTemplateFilter(filterString string) (*api.FieldMask, *api.ConfigObjec
 				}
 			}
 		}
-		switch t.Kind() {
-		case reflect.Ptr:
-			// Nothing to do
-		case reflect.String:
-			v.Set(reflect.ValueOf(q[1]))
-		case reflect.Int64:
-			i, _ := strconv.ParseInt(q[1], 10, 64)
-			v.Set(reflect.ValueOf(i))
-		default:
-			log.Fatalf("Field %v of type %v is not implemented yet", token, t.Kind())
+	}
+
+	if t.Kind() == reflect.Slice {
+		t = t.Elem()
+		val, err := makeValue(t, value)
+		if err != nil {
+			return nil, nil, err
+		}
+		if val.IsValid() {
+			v.Set(reflect.Append(v, val))
+		}
+	} else {
+		val, err := makeValue(t, value)
+		if err != nil {
+			return nil, nil, err
+		}
+		if val.IsValid() {
+			v.Set(val)
 		}
 	}
 	return mask, obj, nil
+}
+
+func makeValue(t reflect.Type, v string) (val reflect.Value, err error) {
+	switch t.Kind() {
+	case reflect.Ptr:
+		switch t.Elem() {
+		case reflect.TypeOf(api.ConfigRef{}):
+			val = reflect.New(t.Elem())
+			cr := val.Interface().(*api.ConfigRef)
+
+			kindId := strings.SplitN(v, ":", 2)
+			cr.Kind = api.Kind(api.Kind_value[kindId[0]])
+			cr.Id = kindId[1]
+		case reflect.TypeOf(api.Label{}):
+			val = reflect.New(t.Elem())
+			cr := val.Interface().(*api.Label)
+
+			keyVal := strings.SplitN(v, ":", 2)
+			cr.Key = keyVal[0]
+			cr.Value = keyVal[1]
+		default:
+			if typeRegistry[t.Elem().Name()] == nil {
+				log.Fatalf("field '%v' of type '%v' is not implemented yet", v, t.Elem())
+			}
+		}
+	case reflect.String:
+		val = reflect.ValueOf(v)
+	case reflect.Int64:
+		n, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return val, err
+		}
+		val = reflect.ValueOf(n)
+	case reflect.Bool:
+		n, err := strconv.ParseBool(v)
+		if err != nil {
+			return val, err
+		}
+		val = reflect.ValueOf(n)
+	default:
+		log.Fatalf("field '%v' of type '%v' is not implemented yet", v, t.Kind())
+	}
+	return
 }
 
 func CreateListRequest(kind api.Kind, ids []string, name string, labelString string, filterString string, pageSize int32, page int32) (*api.ListRequest, error) {
@@ -98,7 +150,7 @@ func CreateListRequest(kind api.Kind, ids []string, name string, labelString str
 	request.PageSize = pageSize
 
 	if filterString != "" {
-		m, o, err := createTemplateFilter(filterString)
+		m, o, err := CreateTemplateFilter(filterString)
 		if err != nil {
 			return nil, err
 		}

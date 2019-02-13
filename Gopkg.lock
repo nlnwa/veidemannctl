@@ -136,8 +136,8 @@
     "veidemann_api",
   ]
   pruneopts = "UT"
-  revision = "0da56c3f6021952baebcbd1f04ba2f5b47ecf5ad"
-  version = "v1.0.0-beta2"
+  revision = "d655e4335039b342a138a2c6616e407f1bb078e2"
+  version = "v1.0.0-beta3"
 
 [[projects]]
   digest = "1:95741de3af260a92cc5c7f3f3061e85273f5a81b5db20d4bd68da74bd521675e"
@@ -402,6 +402,7 @@
     "golang.org/x/oauth2",
     "google.golang.org/grpc",
     "google.golang.org/grpc/credentials",
+    "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

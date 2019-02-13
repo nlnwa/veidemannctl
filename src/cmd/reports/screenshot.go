@@ -17,8 +17,8 @@ package reports
 import (
 	"bytes"
 	"context"
-	"github.com/nlnwa/veidemannctl/src/connection"
 	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
