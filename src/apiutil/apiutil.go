@@ -114,7 +114,7 @@ func makeValue(t reflect.Type, v string) (val reflect.Value, err error) {
 			cr.Value = keyVal[1]
 		default:
 			if typeRegistry[t.Elem().Name()] == nil {
-				log.Fatal("field '%v' of type '%v' is not implemented yet", v, t.Elem())
+				log.Fatalf("field '%v' of type '%v' is not implemented yet", v, t.Elem())
 			}
 		}
 	case reflect.String:
