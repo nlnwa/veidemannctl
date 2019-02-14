@@ -17,9 +17,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	"gopkg.in/yaml.v2"
@@ -43,21 +43,13 @@ type seed struct {
 }
 
 var importFlags struct {
-	errorfile string
-	toplevel  bool
-	checkUri  bool
+	errorfile       string
+	toplevel        bool
+	checkUri        bool
+	checkUriTimeout int64
 }
 
-var httpClient = &http.Client{
-	CheckRedirect: func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	},
-	Transport: &http.Transport{
-		DisableKeepAlives:     true,
-		ResponseHeaderTimeout: 500 * time.Millisecond,
-	},
-	Timeout: 500 * time.Millisecond,
-}
+var httpClient *http.Client
 
 // importCmd represents the import command
 var importCmd = &cobra.Command{
@@ -65,6 +57,17 @@ var importCmd = &cobra.Command{
 	Short: "Import seeds",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		httpTimeout := time.Duration(importFlags.checkUriTimeout) * time.Millisecond
+		httpClient = &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+			Transport: &http.Transport{
+				DisableKeepAlives:     true,
+				ResponseHeaderTimeout: httpTimeout,
+			},
+			Timeout: httpTimeout,
+		}
 
 		if filename == "" {
 			cmd.Usage()
@@ -94,8 +97,19 @@ var importCmd = &cobra.Command{
 		client, conn := connection.NewConfigClient()
 		defer conn.Close()
 
-		var count int
+		var (
+			count   int
+			success int
+			failed  int
+		)
 		for {
+			var obj *seed
+			err = dr.Next(&obj)
+			if err == io.EOF {
+				fmt.Fprintf(os.Stderr, "\nRecords read: %v, imported: %v, failed: %v\n", count, success, failed)
+				return
+			}
+
 			// Print progress
 			count++
 			fmt.Fprint(os.Stderr, ".")
@@ -103,11 +117,6 @@ var importCmd = &cobra.Command{
 				fmt.Fprintln(os.Stderr, count)
 			}
 
-			var obj *seed
-			err = dr.Next(&obj)
-			if err == io.EOF {
-				return
-			}
 			if err != nil {
 				log.Fatalf("Parse error at record #%v: %v, Obj: %v", count, err, obj)
 				continue
@@ -116,6 +125,7 @@ var importCmd = &cobra.Command{
 			if obj != nil {
 				err = checkSeed(obj, client)
 				if err != nil {
+					failed++
 					fmt.Fprintf(out, "{\"uri\":\"%s\", \"err\":\"%s\"}\n", obj.Uri, err)
 				} else {
 					e := &configV1.ConfigObject{
@@ -130,7 +140,7 @@ var importCmd = &cobra.Command{
 					log.Debugf("store entity: %v", e)
 					e, err = client.SaveConfigObject(context.Background(), e)
 					if err != nil {
-						log.Fatalf("Error writing seed: %v", err)
+						log.Fatalf("Error writing crawl entity: %v", err)
 						os.Exit(1)
 					}
 
@@ -153,11 +163,12 @@ var importCmd = &cobra.Command{
 						},
 					}
 					log.Debugf("store seed: %v", s)
-					s, err = client.SaveConfigObject(context.Background(), s)
+					_, err := client.SaveConfigObject(context.Background(), s)
 					if err != nil {
-						log.Fatalf("Error writing crawl entity: %v", err)
+						log.Fatalf("Error writing seed: %v: %v", s, err)
 						os.Exit(1)
 					}
+					success++
 				}
 			}
 		}
@@ -172,6 +183,7 @@ func init() {
 	importCmd.PersistentFlags().StringVarP(&importFlags.errorfile, "errorfile", "e", "", "File to write errors to.")
 	importCmd.PersistentFlags().BoolVarP(&importFlags.toplevel, "toplevel", "", false, "Convert URI to toplevel by removing path.")
 	importCmd.PersistentFlags().BoolVarP(&importFlags.checkUri, "checkuri", "", false, "Check the uri for liveness and follow 301")
+	importCmd.PersistentFlags().Int64VarP(&importFlags.checkUriTimeout, "checkuri-timeout", "", 500, "Timeout in ms when checking uri for liveness.")
 }
 
 func checkSeed(s *seed, client configV1.ConfigClient) (err error) {
@@ -192,7 +204,7 @@ func checkSeed(s *seed, client configV1.ConfigClient) (err error) {
 		uri.Path = ""
 		uri.RawQuery = ""
 		uri.Fragment = ""
-		s.Uri = uri.String()
+		s.Uri = uri.Scheme + "://" + uri.Host
 	}
 
 	if importFlags.checkUri {

@@ -41,7 +41,7 @@ var flags struct {
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
-	Use:   "get [object_type]",
+	Use:   "get <kind>",
 	Short: "Get the value(s) for an object type",
 	Long: `Display one or many objects.
 
@@ -63,7 +63,7 @@ var getCmd = &cobra.Command{
 
 			var ids []string
 
-			if len(args) == 2 {
+			if len(args) > 1 {
 				ids = args[1:]
 			}
 
