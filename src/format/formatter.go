@@ -177,7 +177,7 @@ func Unmarshal(filename string) ([]*config.ConfigObject, error) {
 		if fi, _ := f.Stat(); fi.IsDir() {
 			fis, _ := f.Readdir(0)
 			for _, fi = range fis {
-				if !fi.IsDir() && (strings.HasSuffix(fi.Name(), ".yaml") || strings.HasSuffix(fi.Name(), ".json")) {
+				if !fi.IsDir() && HasSuffix(fi.Name(), ".yaml", ".yml", ".json") {
 					fmt.Println("Reading file: ", fi.Name())
 					f, err = os.Open(fi.Name())
 					if err != nil {
@@ -186,7 +186,7 @@ func Unmarshal(filename string) ([]*config.ConfigObject, error) {
 					}
 					defer f.Close()
 
-					if strings.HasSuffix(f.Name(), ".yaml") {
+					if HasSuffix(f.Name(), ".yaml", ".yml") {
 						result, err = UnmarshalYaml(f, result)
 					} else {
 						result, err = UnmarshalJson(f, result)
@@ -198,7 +198,7 @@ func Unmarshal(filename string) ([]*config.ConfigObject, error) {
 			}
 			return result, nil
 		} else {
-			if strings.HasSuffix(f.Name(), ".yaml") {
+			if HasSuffix(f.Name(), ".yaml", ".yml") {
 				return UnmarshalYaml(f, result)
 			} else {
 				return UnmarshalJson(f, result)
@@ -268,4 +268,13 @@ func UnmarshalJson(r io.Reader, result []*config.ConfigObject) ([]*config.Config
 	}
 
 	return result, nil
+}
+
+func HasSuffix(s string, suffix... string) bool {
+	for _, suf := range suffix {
+		if strings.HasSuffix(s, suf) {
+			return true
+		}
+	}
+	return false
 }

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
+	"github.com/nlnwa/veidemannctl/src/format"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -291,7 +292,7 @@ func (d *docReader) nextDecoder() (err error) {
 	}
 	fi := f[0]
 
-	if !fi.IsDir() && (strings.HasSuffix(fi.Name(), ".yaml") || strings.HasSuffix(fi.Name(), ".yml") || strings.HasSuffix(fi.Name(), ".json")) {
+	if !fi.IsDir() && format.HasSuffix(fi.Name(), ".yaml", ".yml", ".json") {
 		fmt.Println("Reading file: ", fi.Name())
 		d.currFile, err = os.Open(filepath.Join(d.dir.Name(), fi.Name()))
 		if err != nil {
@@ -328,7 +329,7 @@ func NewDocReader(filename string) (d *docReader, err error) {
 			d.nextDecoder()
 			return
 		} else {
-			if strings.HasSuffix(f.Name(), ".yaml") || strings.HasSuffix(f.Name(), ".yml") {
+			if format.HasSuffix(f.Name(), ".yaml", ".yml") {
 				d.decoder = yaml.NewDecoder(f)
 				return
 			} else {

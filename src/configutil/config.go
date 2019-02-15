@@ -14,21 +14,30 @@
 package configutil
 
 import (
+	"fmt"
 	"github.com/ghodss/yaml"
+	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	yaml2 "gopkg.in/yaml.v2"
+	"io/ioutil"
 	"os"
 	"path/filepath"
-	"os/user"
+	"strings"
 )
 
 type config struct {
 	ControllerAddress  string `json:"controllerAddress"`
-	Idp                string `json:"idp"`
 	AccessToken        string `json:"accessToken"`
 	Nonce              string `json:"nonce"`
 	RootCAs            string `json:"rootCAs"`
 	ServerNameOverride string `json:"serverNameOverride"`
+}
+
+var GlobalFlags struct {
+	Context            string
+	ControllerAddress  string
+	ServerNameOverride string
 }
 
 func WriteConfig() {
@@ -36,7 +45,6 @@ func WriteConfig() {
 
 	c := config{
 		viper.GetString("controllerAddress"),
-		viper.GetString("idp"),
 		viper.GetString("accessToken"),
 		viper.GetString("nonce"),
 		viper.GetString("rootCAs"),
@@ -59,10 +67,102 @@ func WriteConfig() {
 }
 
 func GetConfigDir(subdir string) string {
-	usr, err := user.Current()
+	// Find home directory.
+	home, err := homedir.Dir()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return filepath.Join(usr.HomeDir, ".veidemann", subdir)
+	return filepath.Join(home, ".veidemann", subdir)
+}
+
+type context struct {
+	Context string
+}
+
+func GetCurrentContext() (string, error) {
+	contextDir := GetConfigDir("contexts")
+	log.Debugf("Creating context directory: %s", contextDir)
+	if err := os.MkdirAll(contextDir, 0777); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	contextFile := GetConfigDir("context.yaml")
+	f, err := os.Open(contextFile)
+	if err != nil {
+		err = SetCurrentContext("default")
+		if err != nil {
+			return "", err
+		}
+
+		f, err = os.Open(contextFile)
+		if err != nil {
+			log.Fatalf("Could not read file '%s': %v", contextFile, err)
+			return "", err
+		}
+	}
+	defer f.Close()
+
+	var c context
+	dec := yaml2.NewDecoder(f)
+	err = dec.Decode(&c)
+	if err != nil {
+		log.Fatalf("Could not read file '%s': %v", contextFile, err)
+		return "", err
+	}
+
+	return c.Context, err
+}
+
+func SetCurrentContext(ctx string) error {
+	contextFile := GetConfigDir("context.yaml")
+	w, err := os.Create(contextFile)
+	if err != nil {
+		log.Fatalf("Could not open or create file '%s': %v", contextFile, err)
+		return err
+	}
+	enc := yaml2.NewEncoder(w)
+	err = enc.Encode(context{ctx})
+	if err != nil {
+		log.Fatalf("Could not write file '%s': %v", contextFile, err)
+		return err
+	}
+	enc.Close()
+	w.Close()
+
+	return nil
+}
+
+func ListContexts() ([]string, error) {
+	var files []string
+	contextDir := GetConfigDir("contexts")
+	fileInfo, err := ioutil.ReadDir(contextDir)
+	if err != nil {
+		return files, err
+	}
+
+	for _, file := range fileInfo {
+		if !file.IsDir() {
+			sufIdx := strings.LastIndex(file.Name(), ".")
+			if sufIdx > 0 {
+				files = append(files, file.Name()[:sufIdx])
+			}
+		}
+	}
+	return files, nil
+}
+
+func ContextExists(ctx string) (bool, error) {
+	cs, err := ListContexts()
+	if err != nil {
+		return false, err
+	}
+
+	for _, c := range cs {
+		if ctx == c {
+			return true, nil
+		}
+	}
+	return false, nil
 }
