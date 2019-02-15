@@ -18,6 +18,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
 	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	"github.com/nlnwa/veidemannctl/src/configutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
@@ -61,7 +62,7 @@ func newConnection() *grpc.ClientConn {
 }
 
 func connect(idp string, tls bool) (*grpc.ClientConn, bool) {
-	address := viper.GetString("controllerAddress")
+	address := configutil.GlobalFlags.ControllerAddress
 
 	dialOptions := []grpc.DialOption{}
 	if idp != "" {
@@ -105,7 +106,7 @@ func ClientTransportCredentials(tls bool) credentials.TransportCredentials {
 			}
 		}
 
-		serverNameOverride := viper.GetString("serverNameOverride")
+		serverNameOverride := configutil.GlobalFlags.ServerNameOverride
 		log.Debugf("Using server name override: %s", serverNameOverride)
 		creds = credentials.NewClientTLSFromCert(certPool, serverNameOverride)
 	}

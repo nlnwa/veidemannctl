@@ -15,26 +15,22 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
-	"github.com/mitchellh/go-homedir"
+	"github.com/nlnwa/veidemannctl/bindata"
+	"github.com/nlnwa/veidemannctl/src/cmd/config"
+	"github.com/nlnwa/veidemannctl/src/cmd/logconfig"
 	"github.com/nlnwa/veidemannctl/src/cmd/reports"
 	"github.com/nlnwa/veidemannctl/src/configutil"
 	"github.com/nlnwa/veidemannctl/src/version"
-	"github.com/nlnwa/veidemannctl/src/cmd/logconfig"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io/ioutil"
-	"github.com/nlnwa/veidemannctl/bindata"
+	"os"
+	"path/filepath"
 )
 
 var (
-	cfgFile            string
-	controllerAddress  string
-	rootCAs            string
-	serverNameOverride string
-	debug              bool
+	cfgFile string
+	debug   bool
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -69,15 +65,10 @@ func init() {
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.veidemannctl.yaml)")
 
-	RootCmd.PersistentFlags().StringVarP(&controllerAddress, "controllerAddress", "c", "localhost:50051", "Address to the Controller service")
-	viper.BindPFlag("controllerAddress", RootCmd.PersistentFlags().Lookup("controllerAddress"))
+	RootCmd.PersistentFlags().StringVarP(&configutil.GlobalFlags.ControllerAddress, "controllerAddress", "c", "localhost:50051", "Address to the Controller service")
 
-	RootCmd.PersistentFlags().StringVar(&rootCAs, "trusted-ca", "", "File with trusted certificate chains for the idp and controller."+
-		" These are in addition to the default certs configured for the OS.")
-
-	RootCmd.PersistentFlags().StringVar(&serverNameOverride, "serverNameOverride", "",
+	RootCmd.PersistentFlags().StringVar(&configutil.GlobalFlags.ServerNameOverride, "serverNameOverride", "",
 		"If set, it will override the virtual host name of authority (e.g. :authority header field) in requests.")
-	viper.BindPFlag("serverNameOverride", RootCmd.PersistentFlags().Lookup("serverNameOverride"))
 
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Turn on debugging")
 
@@ -85,29 +76,35 @@ func init() {
 
 	RootCmd.AddCommand(reports.ReportCmd)
 	RootCmd.AddCommand(logconfig.LogconfigCmd)
+	RootCmd.AddCommand(config.ConfigCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
+var contextDir string
+
 func initConfig() {
 	if debug {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	var home string
+	configutil.GlobalFlags.Context = "default"
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
 		var err error
-		home, err = homedir.Dir()
+		configutil.GlobalFlags.Context, err = configutil.GetCurrentContext()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Could not get current context: %v", err)
 		}
+		contextDir = configutil.GetConfigDir("contexts")
 
 		// Search config in home directory with name ".veidemannctl" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".veidemannctl")
+		viper.AddConfigPath(contextDir)
+		viper.SetConfigName(configutil.GlobalFlags.Context)
+
+		log.Debug("Using context:", configutil.GlobalFlags.Context)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -115,22 +112,16 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		log.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	} else {
-		viper.SetConfigFile(home + "/.veidemannctl.yaml")
+		viper.SetConfigFile(filepath.Join(contextDir, configutil.GlobalFlags.Context+".yaml"))
 	}
 
-	if rootCAs != "" {
-		rootCABytes, err := ioutil.ReadFile(rootCAs)
-		if err != nil {
-			log.Fatalf("failed to read root-ca: %v", err)
-		}
-		viper.Set("rootCAs", string(rootCABytes))
+	if !RootCmd.PersistentFlags().Changed("controllerAddress") {
+		configutil.GlobalFlags.ControllerAddress = viper.GetString("controllerAddress")
 	}
 
-	if RootCmd.PersistentFlags().Changed("controllerAddress") ||
-		RootCmd.PersistentFlags().Changed("idp") ||
-		RootCmd.PersistentFlags().Changed("trusted-ca") ||
-		RootCmd.PersistentFlags().Changed("serverNameOverride") {
-
-		configutil.WriteConfig()
+	if !RootCmd.PersistentFlags().Changed("serverNameOverride") {
+		configutil.GlobalFlags.ServerNameOverride = viper.GetString("serverNameOverride")
 	}
+	log.Debug("Using controller address:", configutil.GlobalFlags.ControllerAddress)
+	log.Debug("Using server name override:", configutil.GlobalFlags.ServerNameOverride)
 }
