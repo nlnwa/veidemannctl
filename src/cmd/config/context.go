@@ -76,7 +76,7 @@ Examples:
 			}
 
 			contextDir := configutil.GetConfigDir("contexts")
-			viper.SetConfigFile(filepath.Join(contextDir, configutil.GlobalFlags.Context+".yaml"))
+			viper.SetConfigFile(filepath.Join(contextDir, args[0]+".yaml"))
 			configutil.WriteConfig()
 
 			if err := configutil.SetCurrentContext(args[0]); err != nil {
