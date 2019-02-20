@@ -25,6 +25,7 @@ import (
 	"golang.org/x/net/context"
 	"gopkg.in/yaml.v2"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -36,11 +37,14 @@ import (
 type seed struct {
 	EntityName        string
 	Uri               string
-	EntityLabels      []*configV1.Label
-	SeedLabels        []*configV1.Label
+	EntityLabel       []*configV1.Label
+	SeedLabel         []*configV1.Label
 	EntityDescription string
 	SeedDescription   string
 	Description       string
+	fileName          string
+	recNum            int
+	err               error
 }
 
 var importFlags struct {
@@ -103,12 +107,26 @@ var importCmd = &cobra.Command{
 			success int
 			failed  int
 		)
+
+		subCount := 8
+		cData := make(chan *seed)
+		cComplete := make(chan subResponse)
+		for i := 0; i < subCount; i++ {
+			go storeRecord(client, out, cData, cComplete)
+		}
+
 		for {
-			var obj *seed
-			err = dr.Next(&obj)
-			if err == io.EOF {
-				fmt.Fprintf(os.Stderr, "\nRecords read: %v, imported: %v, failed: %v\n", count, success, failed)
-				return
+			var s seed
+			obj := &s
+			err = dr.Next(obj)
+			if err == io.EOF || err == io.ErrUnexpectedEOF {
+				if err == io.ErrUnexpectedEOF {
+					obj.err = err
+					count++
+					failed++
+					printErr(out, obj)
+				}
+				break
 			}
 
 			// Print progress
@@ -119,61 +137,106 @@ var importCmd = &cobra.Command{
 			}
 
 			if err != nil {
-				log.Fatalf("Parse error at record #%v: %v, Obj: %v", count, err, obj)
+				obj.err = err
+				failed++
+				printErr(out, obj)
 				continue
 			}
 
 			if obj != nil {
-				err = checkSeed(obj, client)
-				if err != nil {
-					failed++
-					fmt.Fprintf(out, "{\"uri\":\"%s\", \"err\":\"%s\"}\n", obj.Uri, err)
-				} else {
-					e := &configV1.ConfigObject{
-						ApiVersion: "v1",
-						Kind:       configV1.Kind_crawlEntity,
-						Meta: &configV1.Meta{
-							Name:        obj.EntityName,
-							Description: obj.EntityDescription,
-							Label:       obj.EntityLabels,
-						},
-					}
-					log.Debugf("store entity: %v", e)
-					e, err = client.SaveConfigObject(context.Background(), e)
-					if err != nil {
-						log.Fatalf("Error writing crawl entity: %v", err)
-						os.Exit(1)
-					}
-
-					s := &configV1.ConfigObject{
-						ApiVersion: "v1",
-						Kind:       configV1.Kind_seed,
-						Meta: &configV1.Meta{
-							Name:        obj.Uri,
-							Description: obj.SeedDescription,
-							Label:       obj.SeedLabels,
-						},
-						Spec: &configV1.ConfigObject_Seed{
-							Seed: &configV1.Seed{
-								Disabled: true,
-								EntityRef: &configV1.ConfigRef{
-									Kind: configV1.Kind_crawlEntity,
-									Id:   e.Id,
-								},
-							},
-						},
-					}
-					log.Debugf("store seed: %v", s)
-					_, err := client.SaveConfigObject(context.Background(), s)
-					if err != nil {
-						log.Fatalf("Error writing seed: %v: %v", s, err)
-						os.Exit(1)
-					}
-					success++
-				}
+				cData <- obj
 			}
 		}
+
+		close(cData)
+		subCompleted := 0
+		for i := range cComplete {
+			success += i.success
+			failed += i.failed
+			subCompleted++
+			if subCompleted >= subCount {
+				break
+			}
+		}
+		_, _ = fmt.Fprintf(os.Stderr, "\nRecords read: %v, imported: %v, failed: %v\n", count, success, failed)
+
 	},
+}
+
+type subResponse struct {
+	count   int
+	success int
+	failed  int
+}
+
+func storeRecord(client configV1.ConfigClient, out io.Writer, cin chan *seed, cout chan subResponse) {
+	res := subResponse{}
+
+	for obj := range cin {
+		res.count++
+		err := checkSeed(obj, client)
+		if err != nil {
+			obj.err = err
+			res.failed++
+			printErr(out, obj)
+		} else {
+			e := &configV1.ConfigObject{
+				ApiVersion: "v1",
+				Kind:       configV1.Kind_crawlEntity,
+				Meta: &configV1.Meta{
+					Name:        obj.EntityName,
+					Description: obj.EntityDescription,
+					Label:       obj.EntityLabel,
+				},
+			}
+			log.Debugf("store entity: %v", e)
+			e, err = client.SaveConfigObject(context.Background(), e)
+			if err != nil {
+				obj.err = fmt.Errorf("Error writing crawl entity: %v", err)
+				res.failed++
+				printErr(out, obj)
+				client.DeleteConfigObject(context.Background(), e)
+				continue
+			}
+
+			s := &configV1.ConfigObject{
+				ApiVersion: "v1",
+				Kind:       configV1.Kind_seed,
+				Meta: &configV1.Meta{
+					Name:        obj.Uri,
+					Description: obj.SeedDescription,
+					Label:       obj.SeedLabel,
+				},
+				Spec: &configV1.ConfigObject_Seed{
+					Seed: &configV1.Seed{
+						EntityRef: &configV1.ConfigRef{
+							Kind: configV1.Kind_crawlEntity,
+							Id:   e.Id,
+						},
+					},
+				},
+			}
+			log.Debugf("store seed: %v", s)
+			_, err = client.SaveConfigObject(context.Background(), s)
+			if err != nil {
+				obj.err = fmt.Errorf("Error writing seed: %v", err)
+				res.failed++
+				printErr(out, obj)
+				continue
+			}
+
+			res.success++
+		}
+	}
+	cout <- res
+}
+
+func printErr(out io.Writer, obj *seed) {
+	var uri string
+	if obj != nil {
+		uri = obj.Uri
+	}
+	_, _ = fmt.Fprintf(out, "{\"uri\": \"%s\", \"err\": \"%s\", \"file\": \"%s\", \"recNum\": %v}\n", uri, obj.err, obj.fileName, obj.recNum)
 }
 
 func init() {
@@ -188,42 +251,9 @@ func init() {
 }
 
 func checkSeed(s *seed, client configV1.ConfigClient) (err error) {
-	uri, err := url.Parse(s.Uri)
+	uri, err := checkUri(s, true)
 	if err != nil {
-		return fmt.Errorf("unparseable URL '%v', cause: %v", s.Uri, err)
-	}
-
-	if uri.Host == "" {
-		return errors.New("unparseable URL")
-	}
-
-	if s.EntityName == "" {
-		return errors.New("entityName cannot be empty")
-	}
-
-	if importFlags.toplevel {
-		uri.Path = ""
-		uri.RawQuery = ""
-		uri.Fragment = ""
-		s.Uri = uri.Scheme + "://" + uri.Host
-	}
-
-	if importFlags.checkUri {
-		var resp *http.Response
-		resp, err = httpClient.Head(s.Uri)
-		if err != nil {
-			if strings.Contains(err.Error(), "no such host") {
-				return
-			}
-		} else {
-			resp.Body.Close()
-			if resp.StatusCode == 301 {
-				loc := resp.Header.Get("Location")
-				if loc != "" {
-					s.Uri = loc
-				}
-			}
-		}
+		return
 	}
 
 	req := &configV1.ListRequest{
@@ -255,17 +285,72 @@ func checkSeed(s *seed, client configV1.ConfigClient) (err error) {
 	return nil
 }
 
+func checkUri(s *seed, followRedirect bool) (uri *url.URL, err error) {
+	uri, err = url.Parse(s.Uri)
+	if err != nil {
+		return uri, fmt.Errorf("unparseable URL '%v', cause: %v", s.Uri, err)
+	}
+
+	if uri.Host == "" {
+		return uri, errors.New("unparseable URL")
+	}
+
+	if s.EntityName == "" {
+		return uri, errors.New("entityName cannot be empty")
+	}
+
+	if importFlags.toplevel {
+		uri.Path = ""
+		uri.RawQuery = ""
+		uri.Fragment = ""
+		s.Uri = uri.Scheme + "://" + uri.Host
+	}
+
+	if importFlags.checkUri {
+		var resp *http.Response
+		resp, err = httpClient.Head(s.Uri)
+		if err != nil {
+			uerr := err.(*url.Error)
+			if uerr.Timeout() {
+				err = nil
+			} else {
+				switch v := uerr.Err.(type) {
+				case *net.OpError:
+					if t, ok := v.Err.(*net.DNSError); ok {
+						err = fmt.Errorf("no such host %s", t.Name)
+					}
+					return
+				default:
+					return
+				}
+			}
+		} else {
+			resp.Body.Close()
+			if resp.StatusCode == 301 && followRedirect {
+				loc := resp.Header.Get("Location")
+				if loc != "" {
+					s.Uri = loc
+					return checkUri(s, false)
+				}
+			}
+		}
+	}
+	return
+}
+
 type docReader struct {
-	decoder  yjDecoder
-	currFile *os.File
-	dir      *os.File
+	decoder     yjDecoder
+	curFile     *os.File
+	dir         *os.File
+	curFileName string
+	curRecNum   int
 }
 
 type yjDecoder interface {
 	Decode(v interface{}) (err error)
 }
 
-func (d *docReader) Next(target interface{}) (err error) {
+func (d *docReader) Next(target *seed) (err error) {
 	err = d.decoder.Decode(target)
 	if err == io.EOF {
 		if err = d.nextDecoder(); err != nil {
@@ -273,12 +358,16 @@ func (d *docReader) Next(target interface{}) (err error) {
 		}
 		return d.Next(target)
 	}
+	d.curRecNum++
+	target.fileName = d.curFileName
+	target.recNum = d.curRecNum
+	target.err = err
 	return
 }
 
 func (d *docReader) nextDecoder() (err error) {
-	if d.currFile != nil {
-		d.currFile.Close()
+	if d.curFile != nil {
+		d.curFile.Close()
 	}
 
 	if d.dir == nil {
@@ -294,17 +383,23 @@ func (d *docReader) nextDecoder() (err error) {
 
 	if !fi.IsDir() && format.HasSuffix(fi.Name(), ".yaml", ".yml", ".json") {
 		fmt.Println("Reading file: ", fi.Name())
-		d.currFile, err = os.Open(filepath.Join(d.dir.Name(), fi.Name()))
+		d.curFile, err = os.Open(filepath.Join(d.dir.Name(), fi.Name()))
 		if err != nil {
 			log.Fatalf("Could not open file '%s': %v", filename, err)
 			return
 		}
+		d.curRecNum = 0
+		d.curFileName = d.curFile.Name()
 
-		if strings.HasSuffix(d.currFile.Name(), ".yaml") || strings.HasSuffix(d.currFile.Name(), ".yml") {
-			d.decoder = yaml.NewDecoder(d.currFile)
+		if strings.HasSuffix(d.curFile.Name(), ".yaml") || strings.HasSuffix(d.curFile.Name(), ".yml") {
+			dec := yaml.NewDecoder(d.curFile)
+			dec.SetStrict(true)
+			d.decoder = dec
 			return
 		} else {
-			d.decoder = json.NewDecoder(d.currFile)
+			dec := json.NewDecoder(d.curFile)
+			dec.DisallowUnknownFields()
+			d.decoder = dec
 			return
 		}
 	}
@@ -329,11 +424,16 @@ func NewDocReader(filename string) (d *docReader, err error) {
 			d.nextDecoder()
 			return
 		} else {
+			d.curFileName = f.Name()
 			if format.HasSuffix(f.Name(), ".yaml", ".yml") {
-				d.decoder = yaml.NewDecoder(f)
+				dec := yaml.NewDecoder(f)
+				dec.SetStrict(true)
+				d.decoder = dec
 				return
 			} else {
-				d.decoder = json.NewDecoder(f)
+				dec := json.NewDecoder(f)
+				dec.DisallowUnknownFields()
+				d.decoder = dec
 				return
 			}
 		}
