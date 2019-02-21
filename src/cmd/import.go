@@ -45,6 +45,7 @@ type seed struct {
 	fileName          string
 	recNum            int
 	err               error
+	crawlJobRef       []*configV1.ConfigRef
 }
 
 var importFlags struct {
@@ -52,6 +53,7 @@ var importFlags struct {
 	toplevel        bool
 	checkUri        bool
 	checkUriTimeout int64
+	crawlJobId      string
 }
 
 var httpClient *http.Client
@@ -115,8 +117,17 @@ var importCmd = &cobra.Command{
 			go storeRecord(client, out, cData, cComplete)
 		}
 
+		crawlJobRef := []*configV1.ConfigRef{
+			{
+				Kind: configV1.Kind_crawlJob,
+				Id:   importFlags.crawlJobId,
+			},
+		}
 		for {
 			var s seed
+			if importFlags.crawlJobId != "" {
+				s.crawlJobRef = crawlJobRef
+			}
 			obj := &s
 			err = dr.Next(obj)
 			if err == io.EOF || err == io.ErrUnexpectedEOF {
@@ -213,6 +224,7 @@ func storeRecord(client configV1.ConfigClient, out io.Writer, cin chan *seed, co
 							Kind: configV1.Kind_crawlEntity,
 							Id:   e.Id,
 						},
+						JobRef: obj.crawlJobRef,
 					},
 				},
 			}
@@ -248,6 +260,7 @@ func init() {
 	importCmd.PersistentFlags().BoolVarP(&importFlags.toplevel, "toplevel", "", false, "Convert URI to toplevel by removing path.")
 	importCmd.PersistentFlags().BoolVarP(&importFlags.checkUri, "checkuri", "", false, "Check the uri for liveness and follow 301")
 	importCmd.PersistentFlags().Int64VarP(&importFlags.checkUriTimeout, "checkuri-timeout", "", 500, "Timeout in ms when checking uri for liveness.")
+	importCmd.PersistentFlags().StringVarP(&importFlags.crawlJobId, "crawljob-id", "", "", "Set crawlJob ID for new seeds.")
 }
 
 func checkSeed(s *seed, client configV1.ConfigClient) (err error) {
