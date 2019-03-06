@@ -3,3 +3,9 @@
 [![Travis](https://img.shields.io/travis/nlnwa/veidemannctl.svg)](https://travis-ci.org/nlnwa/veidemannctl)
 
 # veidemannctl
+
+## Install
+
+```console
+curl -sL https://raw.githubusercontent.com/nlnwa/veidemannctl/master/install.sh | bash
+```
