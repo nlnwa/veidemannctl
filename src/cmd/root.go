@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"github.com/nlnwa/veidemannctl/bindata"
 	"github.com/nlnwa/veidemannctl/src/cmd/config"
+	"github.com/nlnwa/veidemannctl/src/cmd/importcmd"
 	"github.com/nlnwa/veidemannctl/src/cmd/logconfig"
 	"github.com/nlnwa/veidemannctl/src/cmd/reports"
 	"github.com/nlnwa/veidemannctl/src/configutil"
@@ -77,6 +78,7 @@ func init() {
 	RootCmd.AddCommand(reports.ReportCmd)
 	RootCmd.AddCommand(logconfig.LogconfigCmd)
 	RootCmd.AddCommand(config.ConfigCmd)
+	RootCmd.AddCommand(importcmd.ImportCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.

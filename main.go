@@ -17,6 +17,7 @@ import (
 	"github.com/nlnwa/veidemannctl/src/cmd"
 	v "github.com/nlnwa/veidemannctl/src/version"
 	log "github.com/sirupsen/logrus"
+	stdlogger "log"
 )
 
 var version = "master"
@@ -31,5 +32,7 @@ func main() {
 }
 
 func init() {
+	stdlogger.SetOutput(log.StandardLogger().Writer())
+
 	log.SetLevel(log.WarnLevel)
 }

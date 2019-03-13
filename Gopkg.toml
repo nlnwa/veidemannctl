@@ -51,6 +51,10 @@ required = ["github.com/jteeuwen/go-bindata"]
   name = "google.golang.org/grpc"
   version = "1.17.0"
 
+[[constraint]]
+  name = "github.com/dgraph-io/badger"
+  version = "=v2.0.0-rc.2"
+
 [prune]
   go-tests = true
   unused-packages = true
