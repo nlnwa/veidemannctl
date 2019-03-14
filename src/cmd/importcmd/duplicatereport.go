@@ -23,7 +23,7 @@ import (
 )
 
 var dupFlags struct {
-	errorFile       string
+	outFile         string
 	dbDir           string
 	resetDb         bool
 }
@@ -36,15 +36,15 @@ var duplicateReportCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 
-		// Create error writer (file or stdout)
-		var errFile io.Writer
-		if dupFlags.errorFile == "" {
-			errFile = os.Stdout
+		// Create output writer (file or stdout)
+		var out io.Writer
+		if dupFlags.outFile == "" {
+			out = os.Stdout
 		} else {
-			errFile, err = os.Create(dupFlags.errorFile)
-			defer errFile.(io.Closer).Close()
+			out, err = os.Create(dupFlags.outFile)
+			defer out.(io.Closer).Close()
 			if err != nil {
-				log.Fatalf("Unable to open error file: %v, cause: %v", dupFlags.errorFile, err)
+				log.Fatalf("Unable to open out file: %v, cause: %v", dupFlags.outFile, err)
 				os.Exit(1)
 			}
 		}
@@ -58,14 +58,14 @@ var duplicateReportCmd = &cobra.Command{
 		impf.ImportExisting()
 		defer impf.Close()
 
-		impf.DuplicateReport()
+		impf.DuplicateReport(out)
 	},
 }
 
 func init() {
 	ImportCmd.AddCommand(duplicateReportCmd)
 
-	duplicateReportCmd.PersistentFlags().StringVarP(&dupFlags.errorFile, "errorfile", "e", "", "File to write errors to.")
+	duplicateReportCmd.PersistentFlags().StringVarP(&dupFlags.outFile, "outFile", "o", "", "File to write output.")
 	duplicateReportCmd.PersistentFlags().StringVarP(&dupFlags.dbDir, "db-directory", "b", "/tmp/veidemannctl", "Directory for storing state db")
 	duplicateReportCmd.PersistentFlags().BoolVarP(&dupFlags.resetDb, "reset-db", "r", false, "Clean state db")
 }

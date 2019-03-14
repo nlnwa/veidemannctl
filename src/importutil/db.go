@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"github.com/dgraph-io/badger"
 	"github.com/dgraph-io/badger/pb"
@@ -144,7 +145,21 @@ func (d *ImportDb) ImportExisting() {
 	fmt.Printf("Imported %v seeds from Veidemann in %s\n", i, elapsed)
 }
 
-func (d *ImportDb) DuplicateReport() error {
+type DuplicateReportRecord struct {
+	Host  string
+	Seeds []SeedRecord
+}
+
+type SeedRecord struct {
+	SeedId            string
+	Uri               string
+	SeedDescription   string
+	EntityId          string
+	EntityName        string
+	EntityDescription string
+}
+
+func (d *ImportDb) DuplicateReport(w io.Writer) error {
 	stream := d.db.NewStream()
 
 	// -- Optional settings
@@ -154,24 +169,44 @@ func (d *ImportDb) DuplicateReport() error {
 
 	// Send is called serially, while Stream.Orchestrate is running.
 	stream.Send = func(list *pb.KVList) error {
-		if len(list.GetKv()) != 1 {
-			for _, kv := range list.GetKv() {
-				val := d.bytesToStringArray(kv.Value)
-				if len(val) > 1 {
-					for idx, id := range val {
-						ref := &configV1.ConfigRef{Id: id, Kind: configV1.Kind_seed}
-						seed, err := d.client.GetConfigObject(context.Background(), ref)
-						if idx == 0 {
-							fmt.Println(string(kv.Key))
+		for _, kv := range list.GetKv() {
+			val := d.bytesToStringArray(kv.Value)
+			if len(val) > 1 {
+				rec := &DuplicateReportRecord{Host: string(kv.Key)}
+				for _, id := range val {
+					ref := &configV1.ConfigRef{Id: id, Kind: configV1.Kind_seed}
+					seed, err := d.client.GetConfigObject(context.Background(), ref)
+					if err == nil {
+						sr := SeedRecord{
+							SeedId:          seed.GetId(),
+							Uri:             seed.GetMeta().GetName(),
+							SeedDescription: seed.GetMeta().GetDescription(),
+							EntityId:        seed.GetSeed().GetEntityRef().GetId(),
 						}
+						rec.Seeds = append(rec.Seeds, sr)
+						entity, err := d.client.GetConfigObject(context.Background(), seed.GetSeed().GetEntityRef())
 						if err == nil {
-							fmt.Println("  *", seed.GetId(), seed.GetSeed().GetEntityRef(), seed.GetMeta().GetName())
-							entity, err := d.client.GetConfigObject(context.Background(), seed.GetSeed().GetEntityRef())
-							if err == nil {
-								fmt.Println("       -", entity.GetId(), entity.GetMeta().GetName(), entity.GetMeta().GetDescription())
-							}
+							sr.EntityName = entity.GetMeta().GetName()
+							sr.EntityDescription = entity.GetMeta().GetDescription()
+						} else {
+							log.Warnf("error getting entity from Veidemann: %v", err)
 						}
+					} else {
+						log.Warnf("error getting seed from Veidemann: %v", err)
 					}
+				}
+				b, err := json.Marshal(rec)
+				if err == nil {
+					d.vmMux.Lock()
+					if _, err := w.Write(b); err != nil {
+						log.Warnf("error wirting record: %v", err)
+					}
+					if _, err := w.Write([]byte{'\n'}); err != nil {
+						log.Warnf("error wirting record: %v", err)
+					}
+					d.vmMux.Unlock()
+				} else {
+					log.Warnf("error formatting json: %v", err)
 				}
 			}
 		}
@@ -244,7 +279,9 @@ func (d *ImportDb) contains(uri *url.URL, id string, update bool) (response *Exi
 			if err == nil {
 				err := item.Value(func(v []byte) error {
 					val = d.bytesToStringArray(v)
-					if len(val) == 0 {val = nil}
+					if len(val) == 0 {
+						val = nil
+					}
 					return nil
 				})
 				if err != nil {
