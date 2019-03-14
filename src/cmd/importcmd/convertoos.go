@@ -116,7 +116,7 @@ var convertOosCmd = &cobra.Command{
 				return fmt.Errorf("%v already exists", v)
 			}
 
-			seed := &seed{
+			seed := &seedDesc{
 				Uri:         v,
 				SeedLabel:   []*configV1.Label{{Key: "source", Value: "oosh"}},
 				EntityLabel: []*configV1.Label{{Key: "source", Value: "oosh"}},
@@ -185,7 +185,7 @@ type converter struct {
 	httpClient *http.Client
 }
 
-func (c *converter) checkUri(s *seed) (err error) {
+func (c *converter) checkUri(s *seedDesc) (err error) {
 	uri, err := url.Parse(s.Uri)
 	if err != nil {
 		return fmt.Errorf("unparseable URL '%v', cause: %v", s.Uri, err)
@@ -208,7 +208,7 @@ func (c *converter) checkUri(s *seed) (err error) {
 	return
 }
 
-func (c *converter) checkRedirect(uri string, s *seed, count int) {
+func (c *converter) checkRedirect(uri string, s *seedDesc, count int) {
 	if count > 5 {
 		return
 	}

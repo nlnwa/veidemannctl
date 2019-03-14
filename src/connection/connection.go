@@ -64,7 +64,10 @@ func newConnection() *grpc.ClientConn {
 func connect(idp string, tls bool) (*grpc.ClientConn, bool) {
 	address := configutil.GlobalFlags.ControllerAddress
 
-	dialOptions := []grpc.DialOption{}
+	dialOptions := []grpc.DialOption{
+		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
+	}
+
 	if idp != "" {
 		dialOptions = AddCredentials(idp, dialOptions)
 	}
