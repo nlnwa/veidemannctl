@@ -53,6 +53,7 @@ var importFlags struct {
 	crawlJobId      string
 	dbDir           string
 	resetDb         bool
+	dryRun          bool
 }
 
 var httpClient *http.Client
@@ -112,7 +113,7 @@ var importSeedCmd = &cobra.Command{
 				return err
 			}
 			exists, err := impf.Check(sd.Uri)
-			if exists.Code > importutil.DUPLICATE_NEW {
+			if exists.Code.ExistsInVeidemann() {
 				return fmt.Errorf("seed already exists: %v", sd.Uri)
 			}
 			if err := i.checkUri(sd); err != nil {
@@ -120,58 +121,61 @@ var importSeedCmd = &cobra.Command{
 			}
 
 			exists, err = impf.CheckAndUpdateVeidemann(sd.Uri, sd, func(client configV1.ConfigClient, data interface{}) (id string, err error) {
-				obj := data.(*seedDesc)
-				e := &configV1.ConfigObject{
-					ApiVersion: "v1",
-					Kind:       configV1.Kind_crawlEntity,
-					Meta: &configV1.Meta{
-						Name:        obj.EntityName,
-						Description: obj.EntityDescription,
-						Label:       obj.EntityLabel,
-					},
-				}
-				ctx := context.Background()
-				log.Debugf("store entity: %v", e)
-				e, err = client.SaveConfigObject(ctx, e)
-				if err != nil {
-					//client.DeleteConfigObject(context.Background(), e)
-					return "", fmt.Errorf("Error writing crawl entity: %v", err)
-				}
-
-				s := &configV1.ConfigObject{
-					ApiVersion: "v1",
-					Kind:       configV1.Kind_seed,
-					Meta: &configV1.Meta{
-						Name:        obj.Uri,
-						Description: obj.SeedDescription,
-						Label:       obj.SeedLabel,
-					},
-					Spec: &configV1.ConfigObject_Seed{
-						Seed: &configV1.Seed{
-							EntityRef: &configV1.ConfigRef{
-								Kind: configV1.Kind_crawlEntity,
-								Id:   e.Id,
-							},
-							JobRef: obj.crawlJobRef,
+				if importFlags.dryRun {
+					return "", nil
+				} else {
+					obj := data.(*seedDesc)
+					e := &configV1.ConfigObject{
+						ApiVersion: "v1",
+						Kind:       configV1.Kind_crawlEntity,
+						Meta: &configV1.Meta{
+							Name:        obj.EntityName,
+							Description: obj.EntityDescription,
+							Label:       obj.EntityLabel,
 						},
-					},
-				}
-				log.Debugf("store seed: %v", s)
-				_, err = client.SaveConfigObject(ctx, s)
-				if err != nil {
-					if d, err := client.DeleteConfigObject(ctx, e); err == nil {
-						fmt.Println("Delete entity: ", d)
-					} else {
-						fmt.Println("Failed deletion of entity: ", err)
 					}
-					return "", fmt.Errorf("Error writing seed: %v", err)
+					ctx := context.Background()
+					log.Debugf("store entity: %v", e)
+					e, err = client.SaveConfigObject(ctx, e)
+					if err != nil {
+						return "", fmt.Errorf("Error writing crawl entity: %v", err)
+					}
+
+					s := &configV1.ConfigObject{
+						ApiVersion: "v1",
+						Kind:       configV1.Kind_seed,
+						Meta: &configV1.Meta{
+							Name:        obj.Uri,
+							Description: obj.SeedDescription,
+							Label:       obj.SeedLabel,
+						},
+						Spec: &configV1.ConfigObject_Seed{
+							Seed: &configV1.Seed{
+								EntityRef: &configV1.ConfigRef{
+									Kind: configV1.Kind_crawlEntity,
+									Id:   e.Id,
+								},
+								JobRef: obj.crawlJobRef,
+							},
+						},
+					}
+					log.Debugf("store seed: %v", s)
+					s, err = client.SaveConfigObject(ctx, s)
+					if err != nil {
+						if d, err := client.DeleteConfigObject(ctx, e); err == nil {
+							fmt.Println("Delete entity: ", d)
+						} else {
+							fmt.Println("Failed deletion of entity: ", err)
+						}
+						return "", fmt.Errorf("Error writing seed: %v", err)
+					}
+					return s.Id, nil
 				}
-				return s.Id, nil
 			})
 			if err != nil {
 				return err
 			}
-			if exists.Code > importutil.NEW {
+			if exists.Code.ExistsInVeidemann() {
 				return fmt.Errorf("seed already exists: %v", sd.Uri)
 			}
 
@@ -236,6 +240,7 @@ func init() {
 	importSeedCmd.PersistentFlags().StringVarP(&importFlags.crawlJobId, "crawljob-id", "", "", "Set crawlJob ID for new seeds.")
 	importSeedCmd.PersistentFlags().StringVarP(&importFlags.dbDir, "db-directory", "b", "/tmp/veidemannctl", "Directory for storing state db")
 	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.resetDb, "reset-db", "r", false, "Clean state db")
+	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.dryRun, "dry-run", "", false, "Run the import without writing anything to Veidemann")
 }
 
 func (i *importer) topLevelUri(s *seedDesc) (err error) {

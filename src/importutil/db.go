@@ -39,6 +39,23 @@ const (
 	DUPLICATE_VEIDEMANN
 )
 
+func (e ExistsCode) ExistsInVeidemann() bool {
+	return e == EXISTS_VEIDEMANN || e == DUPLICATE_VEIDEMANN
+}
+
+func (e ExistsCode) String() string {
+	names := [...]string{
+		"ERROR",
+		"NEW",
+		"DUPLICATE_NEW",
+		"EXISTS_VEIDEMANN",
+		"DUPLICATE_VEIDEMANN",}
+	if e < ERROR || e > DUPLICATE_VEIDEMANN {
+		return "UNKNOWN"
+	}
+	return names[e]
+}
+
 type ExistsResponse struct {
 	Code     ExistsCode
 	KnownIds []string
@@ -141,14 +158,17 @@ func (d *ImportDb) DuplicateReport() error {
 			for _, kv := range list.GetKv() {
 				val := d.bytesToStringArray(kv.Value)
 				if len(val) > 1 {
-					for _, id := range val {
+					for idx, id := range val {
 						ref := &configV1.ConfigRef{Id: id, Kind: configV1.Kind_seed}
 						seed, err := d.client.GetConfigObject(context.Background(), ref)
+						if idx == 0 {
+							fmt.Println(string(kv.Key))
+						}
 						if err == nil {
-							fmt.Println(seed.GetId(), seed.GetSeed().GetEntityRef(), seed.GetMeta().GetName())
+							fmt.Println("  *", seed.GetId(), seed.GetSeed().GetEntityRef(), seed.GetMeta().GetName())
 							entity, err := d.client.GetConfigObject(context.Background(), seed.GetSeed().GetEntityRef())
 							if err == nil {
-								fmt.Println("", entity.GetId(), entity.GetMeta().GetName(), entity.GetMeta().GetDescription())
+								fmt.Println("       -", entity.GetId(), entity.GetMeta().GetName(), entity.GetMeta().GetDescription())
 							}
 						}
 					}
@@ -193,7 +213,7 @@ func (d *ImportDb) CheckAndUpdateVeidemann(uri string, data interface{},
 	}
 
 	exists := d.contains(u, "", true)
-	if exists.Code == NEW || exists.Code == DUPLICATE_NEW {
+	if !exists.Code.ExistsInVeidemann() {
 		id, err := createFunc(d.client, data)
 		if err != nil {
 			return exists, err
@@ -211,7 +231,9 @@ func (d *ImportDb) contains(uri *url.URL, id string, update bool) (response *Exi
 			item, err := txn.Get([]byte(uri.Host))
 			if err == badger.ErrKeyNotFound {
 				response.Code = NEW
-				response.KnownIds = []string{id}
+				if id != "" {
+					response.KnownIds = []string{id}
+				}
 				if update {
 					v := d.stringArrayToBytes(response.KnownIds)
 					txn.Set([]byte(uri.Host), v)
@@ -222,10 +244,19 @@ func (d *ImportDb) contains(uri *url.URL, id string, update bool) (response *Exi
 			if err == nil {
 				err := item.Value(func(v []byte) error {
 					val = d.bytesToStringArray(v)
+					if len(val) == 0 {val = nil}
 					return nil
 				})
 				if err != nil {
 					return nil
+				}
+
+				if id != "" && !d.stringArrayContains(val, id) {
+					val = append(val, id)
+					if update {
+						v := d.stringArrayToBytes(val)
+						txn.Set([]byte(uri.Host), v)
+					}
 				}
 
 				switch len(val) {
@@ -240,13 +271,7 @@ func (d *ImportDb) contains(uri *url.URL, id string, update bool) (response *Exi
 				default:
 					response.Code = DUPLICATE_VEIDEMANN
 				}
-				if id != "" && !d.stringArrayContains(val, id) {
-					if update {
-						val = append(val, id)
-						v := d.stringArrayToBytes(val)
-						txn.Set([]byte(uri.Host), v)
-					}
-				}
+
 				response.KnownIds = val
 				return nil
 			}

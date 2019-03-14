@@ -14,6 +14,7 @@
 package importutil
 
 import (
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"reflect"
 	"testing"
 )
@@ -56,6 +57,85 @@ func TestImportDb_bytesToStringArray(t *testing.T) {
 			d := &ImportDb{}
 			if got := d.bytesToStringArray(tt.args); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ImportDb.bytesToStringArray() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestExistsCode_ExistsInVeidemann(t *testing.T) {
+	tests := []struct {
+		name string
+		e    ExistsCode
+		want bool
+	}{
+		{"error", ERROR, false},
+		{"new", NEW, false},
+		{"duplicate_new", DUPLICATE_NEW, false},
+		{"exists_veidemann", EXISTS_VEIDEMANN, true},
+		{"duplicate_veidemann", DUPLICATE_VEIDEMANN, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.e.ExistsInVeidemann(); got != tt.want {
+				t.Errorf("ExistsCode.ExistsInVeidemann() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestImportDb_CheckAndUpdateVeidemann(t *testing.T) {
+	s1 := "https://www.eiksenteret.no"
+	s2 := "http://www.eiksenteret.no"
+	s3 := "http://www.eiksenteret.no/foo"
+	s4 := "https://www.foo.no"
+	s5 := "http://www.foo.no"
+	s6 := "http://www.foo.no/foo"
+	f := func(client configV1.ConfigClient, data interface{}) (id string, err error) {
+		switch data {
+		case s1:
+			return "s1", nil
+		case s2:
+			return "s2", nil
+		case s3:
+			return "s3", nil
+		case s5:
+			return "s5", nil
+		case s6:
+			return "s6", nil
+		default:
+			return "", nil
+		}
+	}
+
+	type args struct {
+		uri        string
+		data       interface{}
+		createFunc func(client configV1.ConfigClient, data interface{}) (id string, err error)
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *ExistsResponse
+		wantErr bool
+	}{
+		{"first", args{s1, s1, f}, &ExistsResponse{Code: NEW}, false},
+		{"duplicate", args{s2, s2, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s1"}}, false},
+		{"duplicate_with_path", args{s3, s3, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s1"}}, false},
+		{"no_id_first", args{s4, s4, f}, &ExistsResponse{Code: NEW}, false},
+		{"no_id_duplicate", args{s5, s5, f}, &ExistsResponse{Code: DUPLICATE_NEW}, false},
+		{"no_id_duplicate_with_path", args{s6, s6, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s5"}}, false},
+	}
+
+	d := NewImportDb(nil, "/tmp/vmtest", true)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := d.CheckAndUpdateVeidemann(tt.args.uri, tt.args.data, tt.args.createFunc)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ImportDb.CheckAndUpdateVeidemann() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ImportDb.CheckAndUpdateVeidemann() = %v, want %v", got, tt.want)
 			}
 		})
 	}
