@@ -30,7 +30,7 @@ import (
 	"os"
 )
 
-type seed struct {
+type seedDesc struct {
 	EntityName        string
 	Uri               string
 	EntityLabel       []*configV1.Label
@@ -107,20 +107,20 @@ var importSeedCmd = &cobra.Command{
 
 		// Processor for converting oos records into import records
 		proc := func(value interface{}) error {
-			s := value.(*seed)
-			if err := i.topLevelUri(s); err != nil {
+			sd := value.(*seedDesc)
+			if err := i.topLevelUri(sd); err != nil {
 				return err
 			}
-			exists, err := impf.Check(s.Uri)
+			exists, err := impf.Check(sd.Uri)
 			if exists.Code > importutil.DUPLICATE_NEW {
-				return fmt.Errorf("seed already exists: %v", s.Uri)
+				return fmt.Errorf("seed already exists: %v", sd.Uri)
 			}
-			if err := i.checkUri(s); err != nil {
+			if err := i.checkUri(sd); err != nil {
 				return err
 			}
 
-			exists, err = impf.CheckAndUpdateVeidemann(s.Uri, s, func(client configV1.ConfigClient, data interface{}) (id string, err error) {
-				obj := data.(*seed)
+			exists, err = impf.CheckAndUpdateVeidemann(sd.Uri, sd, func(client configV1.ConfigClient, data interface{}) (id string, err error) {
+				obj := data.(*seedDesc)
 				e := &configV1.ConfigObject{
 					ApiVersion: "v1",
 					Kind:       configV1.Kind_crawlEntity,
@@ -130,10 +130,11 @@ var importSeedCmd = &cobra.Command{
 						Label:       obj.EntityLabel,
 					},
 				}
+				ctx := context.Background()
 				log.Debugf("store entity: %v", e)
-				e, err = client.SaveConfigObject(context.Background(), e)
+				e, err = client.SaveConfigObject(ctx, e)
 				if err != nil {
-					client.DeleteConfigObject(context.Background(), e)
+					//client.DeleteConfigObject(context.Background(), e)
 					return "", fmt.Errorf("Error writing crawl entity: %v", err)
 				}
 
@@ -156,9 +157,13 @@ var importSeedCmd = &cobra.Command{
 					},
 				}
 				log.Debugf("store seed: %v", s)
-				_, err = client.SaveConfigObject(context.Background(), s)
+				_, err = client.SaveConfigObject(ctx, s)
 				if err != nil {
-					client.DeleteConfigObject(context.Background(), e)
+					if d, err := client.DeleteConfigObject(ctx, e); err == nil {
+						fmt.Println("Delete entity: ", d)
+					} else {
+						fmt.Println("Failed deletion of entity: ", err)
+					}
 					return "", fmt.Errorf("Error writing seed: %v", err)
 				}
 				return s.Id, nil
@@ -167,7 +172,7 @@ var importSeedCmd = &cobra.Command{
 				return err
 			}
 			if exists.Code > importutil.NEW {
-				return fmt.Errorf("seed already exists: %v", s.Uri)
+				return fmt.Errorf("seed already exists: %v", sd.Uri)
 			}
 
 			return nil
@@ -177,7 +182,7 @@ var importSeedCmd = &cobra.Command{
 		errorHandler := func(state *importutil.StateVal) {
 			var uri string
 			if state.Val != nil {
-				uri = state.Val.(*seed).Uri
+				uri = state.Val.(*seedDesc).Uri
 			}
 			_, _ = fmt.Fprintf(errFile, "{\"uri\": \"%s\", \"err\": \"%s\", \"file\": \"%s\", \"recNum\": %v}\n", uri, state.GetError(), state.GetFilename(), state.GetRecordNum())
 		}
@@ -194,8 +199,8 @@ var importSeedCmd = &cobra.Command{
 
 		// Process
 		for {
-			var ts seed
-			state, err := rr.Next(&ts)
+			var sd seedDesc
+			state, err := rr.Next(&sd)
 			if err == io.EOF {
 				break
 			}
@@ -204,10 +209,10 @@ var importSeedCmd = &cobra.Command{
 				os.Exit(1)
 			}
 			if importFlags.crawlJobId != "" {
-				ts.crawlJobRef = crawlJobRef
+				sd.crawlJobRef = crawlJobRef
 			}
 
-			conv.Do(state, &ts)
+			conv.Do(state, &sd)
 		}
 
 		conv.Finish()
@@ -233,7 +238,7 @@ func init() {
 	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.resetDb, "reset-db", "r", false, "Clean state db")
 }
 
-func (i *importer) topLevelUri(s *seed) (err error) {
+func (i *importer) topLevelUri(s *seedDesc) (err error) {
 	uri, err := url.Parse(s.Uri)
 	if err != nil {
 		return fmt.Errorf("unparseable URL '%v', cause: %v", s.Uri, err)
@@ -252,14 +257,14 @@ func (i *importer) topLevelUri(s *seed) (err error) {
 	return
 }
 
-func (i *importer) checkUri(s *seed) (err error) {
+func (i *importer) checkUri(s *seedDesc) (err error) {
 	if importFlags.checkUri {
 		i.checkRedirect(s.Uri, s, 0)
 	}
 	return
 }
 
-func (i *importer) checkRedirect(uri string, s *seed, count int) {
+func (i *importer) checkRedirect(uri string, s *seedDesc, count int) {
 	if count > 5 {
 		return
 	}
