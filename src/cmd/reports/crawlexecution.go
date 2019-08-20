@@ -46,6 +46,8 @@ to quickly create a Cobra application.`,
 		if len(args) > 0 {
 			request.Id = args
 		}
+		//TODO: While working on NNA-1299 I discovered that none of these options works as expected.
+		// Probably API-related?
 		if jobExecutionId != "" {
 			request.JobExecutionId = jobExecutionId
 		}
@@ -58,7 +60,6 @@ to quickly create a Cobra application.`,
 
 		request.Page = flags.page
 		request.PageSize = flags.pageSize
-
 		r, err := client.ListExecutions(context.Background(), &request)
 		if err != nil {
 			log.Fatalf("could not get crawl log: %v", err)
@@ -71,7 +72,7 @@ to quickly create a Cobra application.`,
 func init() {
 	ReportCmd.AddCommand(crawlexecutionCmd)
 
-	ReportCmd.PersistentFlags().StringVarP(&jobExecutionId, "jobexecution", "j", "", "All executions for a Job Execution ID")
-	ReportCmd.PersistentFlags().StringVarP(&jobId, "job", "", "", "All executions for a Job ID")
-	ReportCmd.PersistentFlags().StringVarP(&seedId, "seed", "", "", "All executions for a Seed ID")
+	crawlexecutionCmd.PersistentFlags().StringVarP(&jobExecutionId, "jobexecution", "j", "", "All executions for a Job Execution ID")
+	crawlexecutionCmd.PersistentFlags().StringVarP(&jobId, "job", "", "", "All executions for a Job ID")
+	crawlexecutionCmd.PersistentFlags().StringVarP(&seedId, "seed", "", "", "All executions for a Seed ID")
 }
