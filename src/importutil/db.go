@@ -50,7 +50,7 @@ func (e ExistsCode) String() string {
 		"NEW",
 		"DUPLICATE_NEW",
 		"EXISTS_VEIDEMANN",
-		"DUPLICATE_VEIDEMANN",}
+		"DUPLICATE_VEIDEMANN"}
 	if e < ERROR || e > DUPLICATE_VEIDEMANN {
 		return "UNKNOWN"
 	}
@@ -70,9 +70,7 @@ type ImportDb struct {
 }
 
 func NewImportDb(client configV1.ConfigClient, dbDir string, resetDb bool) *ImportDb {
-	opts := badger.DefaultOptions
-	opts.Dir = dbDir
-	opts.ValueDir = dbDir
+	opts := badger.DefaultOptions(dbDir)
 	opts.Logger = log.StandardLogger()
 	if resetDb {
 		os.RemoveAll(dbDir)

@@ -15,6 +15,7 @@ package apiutil
 
 import (
 	"fmt"
+	commonsV1 "github.com/nlnwa/veidemann-api-go/commons/v1"
 	api "github.com/nlnwa/veidemann-api-go/config/v1"
 	log "github.com/sirupsen/logrus"
 	"reflect"
@@ -31,9 +32,9 @@ func createSelector(labelString string) []string {
 	return result
 }
 
-func CreateTemplateFilter(filterString string) (*api.FieldMask, *api.ConfigObject, error) {
+func CreateTemplateFilter(filterString string) (*commonsV1.FieldMask, *api.ConfigObject, error) {
 	q := strings.Split(filterString, "=")
-	mask := &api.FieldMask{}
+	mask := &commonsV1.FieldMask{}
 	mask.Paths = append(mask.Paths, q[0])
 	obj := &api.ConfigObject{}
 	path := strings.TrimRight(q[0], "+-")

@@ -22,10 +22,7 @@ import (
 
 var version = "master"
 
-//go:generate go get github.com/golang/dep/cmd/dep
-//go:generate dep ensure -vendor-only
-//go:generate go get github.com/jteeuwen/go-bindata/...
-//go:generate go-bindata -prefix "res/" -pkg bindata -o bindata/resources.go res/...
+//go:generate go run -tags=dev bindata/assets_generate.go
 func main() {
 	v.Version.SetGitVersion(version)
 	cmd.Execute()
