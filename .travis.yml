@@ -5,12 +5,6 @@ go:
 
 gobuild_args: -tags=dev
 
-script:
-  - go generate
-  - go test ./...
-  - go build
-
-
 # calls goreleaser
 deploy:
   - provider: script
