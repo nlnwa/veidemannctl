@@ -1,14 +1,13 @@
 language: go
 
-# needed for the docker pipe
-services:
-- docker
+go:
+  - 1.13.x
 
 # calls goreleaser
 deploy:
-- provider: script
-  skip_cleanup: true
-  script: curl -sL http://git.io/goreleaser | bash
-  on:
-    tags: true
-    condition: $TRAVIS_OS_NAME = linux
+  - provider: script
+    skip_cleanup: true
+    script: curl -sL http://git.io/goreleaser | bash
+    on:
+      tags: true
+      condition: $TRAVIS_OS_NAME = linux
