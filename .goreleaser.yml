@@ -8,8 +8,9 @@ builds:
     hooks:
       pre: go generate
 
-archive:
-  format: binary
+archives:
+  - id: binary
+    format: binary
 
 release:
   draft: true
