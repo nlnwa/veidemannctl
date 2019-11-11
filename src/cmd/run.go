@@ -16,7 +16,7 @@ package cmd
 import (
 	"log"
 
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	controllerV1 "github.com/nlnwa/veidemann-api-go/controller/v1"
 	"golang.org/x/net/context"
 
 	"github.com/nlnwa/veidemannctl/src/connection"
@@ -39,7 +39,7 @@ If seedId is not submitted then all the seeds wich are configured to use the sub
 			switch len(args) {
 			case 1:
 				// One argument (only jobId)
-				request := api.RunCrawlRequest{JobId: args[0]}
+				request := controllerV1.RunCrawlRequest{JobId: args[0]}
 				r, err := client.RunCrawl(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not run job: %v", err)
@@ -48,7 +48,7 @@ If seedId is not submitted then all the seeds wich are configured to use the sub
 				println("Job Execution ID: ", r.GetJobExecutionId())
 			case 2:
 				// Two arguments (jobId and seedId)
-				request := api.RunCrawlRequest{JobId: args[0], SeedId: args[1]}
+				request := controllerV1.RunCrawlRequest{JobId: args[0], SeedId: args[1]}
 				r, err := client.RunCrawl(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not run job: %v", err)

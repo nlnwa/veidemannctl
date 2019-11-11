@@ -17,10 +17,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
-	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"os"
 )
 
@@ -37,14 +37,14 @@ var SetLoggerCmd = &cobra.Command{
 		}
 
 		logger := args[0]
-		level := api.LogLevels_Level(api.LogLevels_Level_value[args[1]])
-		if level == api.LogLevels_UNDEFINED {
+		level := configV1.LogLevels_Level(configV1.LogLevels_Level_value[args[1]])
+		if level == configV1.LogLevels_UNDEFINED {
 			fmt.Printf("Unknown level %v\n", args[1])
 			cmd.Help()
 			os.Exit(1)
 		}
 
-		client, conn := connection.NewControllerClient()
+		client, conn := connection.NewConfigClient()
 		defer conn.Close()
 
 		r, err := client.GetLogConfig(context.Background(), &empty.Empty{})
@@ -52,8 +52,8 @@ var SetLoggerCmd = &cobra.Command{
 			log.Fatalf("could not get log config: %v", err)
 		}
 
-		var loggers map[string]api.LogLevels_Level
-		loggers = make(map[string]api.LogLevels_Level)
+		var loggers map[string]configV1.LogLevels_Level
+		loggers = make(map[string]configV1.LogLevels_Level)
 		for _, l := range r.LogLevel {
 			if l.Logger != "" {
 				loggers[l.Logger] = l.Level
@@ -61,9 +61,9 @@ var SetLoggerCmd = &cobra.Command{
 		}
 
 		loggers[logger] = level
-		n := &api.LogLevels{}
+		n := &configV1.LogLevels{}
 		for k, v := range loggers {
-			n.LogLevel = append(n.LogLevel, &api.LogLevels_LogLevel{Logger: k, Level: v})
+			n.LogLevel = append(n.LogLevel, &configV1.LogLevels_LogLevel{Logger: k, Level: v})
 		}
 
 		_, err = client.SaveLogConfig(context.Background(), n)

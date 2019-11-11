@@ -16,8 +16,9 @@ package connection
 import (
 	"crypto/x509"
 	"github.com/golang/protobuf/ptypes/empty"
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
 	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	controllerV1 "github.com/nlnwa/veidemann-api-go/controller/v1"
+	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
 	"github.com/nlnwa/veidemannctl/src/configutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -29,9 +30,9 @@ import (
 	"time"
 )
 
-func NewControllerClient() (api.ControllerClient, *grpc.ClientConn) {
+func NewControllerClient() (controllerV1.ControllerClient, *grpc.ClientConn) {
 	conn := newConnection()
-	c := api.NewControllerClient(conn)
+	c := controllerV1.NewControllerClient(conn)
 	return c, conn
 }
 
@@ -121,8 +122,8 @@ func GetIdp() (string, bool) {
 	conn, tls := connect("", true)
 	defer conn.Close()
 
-	c := api.NewControllerClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	c := controllerV1.NewControllerClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Debug("requesting OpenIdConnectIssuer")
 	reply, err := c.GetOpenIdConnectIssuer(ctx, &empty.Empty{})

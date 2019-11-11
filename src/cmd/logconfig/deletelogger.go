@@ -17,11 +17,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
-	log "github.com/sirupsen/logrus"
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
 )
 
 // DeleteCmd represents the delete command
@@ -38,7 +38,7 @@ var DeleteLoggerCmd = &cobra.Command{
 
 		logger := args[0]
 
-		client, conn := connection.NewControllerClient()
+		client, conn := connection.NewConfigClient()
 		defer conn.Close()
 
 		r, err := client.GetLogConfig(context.Background(), &empty.Empty{})
@@ -46,17 +46,17 @@ var DeleteLoggerCmd = &cobra.Command{
 			log.Fatalf("could not get log config: %v", err)
 		}
 
-		var loggers map[string]api.LogLevels_Level
-		loggers = make(map[string]api.LogLevels_Level)
+		var loggers map[string]configV1.LogLevels_Level
+		loggers = make(map[string]configV1.LogLevels_Level)
 		for _, l := range r.LogLevel {
 			if l.Logger != "" && l.Logger != logger {
 				loggers[l.Logger] = l.Level
 			}
 		}
 
-		n := &api.LogLevels{}
+		n := &configV1.LogLevels{}
 		for k, v := range loggers {
-			n.LogLevel = append(n.LogLevel, &api.LogLevels_LogLevel{Logger: k, Level: v})
+			n.LogLevel = append(n.LogLevel, &configV1.LogLevels_LogLevel{Logger: k, Level: v})
 		}
 
 		_, err = client.SaveLogConfig(context.Background(), n)
