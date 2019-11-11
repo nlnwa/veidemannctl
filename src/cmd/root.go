@@ -71,6 +71,9 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&configutil.GlobalFlags.ServerNameOverride, "serverNameOverride", "",
 		"If set, it will override the virtual host name of authority (e.g. :authority header field) in requests.")
 
+	RootCmd.PersistentFlags().StringVar(&configutil.GlobalFlags.ApiKey, "apiKey", "",
+		"Api-key used for authentication instead of interactive logon trough IDP.")
+
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Turn on debugging")
 
 	RootCmd.SetVersionTemplate("{{.Version}}")
@@ -124,6 +127,11 @@ func initConfig() {
 	if !RootCmd.PersistentFlags().Changed("serverNameOverride") {
 		configutil.GlobalFlags.ServerNameOverride = viper.GetString("serverNameOverride")
 	}
-	log.Debug("Using controller address:", configutil.GlobalFlags.ControllerAddress)
-	log.Debug("Using server name override:", configutil.GlobalFlags.ServerNameOverride)
+
+	if !RootCmd.PersistentFlags().Changed("apiKey") {
+		configutil.GlobalFlags.ApiKey = viper.GetString("apiKey")
+	}
+	log.Debug("Using controller address: ", configutil.GlobalFlags.ControllerAddress)
+	log.Debug("Using server name override: ", configutil.GlobalFlags.ServerNameOverride)
+	log.Debug("Using api-key: ", configutil.GlobalFlags.ApiKey)
 }

@@ -64,13 +64,14 @@ func newConnection() *grpc.ClientConn {
 
 func connect(idp string, tls bool) (*grpc.ClientConn, bool) {
 	address := configutil.GlobalFlags.ControllerAddress
+	apiKey := configutil.GlobalFlags.ApiKey
 
 	dialOptions := []grpc.DialOption{
 		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
 	}
 
 	if idp != "" {
-		dialOptions = AddCredentials(idp, dialOptions)
+		dialOptions = AddCredentials(idp, apiKey, dialOptions)
 	}
 
 	// Set up a connection to the server.
@@ -155,7 +156,13 @@ func (b bearerTokenCred) RequireTransportSecurity() bool {
 	return false
 }
 
-func AddCredentials(idp string, opts []grpc.DialOption) []grpc.DialOption {
+func AddCredentials(idp, apiKey string, opts []grpc.DialOption) []grpc.DialOption {
+	if apiKey != "" {
+		at := &bearerTokenCred{"ApiKey", apiKey}
+		opts = append(opts, grpc.WithPerRPCCredentials(at))
+		return opts
+	}
+
 	a := NewAuth(idp)
 	if !a.enabled {
 		return opts
@@ -169,8 +176,9 @@ func AddCredentials(idp string, opts []grpc.DialOption) []grpc.DialOption {
 		return opts
 	}
 
-	var bt credentials.PerRPCCredentials = &bearerTokenCred{a.oauth2Token.TokenType, a.rawIdToken}
-	return append(opts, grpc.WithPerRPCCredentials(bt))
+	bt := &bearerTokenCred{a.oauth2Token.TokenType, a.rawIdToken}
+	opts = append(opts, grpc.WithPerRPCCredentials(bt))
+	return opts
 }
 
 // BlockingDial is a helper method to dial the given address, using optional TLS credentials,

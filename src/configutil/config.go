@@ -32,12 +32,14 @@ type config struct {
 	Nonce              string `json:"nonce"`
 	RootCAs            string `json:"rootCAs"`
 	ServerNameOverride string `json:"serverNameOverride"`
+	ApiKey             string `json:"apiKey"`
 }
 
 var GlobalFlags struct {
 	Context            string
 	ControllerAddress  string
 	ServerNameOverride string
+	ApiKey             string
 }
 
 func WriteConfig() {
@@ -49,6 +51,7 @@ func WriteConfig() {
 		viper.GetString("nonce"),
 		viper.GetString("rootCAs"),
 		viper.GetString("serverNameOverride"),
+		viper.GetString("apiKey"),
 	}
 
 	y, err := yaml.Marshal(c)
