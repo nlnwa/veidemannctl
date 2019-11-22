@@ -32,7 +32,7 @@ __veidemannctl_get_resource() {
 
 __veidemannctl_query_resource() {
     local veidemannctl_out
-    if mapfile -t veidemannctl_out < <( veidemannctl report query -q 2>/dev/null ); then
+    if mapfile -t veidemannctl_out < <( veidemannctl report query --comp 2>/dev/null ); then
         mapfile -t COMPREPLY < <( compgen -W "$( printf '%q ' "${veidemannctl_out[@]}" )" -- "$cur" | awk '/ / { print "\""$0"\"" } /^[^ ]+$/ { print $0 }' )
     fi
 }

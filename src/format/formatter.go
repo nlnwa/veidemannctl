@@ -17,131 +17,128 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/nlnwa/veidemann-api-go/config/v1"
 	"github.com/nlnwa/veidemannctl/bindata"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
-	"sync"
 )
 
 var jsonMarshaler = jsonpb.Marshaler{EmitDefaults: true}
 var jsonUnMarshaler = jsonpb.Unmarshaler{}
 
 type Formatter interface {
-	WriteHeader() error
 	WriteRecord(record interface{}) error
 	Close() error
 }
 
 type MarshalSpec struct {
-	Kind                config.Kind
-	Filename            string
+	ObjectType          string
 	Format              string
 	Template            string
-	HeaderTemplate      string
 	defaultTemplateName string
-	Writer              io.Writer
 
-	rFilename string
 	rFormat   string
 	rTemplate string
 	rWriter   io.Writer
 	resolved  bool
-	wg        sync.WaitGroup
 }
 
-func NewFormatter(kind config.Kind, filename string, format string, template string, headerTemplate string) Formatter {
-	s := &MarshalSpec{
-		Kind:           kind,
-		Filename:       filename,
-		Format:         format,
-		Template:       template,
-		HeaderTemplate: headerTemplate,
+func NewFormatter(objectType string, out io.Writer, format string, template string) (formatter Formatter, err error) {
+	if out == nil {
+		return nil, errors.New("missing writer")
 	}
 
-	s.resolve()
+	s := &MarshalSpec{
+		ObjectType: objectType,
+		Format:     format,
+		Template:   template,
+		rWriter:    out,
+	}
 
-	var formatter Formatter
+	if err := s.resolve(); err != nil {
+		return nil, err
+	}
 
 	switch s.rFormat {
 	case "json":
 		formatter = newJsonFormatter(s)
 	case "yaml":
 		formatter = newYamlFormatter(s)
+	case "template":
+		formatter, err = newTemplateFormatter(s)
 	case "table":
-		formatter = newTableFormatter(s)
+		formatter, err = newTemplateFormatter(s)
 	default:
-		log.Fatalf("Illegal format %s", s.rFormat)
+		return nil, errors.New(fmt.Sprintf("Illegal or missing format '%s'", s.rFormat))
 	}
-	return formatter
+	return
 }
 
-func (s *MarshalSpec) WriteHeaderForKind(kind config.Kind) error {
-	fmt.Println("HEAD")
-	return nil
-}
-
-func (s *MarshalSpec) resolve() {
-	if !s.resolved {
-		if s.Writer == nil {
-			if s.Filename == "" {
-				s.rWriter = os.Stdout
-			} else {
-				f, err := os.Create(s.Filename)
-				if err != nil {
-					log.Fatalf("Could not create file '%s': %v", s.Filename, err)
-				}
-				s.rWriter = f
-			}
-		} else {
-			s.rWriter = s.Writer
+// ResolveWriter creates a file and returns a io.Writer for the file.
+// If filename is empty, os.StdOut is returned
+func ResolveWriter(filename string) (io.Writer, error) {
+	if filename == "" {
+		return os.Stdout, nil
+	} else {
+		f, err := os.Create(filename)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("Could not create file '%s': %v", filename, err))
 		}
+		return f, nil
+	}
+}
 
+func (s *MarshalSpec) resolve() (err error) {
+	if !s.resolved {
 		switch s.Format {
 		case "template":
 			if s.Template == "" {
 				if s.defaultTemplateName != "" {
 					data, err := bindata.Asset(s.defaultTemplateName)
 					if err != nil {
-						panic(err)
+						return err
 					}
 					s.rTemplate = string(data)
 				} else {
-					log.Fatal("Format is 'template', but template is missing")
+					return errors.New("Format is 'template', but template is missing")
 				}
 			} else {
 				s.rTemplate = s.Template
 			}
-			s.rFormat = "json"
-			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, s.HeaderTemplate, &s.wg)
+			s.rFormat = s.Format
 		case "template-file":
 			if s.Template == "" {
-				log.Fatal("Format is 'template-file', but template is missing")
+				return errors.New("format is 'template-file', but template is missing")
 			}
 			data, err := ioutil.ReadFile(s.Template)
 			if err != nil {
-				log.Fatalf("Template not found: %v", err)
+				return fmt.Errorf("template not found: %v", err)
 			}
 			s.rTemplate = string(data)
-			s.rFormat = "json"
-			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, s.HeaderTemplate, &s.wg)
-		case "json":
 			s.rFormat = s.Format
-			data, err := bindata.Asset("json.template")
-			if err != nil {
-				panic(err)
-			}
-			s.rTemplate = string(data)
-			s.HeaderTemplate = ""
-			s.rWriter = newTemplateWriter(s.rWriter, s.rTemplate, s.HeaderTemplate, &s.wg)
+		case "json":
+			s.rTemplate = ""
+			s.rFormat = s.Format
 		case "yaml":
 			s.rTemplate = ""
+			s.rFormat = s.Format
+		case "table":
+			if s.ObjectType == "" {
+				return fmt.Errorf("format is table, but object type is missing")
+			}
+
+			templateName := s.ObjectType + "_table.template"
+			data, err := bindata.Asset(templateName)
+			if err != nil {
+				return err
+			}
+			s.rTemplate = string(data)
 			s.rFormat = s.Format
 		default:
 			s.rTemplate = s.Template
@@ -149,17 +146,17 @@ func (s *MarshalSpec) resolve() {
 		}
 	}
 	s.resolved = true
+	return nil
 }
 
 func (s *MarshalSpec) Close() error {
 	if nil != s {
-		if c, ok := s.rWriter.(io.Closer); ok {
+		if c, ok := s.rWriter.(io.Closer); ok && c != os.Stdout {
 			if err := c.Close(); err != nil {
 				return err
 			}
 		}
 	}
-	s.wg.Wait()
 	return nil
 }
 
@@ -170,8 +167,7 @@ func Unmarshal(filename string) ([]*config.ConfigObject, error) {
 	} else {
 		f, err := os.Open(filename)
 		if err != nil {
-			log.Fatalf("Could not open file '%s': %v", filename, err)
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("Could not open file '%s': %v", filename, err))
 		}
 		defer f.Close()
 		if fi, _ := f.Stat(); fi.IsDir() {
@@ -181,8 +177,7 @@ func Unmarshal(filename string) ([]*config.ConfigObject, error) {
 					fmt.Println("Reading file: ", fi.Name())
 					f, err = os.Open(fi.Name())
 					if err != nil {
-						log.Fatalf("Could not open file '%s': %v", filename, err)
-						return nil, err
+						return nil, errors.New(fmt.Sprintf("Could not open file '%s': %v", filename, err))
 					}
 					defer f.Close()
 
@@ -248,7 +243,7 @@ func UnmarshalYaml(r io.Reader, result []*config.ConfigObject) ([]*config.Config
 
 		b, err := yaml.YAMLToJSON(data)
 		if err != nil {
-			log.Fatalf("Error decoding: %v, %v", err, data)
+			return nil, errors.New(fmt.Sprintf("Error decoding: %v, %v", err, data))
 		}
 		buf := bytes.NewBuffer(b)
 
@@ -270,7 +265,7 @@ func UnmarshalJson(r io.Reader, result []*config.ConfigObject) ([]*config.Config
 	return result, nil
 }
 
-func HasSuffix(s string, suffix... string) bool {
+func HasSuffix(s string, suffix ...string) bool {
 	for _, suf := range suffix {
 		if strings.HasSuffix(s, suf) {
 			return true

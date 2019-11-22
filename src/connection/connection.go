@@ -18,7 +18,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	controllerV1 "github.com/nlnwa/veidemann-api-go/controller/v1"
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	reportV1 "github.com/nlnwa/veidemann-api-go/report/v1"
 	"github.com/nlnwa/veidemannctl/src/configutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -36,15 +36,9 @@ func NewControllerClient() (controllerV1.ControllerClient, *grpc.ClientConn) {
 	return c, conn
 }
 
-func NewStatusClient() (api.StatusClient, *grpc.ClientConn) {
+func NewReportClient() (reportV1.ReportClient, *grpc.ClientConn) {
 	conn := newConnection()
-	c := api.NewStatusClient(conn)
-	return c, conn
-}
-
-func NewReportClient() (api.ReportClient, *grpc.ClientConn) {
-	conn := newConnection()
-	c := api.NewReportClient(conn)
+	c := reportV1.NewReportClient(conn)
 	return c, conn
 }
 
@@ -71,18 +65,18 @@ func connect(idp string, tls bool) (*grpc.ClientConn, bool) {
 	}
 
 	if idp != "" {
-		dialOptions = AddCredentials(idp, apiKey, dialOptions)
+		dialOptions = addCredentials(idp, apiKey, dialOptions)
 	}
 
 	// Set up a connection to the server.
-	creds := ClientTransportCredentials(tls)
+	creds := clientTransportCredentials(tls)
 	log.Debugf("connecting to %v", address)
-	conn, err := BlockingDial(context.Background(), address, creds, dialOptions...)
+	conn, err := blockingDial(context.Background(), address, creds, dialOptions...)
 	if err != nil {
 		if strings.Contains(err.Error(), "first record does not look like a TLS handshake") {
 			log.Debug("Could not connect with TLS, retrying without credentials")
 			tls = false
-			conn, err = BlockingDial(context.Background(), address, nil, dialOptions...)
+			conn, err = blockingDial(context.Background(), address, nil, dialOptions...)
 			if err != nil {
 				log.Fatalf("Could not connect: %v", err)
 			}
@@ -94,7 +88,7 @@ func connect(idp string, tls bool) (*grpc.ClientConn, bool) {
 	return conn, tls
 }
 
-func ClientTransportCredentials(tls bool) credentials.TransportCredentials {
+func clientTransportCredentials(tls bool) credentials.TransportCredentials {
 	var creds credentials.TransportCredentials
 
 	if tls {
@@ -156,7 +150,7 @@ func (b bearerTokenCred) RequireTransportSecurity() bool {
 	return false
 }
 
-func AddCredentials(idp, apiKey string, opts []grpc.DialOption) []grpc.DialOption {
+func addCredentials(idp, apiKey string, opts []grpc.DialOption) []grpc.DialOption {
 	if apiKey != "" {
 		at := &bearerTokenCred{"ApiKey", apiKey}
 		opts = append(opts, grpc.WithPerRPCCredentials(at))
@@ -185,7 +179,7 @@ func AddCredentials(idp, apiKey string, opts []grpc.DialOption) []grpc.DialOptio
 // and blocking until the returned connection is ready. If the given credentials are nil, the
 // connection will be insecure (plain-text).
 // This function is borrowed from https://github.com/fullstorydev/grpcurl/blob/master/grpcurl.go
-func BlockingDial(ctx context.Context, address string, creds credentials.TransportCredentials, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
+func blockingDial(ctx context.Context, address string, creds credentials.TransportCredentials, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	// grpc.Dial doesn't provide any information on permanent connection errors (like
 	// TLS handshake failures). So in order to provide good error messages, we need a
 	// custom dialer that can provide that info. That means we manage the TLS handshake.

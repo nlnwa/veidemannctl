@@ -76,6 +76,9 @@ func init() {
 
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Turn on debugging")
 
+	RootCmd.PersistentFlags().BoolVar(&configutil.GlobalFlags.IsShellCompletion, "comp", false, "Clean output used for shell completion")
+	RootCmd.PersistentFlags().MarkHidden("comp")
+
 	RootCmd.SetVersionTemplate("{{.Version}}")
 
 	RootCmd.AddCommand(reports.ReportCmd)

@@ -40,6 +40,7 @@ var GlobalFlags struct {
 	ControllerAddress  string
 	ServerNameOverride string
 	ApiKey             string
+	IsShellCompletion  bool
 }
 
 func WriteConfig() {

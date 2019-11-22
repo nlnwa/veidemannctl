@@ -16,21 +16,31 @@ package reports
 
 import (
 	"context"
-	"github.com/nlnwa/veidemann-api-go/config/v1"
-	"github.com/nlnwa/veidemannctl/src/connection"
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
-	"github.com/spf13/cobra"
-	log "github.com/sirupsen/logrus"
 	"fmt"
-	"io"
-	"strings"
-	"io/ioutil"
 	"github.com/ghodss/yaml"
-	"path/filepath"
-	"os"
+	reportV1 "github.com/nlnwa/veidemann-api-go/report/v1"
 	"github.com/nlnwa/veidemannctl/src/configutil"
+	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+	"io"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 )
+
+type queryConf struct {
+	pageSize   int32
+	page       int32
+	goTemplate string
+	filter     []string
+	file       string
+	format     string
+}
+
+var queryFlags = &queryConf{}
 
 // queryCmd represents the query command
 var queryCmd = &cobra.Command{
@@ -42,7 +52,7 @@ var queryCmd = &cobra.Command{
 			client, conn := connection.NewReportClient()
 			defer conn.Close()
 
-			request := api.ExecuteDbQueryRequest{}
+			request := reportV1.ExecuteDbQueryRequest{}
 
 			queryDef := getQueryDef(args[0])
 			defer queryDef.marshalSpec.Close()
@@ -55,16 +65,12 @@ var queryCmd = &cobra.Command{
 
 			request.Query = fmt.Sprintf(queryDef.Query, params...)
 
-			request.Limit = flags.pageSize
+			request.Limit = queryFlags.pageSize
 			log.Debugf("Executing query: %s", request.GetQuery())
 
 			stream, err := client.ExecuteDbQuery(context.Background(), &request)
 			if err != nil {
 				log.Fatalf("Failed executing query: %v", err)
-			}
-
-			if queryDef.Header != "" {
-				queryDef.marshalSpec.WriteHeader()
 			}
 
 			for {
@@ -79,7 +85,7 @@ var queryCmd = &cobra.Command{
 			}
 		} else {
 			d := configutil.GetConfigDir("query")
-			if flags.quiet {
+			if configutil.GlobalFlags.IsShellCompletion {
 				q := listStoredQueries(d)
 				for _, s := range q {
 					fmt.Println(s.Name)
@@ -99,6 +105,13 @@ var queryCmd = &cobra.Command{
 }
 
 func init() {
+	queryCmd.PersistentFlags().Int32VarP(&queryFlags.pageSize, "pagesize", "s", 10, "Number of objects to get")
+	queryCmd.PersistentFlags().Int32VarP(&queryFlags.page, "page", "p", 0, "The page number")
+	queryCmd.PersistentFlags().StringVarP(&queryFlags.format, "output", "o", "json", "Output format (json|yaml|template|template-file)")
+	queryCmd.PersistentFlags().StringVarP(&queryFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
+	queryCmd.Flags().StringVarP(&queryFlags.file, "filename", "f", "", "File name to write to")
+	queryCmd.PersistentFlags().StringSliceVarP(&queryFlags.filter, "filter", "f", nil, "Filters")
+
 	ReportCmd.AddCommand(queryCmd)
 }
 
@@ -106,7 +119,6 @@ type queryDef struct {
 	Name        string
 	Description string
 	Query       string
-	Header      string
 	Template    string
 	marshalSpec format.Formatter
 }
@@ -122,10 +134,17 @@ func getQueryDef(queryArg string) queryDef {
 		readFile(filename, &queryDef)
 	}
 
+	out, err := format.ResolveWriter(queryFlags.file)
+	if err != nil {
+		log.Fatalf("Could not resolve output '%v': %v", crawlExecFlags.file, err)
+	}
 	if queryDef.Template == "" {
-		queryDef.marshalSpec = format.NewFormatter(config.Kind_undefined, "", flags.format, flags.goTemplate, queryDef.Header)
+		queryDef.marshalSpec, err = format.NewFormatter("", out, queryFlags.format, queryFlags.goTemplate)
 	} else {
-		queryDef.marshalSpec = format.NewFormatter(config.Kind_undefined, "", "template", queryDef.Template, queryDef.Header)
+		queryDef.marshalSpec, err = format.NewFormatter("", out, "template", queryDef.Template)
+	}
+	if err != nil {
+		log.Fatal(err)
 	}
 	return queryDef
 }

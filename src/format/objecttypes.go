@@ -14,26 +14,23 @@
 package format
 
 import (
+	"fmt"
 	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	"sort"
 	"strings"
 )
 
-var objectTypes = []struct {
-	vName  string
-	tabDef []string
-}{
-	{"crawlEntity", []string{"Id", "Meta.Name", "Meta.Description"}},
-	{"seed", []string{"Id", "Meta.Name", "Spec.Seed.EntityRef", "Spec.Seed.Scope.SurtPrefix", "Spec.Seed.JobRef", "Spec.Seed.Disabled"}},
-	{"crawlConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlConfig.CollectionRef", "Spec.CrawlConfig.BrowserConfigRef", "Spec.CrawlConfig.PolitenessRef", "Spec.CrawlConfig.Extra"}},
-	{"crawlJob", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlJob.ScheduleRef", "Spec.CrawlJob.Limits", "Spec.CrawlJob.CrawlConfigRef", "Spec.CrawlJob.Disabled"}},
-	{"crawlScheduleConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlScheduleConfig.CronExpression", "Spec.CrawlScheduleConfig.ValidFrom", "Spec.CrawlScheduleConfig.ValidTo"}},
-	{"browserConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.BrowserConfig.UserAgent", "Spec.BrowserConfig.WindowWidth", "Spec.BrowserConfig.WindowHeight", "Spec.BrowserConfig.PageLoadTimeoutMs", "Spec.BrowserConfig.MaxInactivityTimeMs"}},
-	{"politenessConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.PolitenessConfig.RobotsPolicy", "Spec.PolitenessConfig.MinTimeBetweenPageLoadMs", "Spec.PolitenessConfig.MaxTimeBetweenPageLoadMs", "Spec.PolitenessConfig.DelayFactor", "Spec.PolitenessConfig.MaxRetries", "Spec.PolitenessConfig.RetryDelaySeconds", "Spec.PolitenessConfig.CrawlHostGroupSelector"}},
-	{"browserScript", []string{"Id", "Meta.Name", "Meta.Description", "Spec.BrowserScript.Script", "Spec.BrowserScript.UrlRegexp"}},
-	{"crawlHostGroupConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlHostGroup.IpRange"}},
-	{"roleMapping", []string{"Id", "Spec.RoleMapping.EmailOrGroup.Email", "Spec.RoleMapping.EmailOrGroup.Group", "Spec.RoleMapping.Role"}},
-	{"collection", []string{"Id", "Meta.Name", "Spec.Collection.CollectionDedupPolicy", "Spec.Collection.FileRotationPolicy", "Spec.Collection.SubCollections"}},
-}
+//	{"crawlEntity", []string{"Id", "Meta.Name", "Meta.Description"}},
+//	{"seed", []string{"Id", "Meta.Name", "Spec.Seed.EntityRef", "Spec.Seed.Scope.SurtPrefix", "Spec.Seed.JobRef", "Spec.Seed.Disabled"}},
+//	{"crawlConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlConfig.CollectionRef", "Spec.CrawlConfig.BrowserConfigRef", "Spec.CrawlConfig.PolitenessRef", "Spec.CrawlConfig.Extra"}},
+//	{"crawlJob", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlJob.ScheduleRef", "Spec.CrawlJob.Limits", "Spec.CrawlJob.CrawlConfigRef", "Spec.CrawlJob.Disabled"}},
+//	{"crawlScheduleConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlScheduleConfig.CronExpression", "Spec.CrawlScheduleConfig.ValidFrom", "Spec.CrawlScheduleConfig.ValidTo"}},
+//	{"browserConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.BrowserConfig.UserAgent", "Spec.BrowserConfig.WindowWidth", "Spec.BrowserConfig.WindowHeight", "Spec.BrowserConfig.PageLoadTimeoutMs", "Spec.BrowserConfig.MaxInactivityTimeMs"}},
+//	{"politenessConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.PolitenessConfig.RobotsPolicy", "Spec.PolitenessConfig.MinTimeBetweenPageLoadMs", "Spec.PolitenessConfig.MaxTimeBetweenPageLoadMs", "Spec.PolitenessConfig.DelayFactor", "Spec.PolitenessConfig.MaxRetries", "Spec.PolitenessConfig.RetryDelaySeconds", "Spec.PolitenessConfig.CrawlHostGroupSelector"}},
+//	{"browserScript", []string{"Id", "Meta.Name", "Meta.Description", "Spec.BrowserScript.Script", "Spec.BrowserScript.UrlRegexp"}},
+//	{"crawlHostGroupConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlHostGroup.IpRange"}},
+//	{"roleMapping", []string{"Id", "Spec.RoleMapping.EmailOrGroup.Email", "Spec.RoleMapping.EmailOrGroup.Group", "Spec.RoleMapping.Role"}},
+//	{"collection", []string{"Id", "Meta.Name", "Spec.Collection.CollectionDedupPolicy", "Spec.Collection.FileRotationPolicy", "Spec.Collection.SubCollections"}},
 
 // Get kind for string
 func GetKind(Name string) configV1.Kind {
@@ -46,19 +43,19 @@ func GetKind(Name string) configV1.Kind {
 	return configV1.Kind_undefined
 }
 
-func GetTableDefForKind(kind configV1.Kind) []string {
-	for _, ot := range objectTypes {
-		if ot.vName == kind.String() {
-			return ot.tabDef
+func GetObjectNames() []string {
+	result := make([]string, len(configV1.Kind_name)-1)
+	idx := 0
+	for _, n := range configV1.Kind_name {
+		if n != "undefined" {
+			result[idx] = n
+			idx++
 		}
 	}
-	return nil
+	sort.Strings(result)
+	return result
 }
 
-func GetObjectNames() []string {
-	result := make([]string, len(objectTypes))
-	for idx, ot := range objectTypes {
-		result[idx] = ot.vName
-	}
-	return result
+func GetTemplateBaseName(obj interface{}) string {
+	return fmt.Sprintf("%T", obj)
 }

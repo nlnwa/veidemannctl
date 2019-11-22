@@ -16,11 +16,26 @@ package reports
 
 import (
 	"context"
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
+	reportV1 "github.com/nlnwa/veidemann-api-go/report/v1"
+	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
+	"github.com/nlnwa/veidemannctl/src/format"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"log"
+	"io"
+	"os"
 )
+
+var pagelogFlags struct {
+	filter     string
+	pageSize   int32
+	page       int32
+	goTemplate string
+	format     string
+	file       string
+	watch      bool
+}
 
 // pagelogCmd represents the pagelog command
 var pagelogCmd = &cobra.Command{
@@ -36,26 +51,79 @@ to quickly create a Cobra application.`,
 		client, conn := connection.NewReportClient()
 		defer conn.Close()
 
-		request := api.PageLogListRequest{}
+		var ids []string
+
 		if len(args) > 0 {
-			request.WarcId = args
+			ids = args
 		}
-		if flags.executionId != "" {
-			request.ExecutionId = flags.executionId
-		}
-		request.Filter = applyFilter(flags.filter)
-		request.Page = flags.page
-		request.PageSize = flags.pageSize
 
-		r, err := client.ListPageLogs(context.Background(), &request)
+		request, err := CreatePageLogListRequest(ids)
 		if err != nil {
-			log.Fatalf("could not get page log: %v", err)
+			log.Fatalf("Error creating request: %v", err)
 		}
 
-		ApplyTemplate(r, "pagelog.template")
+		r, err := client.ListPageLogs(context.Background(), request)
+		if err != nil {
+			log.Fatalf("Error from controller: %v", err)
+		}
+
+		out, err := format.ResolveWriter(pagelogFlags.file)
+		if err != nil {
+			log.Fatalf("Could not resolve output '%v': %v", crawlExecFlags.file, err)
+		}
+		s, err := format.NewFormatter("PageLog", out, pagelogFlags.format, pagelogFlags.goTemplate)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer s.Close()
+
+		for {
+			msg, err := r.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Error getting object: %v", err)
+			}
+			log.Debugf("Outputting page log record with WARC id '%s'", msg.WarcId)
+			if s.WriteRecord(msg) != nil {
+				os.Exit(1)
+			}
+		}
 	},
 }
 
 func init() {
+	pagelogCmd.Flags().Int32VarP(&pagelogFlags.pageSize, "pagesize", "s", 10, "Number of objects to get")
+	pagelogCmd.Flags().Int32VarP(&pagelogFlags.page, "page", "p", 0, "The page number")
+	pagelogCmd.Flags().StringVarP(&pagelogFlags.format, "output", "o", "json", "Output format (json|yaml|template|template-file)")
+	pagelogCmd.Flags().StringVarP(&pagelogFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
+	pagelogCmd.Flags().StringVarP(&pagelogFlags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
+	pagelogCmd.Flags().StringVarP(&pagelogFlags.file, "filename", "f", "", "File name to write to")
+	pagelogCmd.Flags().BoolVarP(&pagelogFlags.watch, "watch", "w", false, "Get a continous stream of changes")
+
 	ReportCmd.AddCommand(pagelogCmd)
+}
+
+func CreatePageLogListRequest(ids []string) (*reportV1.PageLogListRequest, error) {
+	request := &reportV1.PageLogListRequest{}
+	request.WarcId = ids
+	request.Watch = pagelogFlags.watch
+	if pagelogFlags.watch {
+		pagelogFlags.pageSize = 0
+	}
+
+	request.Offset = pagelogFlags.page
+	request.PageSize = pagelogFlags.pageSize
+
+	if pagelogFlags.filter != "" {
+		m, o, err := apiutil.CreateTemplateFilter(pagelogFlags.filter, &frontierV1.PageLog{})
+		if err != nil {
+			return nil, err
+		}
+		request.QueryMask = m
+		request.QueryTemplate = o.(*frontierV1.PageLog)
+	}
+
+	return request, nil
 }

@@ -76,7 +76,7 @@ var updateCmd = &cobra.Command{
 				log.Fatalf("Error creating request: %v", err)
 			}
 
-			mask, obj, err := apiutil.CreateTemplateFilter(updateflags.updateField)
+			mask, obj, err := apiutil.CreateTemplateFilter(updateflags.updateField, &configV1.ConfigObject{})
 			if err != nil {
 				log.Fatalf("Error creating request: %v", err)
 			}
@@ -84,7 +84,7 @@ var updateCmd = &cobra.Command{
 			updateRequest := &configV1.UpdateRequest{
 				ListRequest:    selector,
 				UpdateMask:     mask,
-				UpdateTemplate: obj,
+				UpdateTemplate: obj.(*configV1.ConfigObject),
 			}
 
 			u, err := configClient.UpdateConfigObjects(context.Background(), updateRequest)

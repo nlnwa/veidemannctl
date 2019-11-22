@@ -16,10 +16,10 @@ package format
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"io"
-	"log"
 	"reflect"
 )
 
@@ -31,14 +31,6 @@ func newJsonFormatter(s *MarshalSpec) Formatter {
 	return &jsonFormatter{
 		MarshalSpec: s,
 	}
-}
-
-func (jf *jsonFormatter) WriteHeader() error {
-	t, ok := jf.rWriter.(*templateWriter)
-	if ok && jf.HeaderTemplate != "" {
-		t.applyHeaderTemplate(jf.HeaderTemplate)
-	}
-	return nil
 }
 
 func (jf *jsonFormatter) WriteRecord(record interface{}) error {
@@ -71,7 +63,7 @@ func (jf *jsonFormatter) WriteRecord(record interface{}) error {
 			}
 		}
 	default:
-		log.Fatalf("Illegal format %s", jf.rFormat)
+		return errors.New(fmt.Sprintf("Illegal record type '%T'", record))
 	}
 	return nil
 }
@@ -79,7 +71,6 @@ func (jf *jsonFormatter) WriteRecord(record interface{}) error {
 func marshalElementJson(w io.Writer, msg proto.Message) error {
 	r, err := EncodeJson(msg)
 	if err != nil {
-		log.Fatalf("Could not convert %v to JSON: %v", msg, err)
 		return err
 	}
 
@@ -93,8 +84,7 @@ func marshalElementJson(w io.Writer, msg proto.Message) error {
 func EncodeJson(msg proto.Message) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := jsonMarshaler.Marshal(&buf, msg); err != nil {
-		log.Fatalf("Could not convert %v to YAML: %v", msg, err)
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("Could not convert %v to JSON: %v", msg, err))
 	}
 
 	values := make(map[string]interface{})
