@@ -14,7 +14,6 @@
 package format
 
 import (
-	"fmt"
 	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"sort"
 	"strings"
@@ -54,8 +53,4 @@ func GetObjectNames() []string {
 	}
 	sort.Strings(result)
 	return result
-}
-
-func GetTemplateBaseName(obj interface{}) string {
-	return fmt.Sprintf("%T", obj)
 }

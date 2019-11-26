@@ -15,7 +15,6 @@ package format
 
 import (
 	"github.com/magiconair/properties/assert"
-	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
 	"reflect"
 	"testing"
 
@@ -43,22 +42,4 @@ func TestGetKind(t *testing.T) {
 
 func TestGetObjectNames(t *testing.T) {
 	assert.Equal(t, GetObjectNames(), []string{"browserConfig", "browserScript", "collection", "crawlConfig", "crawlEntity", "crawlHostGroupConfig", "crawlJob", "crawlScheduleConfig", "politenessConfig", "roleMapping", "seed"})
-}
-
-func TestGetTemplateBaseName(t *testing.T) {
-	tests := []struct {
-		name string
-		obj  interface{}
-		want string
-	}{
-		{"1", &frontierV1.JobExecutionStatus{}, "JobExecutionStatus"},
-		{"2", configV1.Kind_crawlConfig, "crawlConfig"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := GetTemplateBaseName(tt.obj); got != tt.want {
-				t.Errorf("GetTemplateBaseName() = %v, want %v", got, tt.want)
-			}
-		})
-	}
 }
