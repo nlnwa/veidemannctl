@@ -74,6 +74,8 @@ func NewFormatter(objectType string, out io.Writer, format string, template stri
 		formatter, err = newTemplateFormatter(s)
 	case "table":
 		formatter, err = newTemplateFormatter(s)
+	case "wide":
+		formatter, err = newTemplateFormatter(s)
 	default:
 		return nil, errors.New(fmt.Sprintf("Illegal or missing format '%s'", s.rFormat))
 	}
@@ -134,6 +136,18 @@ func (s *MarshalSpec) resolve() (err error) {
 			}
 
 			templateName := s.ObjectType + "_table.template"
+			data, err := bindata.Asset(templateName)
+			if err != nil {
+				return err
+			}
+			s.rTemplate = string(data)
+			s.rFormat = s.Format
+		case "wide":
+			if s.ObjectType == "" {
+				return fmt.Errorf("format is wide, but object type is missing")
+			}
+
+			templateName := s.ObjectType + "_wide.template"
 			data, err := bindata.Asset(templateName)
 			if err != nil {
 				return err

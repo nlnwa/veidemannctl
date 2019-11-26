@@ -98,7 +98,7 @@ to quickly create a Cobra application.`,
 func init() {
 	jobexecutionCmd.Flags().Int32VarP(&jobExecFlags.pageSize, "pagesize", "s", 10, "Number of objects to get")
 	jobexecutionCmd.Flags().Int32VarP(&jobExecFlags.page, "page", "p", 0, "The page number")
-	jobexecutionCmd.Flags().StringVarP(&jobExecFlags.format, "output", "o", "table", "Output format (table|json|yaml|template|template-file)")
+	jobexecutionCmd.Flags().StringVarP(&jobExecFlags.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
 	jobexecutionCmd.Flags().StringVarP(&jobExecFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
 	jobexecutionCmd.Flags().StringVarP(&jobExecFlags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
 	jobexecutionCmd.Flags().StringVarP(&jobExecFlags.file, "filename", "f", "", "File name to write to")

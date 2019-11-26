@@ -96,7 +96,7 @@ to quickly create a Cobra application.`,
 func init() {
 	crawlexecutionCmd.Flags().Int32VarP(&crawlExecFlags.pageSize, "pagesize", "s", 10, "Number of objects to get")
 	crawlexecutionCmd.Flags().Int32VarP(&crawlExecFlags.page, "page", "p", 0, "The page number")
-	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.format, "output", "o", "table", "Output format (table|json|yaml|template|template-file)")
+	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
 	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
 	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
 	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.file, "filename", "f", "", "File name to write to")

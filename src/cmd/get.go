@@ -136,7 +136,7 @@ func init() {
 	getCmd.PersistentFlags().Lookup("name").Annotations = annotation
 
 	getCmd.PersistentFlags().StringVarP(&flags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
-	getCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "table", "Output format (table|json|yaml|template|template-file)")
+	getCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
 	getCmd.PersistentFlags().StringVarP(&flags.goTemplate, "template", "t", "", "A Go template used to format the output")
 	getCmd.PersistentFlags().StringVarP(&flags.file, "filename", "f", "", "File name to write to")
 	getCmd.PersistentFlags().Int32VarP(&flags.pageSize, "pagesize", "s", 10, "Number of objects to get")
