@@ -3,7 +3,7 @@ language: go
 go:
   - 1.13.x
 
-gobuild_args: -tags=dev
+#gobuild_args: -tags=dev
 
 # calls goreleaser
 deploy:
