@@ -35,7 +35,6 @@ type queryConf struct {
 	pageSize   int32
 	page       int32
 	goTemplate string
-	filter     []string
 	file       string
 	format     string
 }
@@ -110,7 +109,6 @@ func init() {
 	queryCmd.PersistentFlags().StringVarP(&queryFlags.format, "output", "o", "json", "Output format (json|yaml|template|template-file)")
 	queryCmd.PersistentFlags().StringVarP(&queryFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
 	queryCmd.Flags().StringVarP(&queryFlags.file, "filename", "f", "", "File name to write to")
-	queryCmd.PersistentFlags().StringSliceVarP(&queryFlags.filter, "filter", "f", nil, "Filters")
 
 	ReportCmd.AddCommand(queryCmd)
 }

@@ -115,11 +115,17 @@ func makeValue(t reflect.Type, v string) (val reflect.Value, err error) {
 			cr.Value = keyVal[1]
 		default:
 			if typeRegistry[t.Elem().Name()] == nil {
-				log.Fatalf("field '%v' of type '%v' is not implemented yet", v, t.Elem())
+				log.Fatalf("field '%v' of pointer type '%v' is not implemented yet", v, t.Elem())
 			}
 		}
 	case reflect.String:
 		val = reflect.ValueOf(v)
+	case reflect.Int32:
+		n, err := strconv.ParseInt(v, 10, 32)
+		if err != nil {
+			return val, err
+		}
+		val = reflect.ValueOf(int32(n))
 	case reflect.Int64:
 		n, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
