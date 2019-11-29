@@ -16,7 +16,7 @@ package apiutil
 import (
 	"fmt"
 	commonsV1 "github.com/nlnwa/veidemann-api-go/commons/v1"
-	api "github.com/nlnwa/veidemann-api-go/config/v1"
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	log "github.com/sirupsen/logrus"
 	"reflect"
 	"strconv"
@@ -24,7 +24,7 @@ import (
 	"strings"
 )
 
-func createSelector(labelString string) []string {
+func CreateSelector(labelString string) []string {
 	var result []string
 	if labelString != "" {
 		result = strings.Split(labelString, ",")
@@ -32,11 +32,11 @@ func createSelector(labelString string) []string {
 	return result
 }
 
-func CreateTemplateFilter(filterString string) (*commonsV1.FieldMask, *api.ConfigObject, error) {
+func CreateTemplateFilter(filterString string, templateObj interface{}) (*commonsV1.FieldMask, interface{}, error) {
 	q := strings.Split(filterString, "=")
 	mask := &commonsV1.FieldMask{}
 	mask.Paths = append(mask.Paths, q[0])
-	obj := &api.ConfigObject{}
+	obj := templateObj
 	path := strings.TrimRight(q[0], "+-")
 	value := q[1]
 	tokens := strings.Split(path, ".")
@@ -99,27 +99,33 @@ func makeValue(t reflect.Type, v string) (val reflect.Value, err error) {
 	switch t.Kind() {
 	case reflect.Ptr:
 		switch t.Elem() {
-		case reflect.TypeOf(api.ConfigRef{}):
+		case reflect.TypeOf(configV1.ConfigRef{}):
 			val = reflect.New(t.Elem())
-			cr := val.Interface().(*api.ConfigRef)
+			cr := val.Interface().(*configV1.ConfigRef)
 
 			kindId := strings.SplitN(v, ":", 2)
-			cr.Kind = api.Kind(api.Kind_value[kindId[0]])
+			cr.Kind = configV1.Kind(configV1.Kind_value[kindId[0]])
 			cr.Id = kindId[1]
-		case reflect.TypeOf(api.Label{}):
+		case reflect.TypeOf(configV1.Label{}):
 			val = reflect.New(t.Elem())
-			cr := val.Interface().(*api.Label)
+			cr := val.Interface().(*configV1.Label)
 
 			keyVal := strings.SplitN(v, ":", 2)
 			cr.Key = keyVal[0]
 			cr.Value = keyVal[1]
 		default:
 			if typeRegistry[t.Elem().Name()] == nil {
-				log.Fatalf("field '%v' of type '%v' is not implemented yet", v, t.Elem())
+				log.Fatalf("field '%v' of pointer type '%v' is not implemented yet", v, t.Elem())
 			}
 		}
 	case reflect.String:
 		val = reflect.ValueOf(v)
+	case reflect.Int32:
+		n, err := strconv.ParseInt(v, 10, 32)
+		if err != nil {
+			return val, err
+		}
+		val = reflect.ValueOf(int32(n))
 	case reflect.Int64:
 		n, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
@@ -138,10 +144,10 @@ func makeValue(t reflect.Type, v string) (val reflect.Value, err error) {
 	return
 }
 
-func CreateListRequest(kind api.Kind, ids []string, name string, labelString string, filterString string, pageSize int32, page int32) (*api.ListRequest, error) {
-	selector := createSelector(labelString)
+func CreateListRequest(kind configV1.Kind, ids []string, name string, labelString string, filterString string, pageSize int32, page int32) (*configV1.ListRequest, error) {
+	selector := CreateSelector(labelString)
 
-	request := &api.ListRequest{}
+	request := &configV1.ListRequest{}
 	request.Kind = kind
 	request.Id = ids
 	request.NameRegex = name
@@ -151,12 +157,12 @@ func CreateListRequest(kind api.Kind, ids []string, name string, labelString str
 	request.PageSize = pageSize
 
 	if filterString != "" {
-		m, o, err := CreateTemplateFilter(filterString)
+		m, o, err := CreateTemplateFilter(filterString, &configV1.ConfigObject{})
 		if err != nil {
 			return nil, err
 		}
 		request.QueryMask = m
-		request.QueryTemplate = o
+		request.QueryTemplate = o.(*configV1.ConfigObject)
 	}
 
 	return request, nil
@@ -165,7 +171,7 @@ func CreateListRequest(kind api.Kind, ids []string, name string, labelString str
 var typeRegistry = make(map[string]reflect.Type)
 
 func init() {
-	co := api.ConfigObject{}
+	co := configV1.ConfigObject{}
 	for _, b := range co.XXX_OneofWrappers() {
 		t := reflect.TypeOf(b).Elem()
 		n := strings.TrimPrefix(t.String(), "config.ConfigObject_")

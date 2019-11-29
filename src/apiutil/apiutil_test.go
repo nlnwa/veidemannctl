@@ -47,7 +47,7 @@ func TestCreateSelector(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := createSelector(tt.args.labelString); !reflect.DeepEqual(got, tt.want) {
+			if got := CreateSelector(tt.args.labelString); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CreateSelector() = %v, want %v", got, tt.want)
 			}
 		})

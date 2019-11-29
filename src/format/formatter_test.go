@@ -13,7 +13,15 @@
 
 package format
 
-import "testing"
+import (
+	"bytes"
+	"github.com/golang/protobuf/ptypes"
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
+	"github.com/stretchr/testify/assert"
+	"testing"
+	"time"
+)
 
 func TestHasSuffix(t *testing.T) {
 	type args struct {
@@ -35,6 +43,180 @@ func TestHasSuffix(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := HasSuffix(tt.args.s, tt.args.suffix...); got != tt.want {
 				t.Errorf("HasSuffix() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewFormatter(t *testing.T) {
+	ts, _ := time.Parse(time.RFC3339, "2019-12-24T17:00:00Z")
+	startTime, _ := ptypes.TimestampProto(ts)
+	ts, _ = time.Parse(time.RFC3339, "2019-12-31T23:59:59Z")
+	endTime, _ := ptypes.TimestampProto(ts)
+
+	jobExec := &frontierV1.JobExecutionStatus{Id: "id1", StartTime: startTime, EndTime: endTime}
+
+	seed := &configV1.ConfigObject{
+		ApiVersion: "v1",
+		Kind:       configV1.Kind_seed,
+		Id:         "id1",
+		Meta:       &configV1.Meta{Name: "http://www.example.com"},
+		Spec:       &configV1.ConfigObject_Seed{Seed: &configV1.Seed{EntityRef: &configV1.ConfigRef{Kind: configV1.Kind_crawlEntity, Id: "entityRef"}}}}
+
+	json := "{\"foo\": \"bar\", \"val\": 42}"
+
+	type args struct {
+		kind     string
+		format   string
+		template string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		record interface{}
+		want   string
+	}{
+		{"JobExec-json", args{format: "json"},
+			jobExec,
+			`{
+  "bytesCrawled": "0",
+  "documentsCrawled": "0",
+  "documentsDenied": "0",
+  "documentsFailed": "0",
+  "documentsOutOfScope": "0",
+  "documentsRetried": "0",
+  "endTime": "2019-12-31T23:59:59Z",
+  "error": null,
+  "executionsState": {},
+  "id": "id1",
+  "jobId": "",
+  "startTime": "2019-12-24T17:00:00Z",
+  "state": "UNDEFINED",
+  "urisCrawled": "0"
+}`},
+
+		{"JobExec-yaml", args{format: "yaml"},
+			jobExec,
+			`bytesCrawled: "0"
+documentsCrawled: "0"
+documentsDenied: "0"
+documentsFailed: "0"
+documentsOutOfScope: "0"
+documentsRetried: "0"
+endTime: "2019-12-31T23:59:59Z"
+error: null
+executionsState: {}
+id: id1
+jobId: ""
+startTime: "2019-12-24T17:00:00Z"
+state: UNDEFINED
+urisCrawled: "0"
+`},
+
+		{"JobExec-table", args{format: "table", kind: "JobExecutionStatus"},
+			jobExec,
+			`Id                                             State     Docs     Uris Start time               End time                
+                                 id1       UNDEFINED        0        0 2019-12-24T17:00:00Z     2019-12-31T23:59:59Z    
+`},
+
+		{"JobExec-template", args{format: "template", template: "ID: {{.Id}}, State: {{.State}}"},
+			jobExec,
+			`ID: id1, State: UNDEFINED`},
+
+		{"Seed-json", args{format: "json"},
+			seed,
+			`{
+  "apiVersion": "v1",
+  "id": "id1",
+  "kind": "seed",
+  "meta": {
+    "created": null,
+    "createdBy": "",
+    "description": "",
+    "label": [],
+    "lastModified": null,
+    "lastModifiedBy": "",
+    "name": "http://www.example.com"
+  },
+  "seed": {
+    "disabled": false,
+    "entityRef": {
+      "id": "entityRef",
+      "kind": "crawlEntity"
+    },
+    "jobRef": [],
+    "scope": null
+  }
+}`},
+
+		{"Seed-yaml", args{format: "yaml"},
+			seed,
+			`apiVersion: v1
+id: id1
+kind: seed
+meta:
+  created: null
+  createdBy: ""
+  description: ""
+  label: []
+  lastModified: null
+  lastModifiedBy: ""
+  name: http://www.example.com
+seed:
+  disabled: false
+  entityRef:
+    id: entityRef
+    kind: crawlEntity
+  jobRef: []
+  scope: null
+
+---
+`},
+
+		{"Seed-table", args{format: "table", kind: "seed"},
+			seed,
+			`Id                                               Url EntityId     Surt JobId                    Disabled                
+                                 id1 http://www.example.com entityRef [] false
+`},
+
+		{"Seed-template", args{format: "template", template: "ID: {{.Id}}, Url: {{.Meta.Name}}"},
+			seed,
+			`ID: id1, Url: http://www.example.com`},
+
+		{"Json-json", args{format: "json"},
+			json,
+			`{"foo": "bar", "val": 42}`},
+
+		{"Json-yaml", args{format: "yaml"},
+			json,
+			`foo: bar
+val: 42
+
+---
+`},
+
+		{"Json-template", args{format: "template", template: "ID: {{.foo}}, Val: {{.val}}"},
+			json,
+			`ID: bar, Val: 42`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out := bytes.NewBuffer([]byte{})
+			//out := os.Stdout
+			f, err := NewFormatter(tt.args.kind, out, tt.args.format, tt.args.template)
+			if assert.NoError(t, err) {
+				err = f.WriteRecord(tt.record)
+				_ = f.Close()
+				if assert.NoError(t, err) {
+					switch tt.args.format {
+					case "json":
+						assert.JSONEq(t, tt.want, out.String(), "Got: '%s'", out.String())
+					case "yaml":
+						assert.YAMLEq(t, tt.want, out.String(), "Got: '%s'", out.String())
+					default:
+						assert.Equal(t, tt.want, out.String(), "Got: '%s'", out.String())
+					}
+				}
 			}
 		})
 	}

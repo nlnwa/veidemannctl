@@ -83,10 +83,16 @@ var getCmd = &cobra.Command{
 				log.Fatalf("Error from controller: %v", err)
 			}
 
-			s := format.NewFormatter(k, flags.file, flags.format, flags.goTemplate, "")
+			out, err := format.ResolveWriter(flags.file)
+			if err != nil {
+				log.Fatalf("Could not resolve output '%v': %v", flags.file, err)
+			}
+			s, err := format.NewFormatter(args[0], out, flags.format, flags.goTemplate)
+			if err != nil {
+				log.Fatal(err)
+			}
 			defer s.Close()
 
-			s.WriteHeader()
 			for {
 				msg, err := r.Recv()
 				if err == io.EOF {
@@ -95,7 +101,7 @@ var getCmd = &cobra.Command{
 				if err != nil {
 					log.Fatalf("Error getting object: %v", err)
 				}
-				log.Debugf("Outputing record of kind '%s' with name '%s'", msg.Kind, msg.Meta.Name)
+				log.Debugf("Outputting record of kind '%s' with name '%s'", msg.Kind, msg.Meta.Name)
 				if s.WriteRecord(msg) != nil {
 					os.Exit(1)
 				}
@@ -130,7 +136,7 @@ func init() {
 	getCmd.PersistentFlags().Lookup("name").Annotations = annotation
 
 	getCmd.PersistentFlags().StringVarP(&flags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
-	getCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "table", "Output format (table|json|yaml|template|template-file)")
+	getCmd.PersistentFlags().StringVarP(&flags.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
 	getCmd.PersistentFlags().StringVarP(&flags.goTemplate, "template", "t", "", "A Go template used to format the output")
 	getCmd.PersistentFlags().StringVarP(&flags.file, "filename", "f", "", "File name to write to")
 	getCmd.PersistentFlags().Int32VarP(&flags.pageSize, "pagesize", "s", 10, "Number of objects to get")

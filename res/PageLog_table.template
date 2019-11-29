@@ -15,9 +15,4 @@
 {{range .Outlink}}{{template "OUTLINK" .}}{{end}}
 {{end -}}
 
-{{define "MAIN"}}
-{{range .Value}}{{template "PAGE" .}}{{end}}
-TOTAL {{print .Count}}
-{{end -}}
-
-{{template "MAIN" .}}
+{{template "PAGE" .}}

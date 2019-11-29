@@ -14,7 +14,7 @@
 package cmd
 
 import (
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	controllerV1 "github.com/nlnwa/veidemann-api-go/controller/v1"
 
 	"context"
 	"github.com/nlnwa/veidemannctl/src/connection"
@@ -29,11 +29,11 @@ var abortJobExecutionCmd = &cobra.Command{
 	Long:  `Abort one or more job executions.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			client, conn := connection.NewStatusClient()
+			client, conn := connection.NewControllerClient()
 			defer conn.Close()
 
 			for _, arg := range args {
-				request := api.ExecutionId{Id: arg}
+				request := controllerV1.ExecutionId{Id: arg}
 				_, err := client.AbortJobExecution(context.Background(), &request)
 				if err != nil {
 					log.Fatalf("could not abort job execution '%v': %v", arg, err)

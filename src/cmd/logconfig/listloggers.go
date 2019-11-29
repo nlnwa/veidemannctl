@@ -28,7 +28,7 @@ var ListLoggersCmd = &cobra.Command{
 	Short: "List configured loggers",
 	Long:  `List configured loggers.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, conn := connection.NewControllerClient()
+		client, conn := connection.NewConfigClient()
 		defer conn.Close()
 
 		r, err := client.GetLogConfig(context.Background(), &empty.Empty{})

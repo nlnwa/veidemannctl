@@ -14,11 +14,11 @@
 package format
 
 import (
+	"errors"
 	"fmt"
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/proto"
 	"io"
-	"log"
 	"reflect"
 )
 
@@ -30,10 +30,6 @@ func newYamlFormatter(s *MarshalSpec) Formatter {
 	return &yamlFormatter{
 		MarshalSpec: s,
 	}
-}
-
-func (yf *yamlFormatter) WriteHeader() error {
-	return nil
 }
 
 func (yf *yamlFormatter) WriteRecord(record interface{}) error {
@@ -78,7 +74,7 @@ func (yf *yamlFormatter) WriteRecord(record interface{}) error {
 			yf.rWriter.Write([]byte("---\n"))
 		}
 	default:
-		log.Fatalf("Illegal format %s", yf.rFormat)
+		return errors.New(fmt.Sprintf("Illegal record type '%T'", record))
 	}
 	return nil
 }
@@ -86,14 +82,12 @@ func (yf *yamlFormatter) WriteRecord(record interface{}) error {
 func marshalElementYaml(w io.Writer, msg proto.Message) error {
 	r, err := EncodeJson(msg)
 	if err != nil {
-		log.Fatalf("Could not convert %v to JSON: %v", msg, err)
-		return err
+		return errors.New(fmt.Sprintf("Could not convert %v to JSON: %v", msg, err))
 	}
 
 	final, err := yaml.JSONToYAML(r)
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
-		return err
+		return errors.New(fmt.Sprintf("Could not convert %v to YAML: %v", r, err))
 	}
 
 	fmt.Fprintln(w, string(final))

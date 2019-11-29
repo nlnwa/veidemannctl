@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 National Library of Norway.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package format
 
 import (
@@ -5,67 +21,60 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
-	"io"
-	log "github.com/sirupsen/logrus"
-	"sync"
-	"text/template"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
+	log "github.com/sirupsen/logrus"
+	"text/template"
 )
 
-type templateWriter struct {
-	writer         io.Writer
-	template       string
-	headerTemplate string
-	pin            *io.PipeReader
-	pout           *io.PipeWriter
-	wg             *sync.WaitGroup
+type templateFormatter struct {
+	*MarshalSpec
+	headerWritten  bool
+	parsedTemplate *template.Template
 }
 
-func newTemplateWriter(writer io.Writer, template string, headerTemplate string, wg *sync.WaitGroup) *templateWriter {
-	t := &templateWriter{}
-	t.writer = writer
-	t.template = template
-	t.headerTemplate = headerTemplate
-	t.pin, t.pout = io.Pipe()
-	t.wg = wg
-	t.wg.Add(1)
-	go t.unmarshalJson()
-	return t
+func newTemplateFormatter(s *MarshalSpec) (Formatter, error) {
+	t := &templateFormatter{
+		MarshalSpec: s,
+	}
+	pt, err := parseTemplate(t.rTemplate)
+	if err != nil {
+		return nil, err
+	}
+	t.parsedTemplate = pt
+	return t, nil
 }
 
-func (t *templateWriter) Write(p []byte) (n int, err error) {
-	return t.pout.Write(p)
-}
-
-func (t *templateWriter) Close() error {
-	return t.pout.Close()
-}
-
-func (t *templateWriter) unmarshalJson() {
-	defer t.wg.Done()
-	dec := json.NewDecoder(t.pin)
-	for dec.More() {
-		var val interface{}
-		err := dec.Decode(&val)
-		if err != nil {
-			log.Fatal("Failed decoding json: ", err)
+func (tf *templateFormatter) WriteRecord(record interface{}) error {
+	if !tf.headerWritten {
+		tf.headerWritten = true
+		tpl := tf.parsedTemplate.Lookup("HEADER")
+		if tpl != nil {
+			err := tpl.Execute(tf.rWriter, nil)
+			if err != nil {
+				log.Fatal("Failed applying header template: ", err)
+			}
 		}
-		t.applyRecordTemplate(val)
 	}
-	if c, ok := t.writer.(io.Closer); ok {
-		c.Close()
+
+	tpl := tf.parsedTemplate
+	if tpl != nil {
+		if r, ok := record.(string); ok {
+			var j interface{}
+			err := json.Unmarshal([]byte(r), &j)
+			if err != nil {
+				return fmt.Errorf("failed to parse json: %v", err)
+			}
+			record = j
+		}
+		err := tpl.Execute(tf.rWriter, record)
+		if err != nil {
+			return fmt.Errorf("failed applying template to '%v': %v", record, err)
+		}
 	}
+	return nil
 }
 
-func (t *templateWriter) applyHeaderTemplate(msg interface{}) {
-	t.applyTemplate(nil, t.headerTemplate)
-}
-
-func (t *templateWriter) applyRecordTemplate(val interface{}) {
-	t.applyTemplate(val, t.template)
-}
-
-func (t *templateWriter) applyTemplate(val interface{}, templateString string) {
+func parseTemplate(templateString string) (*template.Template, error) {
 	ESC := string(0x1b)
 	funcMap := template.FuncMap{
 		"reset":         func() string { return ESC + "[0m" },
@@ -134,12 +143,5 @@ func (t *templateWriter) applyTemplate(val interface{}, templateString string) {
 		"nl": func() string { return "\n" },
 	}
 
-	tmpl, err := template.New("Template").Funcs(funcMap).Parse(templateString)
-	if err != nil {
-		panic(err)
-	}
-	err = tmpl.Execute(t.writer, val)
-	if err != nil {
-		panic(err)
-	}
+	return template.New("Template").Funcs(funcMap).Parse(templateString)
 }

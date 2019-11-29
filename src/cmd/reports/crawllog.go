@@ -16,11 +16,27 @@ package reports
 
 import (
 	"context"
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
+	reportV1 "github.com/nlnwa/veidemann-api-go/report/v1"
+	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
+	"github.com/nlnwa/veidemannctl/src/format"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"log"
+	"io"
+	"os"
 )
+
+var crawllogFlags struct {
+	executionId string
+	filter      string
+	pageSize    int32
+	page        int32
+	goTemplate  string
+	format      string
+	file        string
+	watch       bool
+}
 
 // crawllogCmd represents the crawllog command
 var crawllogCmd = &cobra.Command{
@@ -36,26 +52,79 @@ to quickly create a Cobra application.`,
 		client, conn := connection.NewReportClient()
 		defer conn.Close()
 
-		request := api.CrawlLogListRequest{}
+		var ids []string
+
 		if len(args) > 0 {
-			request.WarcId = args
+			ids = args
 		}
-		if flags.executionId != "" {
-			request.ExecutionId = flags.executionId
-		}
-		request.Filter = applyFilter(flags.filter)
-		request.Page = flags.page
-		request.PageSize = flags.pageSize
 
-		r, err := client.ListCrawlLogs(context.Background(), &request)
+		request, err := CreateCrawlLogListRequest(ids)
 		if err != nil {
-			log.Fatalf("could not get crawl log: %v", err)
+			log.Fatalf("Error creating request: %v", err)
 		}
 
-		ApplyTemplate(r, "crawllog.template")
+		r, err := client.ListCrawlLogs(context.Background(), request)
+		if err != nil {
+			log.Fatalf("Error from controller: %v", err)
+		}
+
+		out, err := format.ResolveWriter(crawllogFlags.file)
+		if err != nil {
+			log.Fatalf("Could not resolve output '%v': %v", crawlExecFlags.file, err)
+		}
+		s, err := format.NewFormatter("CrawlLog", out, crawllogFlags.format, crawllogFlags.goTemplate)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer s.Close()
+
+		for {
+			msg, err := r.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Error getting object: %v", err)
+			}
+			log.Debugf("Outputting crawl log record with WARC id '%s'", msg.WarcId)
+			if s.WriteRecord(msg) != nil {
+				os.Exit(1)
+			}
+		}
 	},
 }
 
 func init() {
+	crawllogCmd.Flags().Int32VarP(&crawllogFlags.pageSize, "pagesize", "s", 10, "Number of objects to get")
+	crawllogCmd.Flags().Int32VarP(&crawllogFlags.page, "page", "p", 0, "The page number")
+	crawllogCmd.Flags().StringVarP(&crawllogFlags.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
+	crawllogCmd.Flags().StringVarP(&crawllogFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
+	crawllogCmd.Flags().StringVarP(&crawllogFlags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
+	crawllogCmd.Flags().StringVarP(&crawllogFlags.file, "filename", "f", "", "File name to write to")
+	crawllogCmd.Flags().BoolVarP(&crawllogFlags.watch, "watch", "w", false, "Get a continous stream of changes")
+
 	ReportCmd.AddCommand(crawllogCmd)
+}
+
+func CreateCrawlLogListRequest(ids []string) (*reportV1.CrawlLogListRequest, error) {
+	request := &reportV1.CrawlLogListRequest{}
+	request.WarcId = ids
+	request.Watch = crawllogFlags.watch
+	if crawllogFlags.watch {
+		crawllogFlags.pageSize = 0
+	}
+
+	request.Offset = crawllogFlags.page
+	request.PageSize = crawllogFlags.pageSize
+
+	if crawllogFlags.filter != "" {
+		m, o, err := apiutil.CreateTemplateFilter(crawllogFlags.filter, &frontierV1.CrawlLog{})
+		if err != nil {
+			return nil, err
+		}
+		request.QueryMask = m
+		request.QueryTemplate = o.(*frontierV1.CrawlLog)
+	}
+
+	return request, nil
 }

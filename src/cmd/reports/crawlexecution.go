@@ -16,17 +16,26 @@ package reports
 
 import (
 	"context"
-	api "github.com/nlnwa/veidemann-api-go/veidemann_api"
+	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
+	reportV1 "github.com/nlnwa/veidemann-api-go/report/v1"
+	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
+	"github.com/nlnwa/veidemannctl/src/format"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"log"
+	"io"
+	"os"
 )
 
-var (
-	jobExecutionId string
-	jobId string
-	seedId string
-)
+var crawlExecFlags struct {
+	filter     string
+	pageSize   int32
+	page       int32
+	goTemplate string
+	format     string
+	file       string
+	watch      bool
+}
 
 // crawlexecutionCmd represents the crawlexecution command
 var crawlexecutionCmd = &cobra.Command{
@@ -39,40 +48,82 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, conn := connection.NewStatusClient()
+		client, conn := connection.NewReportClient()
 		defer conn.Close()
 
-		request := api.ListExecutionsRequest{}
+		var ids []string
+
 		if len(args) > 0 {
-			request.Id = args
-		}
-		//TODO: While working on NNA-1299 I discovered that none of these options works as expected.
-		// Probably API-related?
-		if jobExecutionId != "" {
-			request.JobExecutionId = jobExecutionId
-		}
-		if jobId != "" {
-			request.JobId = jobId
-		}
-		if seedId != "" {
-			request.SeedId = seedId
+			ids = args
 		}
 
-		request.Page = flags.page
-		request.PageSize = flags.pageSize
-		r, err := client.ListExecutions(context.Background(), &request)
+		request, err := CreateCrawlExecutionsListRequest(ids)
 		if err != nil {
-			log.Fatalf("could not get crawl log: %v", err)
+			log.Fatalf("Error creating request: %v", err)
 		}
 
-		ApplyTemplate(r, "crawlexecution.template")
+		r, err := client.ListExecutions(context.Background(), request)
+		if err != nil {
+			log.Fatalf("Error from controller: %v", err)
+		}
+
+		out, err := format.ResolveWriter(crawlExecFlags.file)
+		if err != nil {
+			log.Fatalf("Could not resolve output '%v': %v", crawlExecFlags.file, err)
+		}
+		s, err := format.NewFormatter("CrawlExecutionStatus", out, crawlExecFlags.format, crawlExecFlags.goTemplate)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer s.Close()
+
+		for {
+			msg, err := r.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Error getting object: %v", err)
+			}
+			log.Debugf("Outputting page log record with id '%s'", msg.Id)
+			if s.WriteRecord(msg) != nil {
+				os.Exit(1)
+			}
+		}
 	},
 }
 
 func init() {
-	ReportCmd.AddCommand(crawlexecutionCmd)
+	crawlexecutionCmd.Flags().Int32VarP(&crawlExecFlags.pageSize, "pagesize", "s", 10, "Number of objects to get")
+	crawlexecutionCmd.Flags().Int32VarP(&crawlExecFlags.page, "page", "p", 0, "The page number")
+	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
+	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
+	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
+	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.file, "filename", "f", "", "File name to write to")
+	crawlexecutionCmd.Flags().BoolVarP(&crawlExecFlags.watch, "watch", "w", false, "Get a continous stream of changes")
 
-	crawlexecutionCmd.PersistentFlags().StringVarP(&jobExecutionId, "jobexecution", "j", "", "All executions for a Job Execution ID")
-	crawlexecutionCmd.PersistentFlags().StringVarP(&jobId, "job", "", "", "All executions for a Job ID")
-	crawlexecutionCmd.PersistentFlags().StringVarP(&seedId, "seed", "", "", "All executions for a Seed ID")
+	ReportCmd.AddCommand(crawlexecutionCmd)
+}
+
+func CreateCrawlExecutionsListRequest(ids []string) (*reportV1.CrawlExecutionsListRequest, error) {
+	request := &reportV1.CrawlExecutionsListRequest{}
+	request.Id = ids
+	request.Watch = crawlExecFlags.watch
+	if crawlExecFlags.watch {
+		crawlExecFlags.pageSize = 0
+	}
+
+	request.Offset = crawlExecFlags.page
+	request.PageSize = crawlExecFlags.pageSize
+
+	if crawlExecFlags.filter != "" {
+		m, o, err := apiutil.CreateTemplateFilter(crawlExecFlags.filter, &frontierV1.CrawlExecutionStatus{})
+		if err != nil {
+			return nil, err
+		}
+		request.QueryMask = m
+		request.QueryTemplate = o.(*frontierV1.CrawlExecutionStatus)
+	}
+
+	return request, nil
 }
