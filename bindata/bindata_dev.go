@@ -18,7 +18,15 @@
 
 package bindata
 
-import "net/http"
+import (
+	"net/http"
+	"path/filepath"
+	"runtime"
+)
+
+// Find the 'res' directory relative to this file to allow callers to be in any package
+var _, b, _, _ = runtime.Caller(0)
+var dir = filepath.Join(filepath.Dir(b), "../res")
 
 // Assets contains project assets.
-var Assets http.FileSystem = http.Dir("res")
+var Assets http.FileSystem = http.Dir(dir)

@@ -202,7 +202,6 @@ val: 42
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := bytes.NewBuffer([]byte{})
-			//out := os.Stdout
 			f, err := NewFormatter(tt.args.kind, out, tt.args.format, tt.args.template)
 			if assert.NoError(t, err) {
 				err = f.WriteRecord(tt.record)
