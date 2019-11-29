@@ -19,18 +19,6 @@ import (
 	"strings"
 )
 
-//	{"crawlEntity", []string{"Id", "Meta.Name", "Meta.Description"}},
-//	{"seed", []string{"Id", "Meta.Name", "Spec.Seed.EntityRef", "Spec.Seed.Scope.SurtPrefix", "Spec.Seed.JobRef", "Spec.Seed.Disabled"}},
-//	{"crawlConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlConfig.CollectionRef", "Spec.CrawlConfig.BrowserConfigRef", "Spec.CrawlConfig.PolitenessRef", "Spec.CrawlConfig.Extra"}},
-//	{"crawlJob", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlJob.ScheduleRef", "Spec.CrawlJob.Limits", "Spec.CrawlJob.CrawlConfigRef", "Spec.CrawlJob.Disabled"}},
-//	{"crawlScheduleConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlScheduleConfig.CronExpression", "Spec.CrawlScheduleConfig.ValidFrom", "Spec.CrawlScheduleConfig.ValidTo"}},
-//	{"browserConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.BrowserConfig.UserAgent", "Spec.BrowserConfig.WindowWidth", "Spec.BrowserConfig.WindowHeight", "Spec.BrowserConfig.PageLoadTimeoutMs", "Spec.BrowserConfig.MaxInactivityTimeMs"}},
-//	{"politenessConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.PolitenessConfig.RobotsPolicy", "Spec.PolitenessConfig.MinTimeBetweenPageLoadMs", "Spec.PolitenessConfig.MaxTimeBetweenPageLoadMs", "Spec.PolitenessConfig.DelayFactor", "Spec.PolitenessConfig.MaxRetries", "Spec.PolitenessConfig.RetryDelaySeconds", "Spec.PolitenessConfig.CrawlHostGroupSelector"}},
-//	{"browserScript", []string{"Id", "Meta.Name", "Meta.Description", "Spec.BrowserScript.Script", "Spec.BrowserScript.UrlRegexp"}},
-//	{"crawlHostGroupConfig", []string{"Id", "Meta.Name", "Meta.Description", "Spec.CrawlHostGroup.IpRange"}},
-//	{"roleMapping", []string{"Id", "Spec.RoleMapping.EmailOrGroup.Email", "Spec.RoleMapping.EmailOrGroup.Group", "Spec.RoleMapping.Role"}},
-//	{"collection", []string{"Id", "Meta.Name", "Spec.Collection.CollectionDedupPolicy", "Spec.Collection.FileRotationPolicy", "Spec.Collection.SubCollections"}},
-
 // Get kind for string
 func GetKind(Name string) configV1.Kind {
 	Name = strings.ToLower(Name)
