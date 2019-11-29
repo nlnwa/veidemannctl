@@ -7,8 +7,6 @@ builds:
       - amd64
     hooks:
       pre: go generate
-    flags:
-      - tags=
 
 archives:
   - id: binary
