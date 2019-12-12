@@ -4,6 +4,13 @@
 
 # veidemannctl
 
+## Build instructions
+
+```console
+go generate
+go build
+```
+
 ## Install
 
 ```console
