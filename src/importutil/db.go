@@ -130,6 +130,7 @@ func (d *ImportDb) ImportExisting() {
 			log.Infof("Failed handling: %v", uri)
 		case NEW:
 			log.Debugf("New uri '%v' added", uri)
+			i++
 		case EXISTS_VEIDEMANN:
 			log.Debugf("Already exists in Veidemann: %v", uri)
 		case DUPLICATE_NEW:
@@ -137,7 +138,6 @@ func (d *ImportDb) ImportExisting() {
 		case DUPLICATE_VEIDEMANN:
 			log.Infof("Found duplicate already existing in Veidemann: %v", uri)
 		}
-		i++
 	}
 	elapsed := time.Since(start)
 	fmt.Printf("Imported %v seeds from Veidemann in %s\n", i, elapsed)
