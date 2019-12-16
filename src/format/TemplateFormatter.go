@@ -22,7 +22,10 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/nlnwa/veidemann-api-go/config/v1"
 	log "github.com/sirupsen/logrus"
+	"reflect"
+	"strings"
 	"text/template"
 )
 
@@ -141,6 +144,68 @@ func parseTemplate(templateString string) (*template.Template, error) {
 			}
 		},
 		"nl": func() string { return "\n" },
+		"join": func(sep string, v interface{}) string {
+			a := reflect.ValueOf(v)
+			if a.Kind() != reflect.Slice {
+				return v.(string)
+			}
+			var b strings.Builder
+			if a.Len() == 0 {
+				return ""
+			}
+			b.WriteString(fmt.Sprintf("%s", a.Index(0)))
+			for i := 1; i < a.Len(); i++ {
+				b.WriteString(sep)
+				b.WriteString(fmt.Sprintf("%s", a.Index(i)))
+			}
+			return b.String()
+		},
+		"flatMap": func(v interface{}, field ...string) []interface{} {
+			slice := reflect.ValueOf(v)
+			if slice.Kind() != reflect.Slice {
+				return nil
+			}
+			n := slice.Len()
+			fieldCount := len(field)
+			if fieldCount == 0 {
+				fieldCount = 1
+			}
+			res := make([]interface{}, n*fieldCount)
+
+			for i := 0; i < n; i++ {
+				val := reflect.ValueOf(v).Index(i)
+				if len(field) == 0 {
+					res[i] = fmt.Sprintf("%s", val)
+				} else {
+					if val.Kind() == reflect.Ptr {
+						val = val.Elem()
+					}
+					for j, f := range field {
+						res[i*fieldCount+j] = fmt.Sprintf("%s", val.FieldByName(f))
+					}
+				}
+			}
+
+			return res
+		},
+		"printLabels": func(v interface{}) string {
+			if labels, ok := v.([]*config.Label); ok {
+				b := strings.Builder{}
+				b.WriteString("[")
+				for i, l := range labels {
+					if i > 0 {
+						b.WriteString(", ")
+					}
+					b.WriteString(l.Key)
+					b.WriteString(":'")
+					b.WriteString(l.Value)
+					b.WriteString("'")
+				}
+				b.WriteString("]")
+				return b.String()
+			}
+			return ""
+		},
 	}
 
 	return template.New("Template").Funcs(funcMap).Parse(templateString)
