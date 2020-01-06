@@ -14,6 +14,7 @@
 package importcmd
 
 import (
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/importutil"
 	log "github.com/sirupsen/logrus"
@@ -23,18 +24,21 @@ import (
 )
 
 var dupFlags struct {
-	outFile         string
-	dbDir           string
-	resetDb         bool
+	outFile string
+	dbDir   string
+	resetDb bool
 }
 
 // duplicateReportCmd represents the duplicatereport command
 var duplicateReportCmd = &cobra.Command{
-	Use:   "duplicatereport",
+	Use:   "duplicatereport [kind]",
 	Short: "List duplicated seeds in Veidemann",
 	Long:  ``,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
+
+		kind := configV1.Kind(configV1.Kind_value[args[0]])
 
 		// Create output writer (file or stdout)
 		var out io.Writer
@@ -54,11 +58,20 @@ var duplicateReportCmd = &cobra.Command{
 		defer conn.Close()
 
 		// Create state Database based on seeds in Veidemann
-		impf := importutil.NewImportDb(client, dupFlags.dbDir, dupFlags.resetDb)
+		impf := importutil.NewImportDb(client, dupFlags.dbDir, kind, dupFlags.resetDb)
 		impf.ImportExisting()
 		defer impf.Close()
 
-		impf.DuplicateReport(out)
+		switch kind {
+		case configV1.Kind_seed:
+			if err = impf.SeedDuplicateReport(out); err != nil {
+				log.Errorf("failed creating seed duplicate report: %v", err)
+			}
+		case configV1.Kind_crawlEntity:
+			if err = impf.CrawlEntityDuplicateReport(out); err != nil {
+				log.Errorf("failed creating crawl entity duplicate report: %v", err)
+			}
+		}
 	},
 }
 

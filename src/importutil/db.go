@@ -19,14 +19,17 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
-	"github.com/dgraph-io/badger"
-	"github.com/dgraph-io/badger/pb"
+	"github.com/dgraph-io/badger/v2"
+	"github.com/dgraph-io/badger/v2/pb"
 	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	"github.com/nlnwa/veidemannctl/src/configutil"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/url"
 	"os"
+	"path"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -66,14 +69,22 @@ type ImportDb struct {
 	db     *badger.DB
 	gc     *time.Ticker
 	client configV1.ConfigClient
+	kind   configV1.Kind
 	vmMux  sync.Mutex
 }
 
-func NewImportDb(client configV1.ConfigClient, dbDir string, resetDb bool) *ImportDb {
+func NewImportDb(client configV1.ConfigClient, dbDir string, kind configV1.Kind, resetDb bool) *ImportDb {
+	kindName := kind.String()
+	dbDir = path.Join(dbDir, configutil.GlobalFlags.Context, kindName)
+	if err := os.MkdirAll(dbDir, 0777); err != nil {
+		log.Fatal(err)
+	}
 	opts := badger.DefaultOptions(dbDir)
 	opts.Logger = log.StandardLogger()
 	if resetDb {
-		os.RemoveAll(dbDir)
+		if err := os.RemoveAll(dbDir); err != nil {
+			log.Fatal(err)
+		}
 	}
 	db, err := badger.Open(opts)
 	if err != nil {
@@ -83,6 +94,7 @@ func NewImportDb(client configV1.ConfigClient, dbDir string, resetDb bool) *Impo
 	d := &ImportDb{
 		db:     db,
 		client: client,
+		kind:   kind,
 	}
 
 	d.gc = time.NewTicker(5 * time.Minute)
@@ -101,11 +113,11 @@ func NewImportDb(client configV1.ConfigClient, dbDir string, resetDb bool) *Impo
 
 func (d *ImportDb) ImportExisting() {
 	req := &configV1.ListRequest{
-		Kind: configV1.Kind_seed,
+		Kind: d.kind,
 	}
 	r, err := d.client.ListConfigObjects(context.Background(), req)
 	if err != nil {
-		log.Fatalf("Error reading seeds from Veidemann: %v", err)
+		log.Fatalf("Error reading %s from Veidemann: %v", d.kind.String(), err)
 	}
 
 	i := 0
@@ -116,34 +128,42 @@ func (d *ImportDb) ImportExisting() {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Error reading seed from Veidemann: %v", err)
+			log.Fatalf("Error reading %s from Veidemann: %v", d.kind.String(), err)
 		}
 
-		uri, err := url.Parse(msg.GetMeta().GetName())
-		if err != nil {
-			log.Warnf("error parsing uri '%v': %v", uri, err)
-			continue
+		var metaName string
+		switch d.kind {
+		case configV1.Kind_seed:
+			uri, err := url.Parse(msg.GetMeta().GetName())
+			if err != nil {
+				log.Warnf("error parsing uri '%v': %v", uri, err)
+				continue
+			}
+			metaName = uri.String()
+		default:
+			metaName = msg.GetMeta().GetName()
 		}
-		exists := d.contains(uri, msg.Id, true)
+
+		exists := d.contains(metaName, msg.Id, true)
 		switch exists.Code {
 		case ERROR:
-			log.Infof("Failed handling: %v", uri)
+			log.Infof("Failed handling: %v", metaName)
 		case NEW:
-			log.Debugf("New uri '%v' added", uri)
+			log.Debugf("New key '%v' added", metaName)
 		case EXISTS_VEIDEMANN:
-			log.Debugf("Already exists in Veidemann: %v", uri)
+			log.Debugf("Already exists in Veidemann: %v", metaName)
 		case DUPLICATE_NEW:
-			log.Infof("Found new duplicate: %v", uri)
+			log.Infof("Found new duplicate: %v", metaName)
 		case DUPLICATE_VEIDEMANN:
-			log.Infof("Found duplicate already existing in Veidemann: %v", uri)
+			log.Infof("Found duplicate already existing in Veidemann: %v", metaName)
 		}
 		i++
 	}
 	elapsed := time.Since(start)
-	fmt.Printf("Imported %v seeds from Veidemann in %s\n", i, elapsed)
+	fmt.Printf("Imported %v %s from Veidemann in %s\n", i, d.kind.String(), elapsed)
 }
 
-type DuplicateReportRecord struct {
+type SeedDuplicateReportRecord struct {
 	Host  string
 	Seeds []SeedRecord
 }
@@ -157,7 +177,7 @@ type SeedRecord struct {
 	EntityDescription string
 }
 
-func (d *ImportDb) DuplicateReport(w io.Writer) error {
+func (d *ImportDb) SeedDuplicateReport(w io.Writer) error {
 	stream := d.db.NewStream()
 
 	// -- Optional settings
@@ -165,12 +185,14 @@ func (d *ImportDb) DuplicateReport(w io.Writer) error {
 	stream.LogPrefix = "Badger.Streaming" // For identifying stream logs. Outputs to Logger.
 	// -- End of optional settings.
 
+	var duplicateCount int32
+
 	// Send is called serially, while Stream.Orchestrate is running.
 	stream.Send = func(list *pb.KVList) error {
 		for _, kv := range list.GetKv() {
 			val := d.bytesToStringArray(kv.Value)
 			if len(val) > 1 {
-				rec := &DuplicateReportRecord{Host: string(kv.Key)}
+				rec := &SeedDuplicateReportRecord{Host: string(kv.Key)}
 				for _, id := range val {
 					ref := &configV1.ConfigRef{Id: id, Kind: configV1.Kind_seed}
 					seed, err := d.client.GetConfigObject(context.Background(), ref)
@@ -193,6 +215,7 @@ func (d *ImportDb) DuplicateReport(w io.Writer) error {
 						log.Warnf("error getting seed from Veidemann: %v", err)
 					}
 				}
+				atomic.AddInt32(&duplicateCount, 1)
 				b, err := json.Marshal(rec)
 				if err == nil {
 					d.vmMux.Lock()
@@ -215,53 +238,99 @@ func (d *ImportDb) DuplicateReport(w io.Writer) error {
 	if err := stream.Orchestrate(context.Background()); err != nil {
 		return err
 	}
+	fmt.Printf("Number of duplicates %v\n", duplicateCount)
 	return nil
 }
 
-func (d *ImportDb) Check(uri string) (*ExistsResponse, error) {
-	u, err := url.Parse(uri)
-	if err != nil {
-		return &ExistsResponse{Code: ERROR}, fmt.Errorf("error parsing uri '%v': %v", uri, err)
-	}
-	return d.contains(u, "", false), nil
+type CrawlEntityDuplicateReportRecord struct {
+	Name          string
+	CrawlEntities []CrawlEntityRecord
 }
 
-func (d *ImportDb) CheckAndUpdate(uri string) (*ExistsResponse, error) {
-	u, err := url.Parse(uri)
-	if err != nil {
-		return &ExistsResponse{Code: ERROR}, fmt.Errorf("error parsing uri '%v': %v", uri, err)
-	}
-	return d.contains(u, "", true), nil
+type CrawlEntityRecord struct {
+	Id string
 }
 
-func (d *ImportDb) CheckAndUpdateVeidemann(uri string, data interface{},
+func (d *ImportDb) CrawlEntityDuplicateReport(w io.Writer) error {
+	stream := d.db.NewStream()
+
+	// -- Optional settings
+	stream.NumGo = 16                     // Set number of goroutines to use for iteration.
+	stream.LogPrefix = "Badger.Streaming" // For identifying stream logs. Outputs to Logger.
+	// -- End of optional settings.
+
+	var duplicateCount int32
+
+	// Send is called serially, while Stream.Orchestrate is running.
+	stream.Send = func(list *pb.KVList) error {
+		for _, kv := range list.GetKv() {
+			val := d.bytesToStringArray(kv.Value)
+			if len(val) > 1 {
+				rec := &CrawlEntityDuplicateReportRecord{Name: string(kv.Key)}
+				for _, id := range val {
+					sr := CrawlEntityRecord{
+						Id: id,
+					}
+					rec.CrawlEntities = append(rec.CrawlEntities, sr)
+				}
+				atomic.AddInt32(&duplicateCount, 1)
+				b, err := json.Marshal(rec)
+				if err == nil {
+					d.vmMux.Lock()
+					if _, err := w.Write(b); err != nil {
+						log.Warnf("error wirting record: %v", err)
+					}
+					if _, err := w.Write([]byte{'\n'}); err != nil {
+						log.Warnf("error wirting record: %v", err)
+					}
+					d.vmMux.Unlock()
+				} else {
+					log.Warnf("error formatting json: %v", err)
+				}
+			}
+		}
+		return nil
+	}
+
+	// Run the stream
+	if err := stream.Orchestrate(context.Background()); err != nil {
+		return err
+	}
+	fmt.Printf("Number of duplicates %v\n", duplicateCount)
+	return nil
+}
+
+func (d *ImportDb) Check(metaName string) (*ExistsResponse, error) {
+	return d.contains(metaName, "", false), nil
+}
+
+func (d *ImportDb) CheckAndUpdate(metaName string) (*ExistsResponse, error) {
+	return d.contains(metaName, "", true), nil
+}
+
+func (d *ImportDb) CheckAndUpdateVeidemann(metaName string, data interface{},
 	createFunc func(client configV1.ConfigClient, data interface{}) (id string, err error)) (*ExistsResponse, error) {
 
 	d.vmMux.Lock()
 	defer d.vmMux.Unlock()
 
-	u, err := url.Parse(uri)
-	if err != nil {
-		return &ExistsResponse{Code: ERROR}, fmt.Errorf("error parsing uri '%v': %v", uri, err)
-	}
-
-	exists := d.contains(u, "", true)
+	exists := d.contains(metaName, "", true)
 	if !exists.Code.ExistsInVeidemann() {
 		id, err := createFunc(d.client, data)
 		if err != nil {
 			return exists, err
 		}
-		d.contains(u, id, true)
+		d.contains(metaName, id, true)
 	}
 	return exists, nil
 }
 
-func (d *ImportDb) contains(uri *url.URL, id string, update bool) (response *ExistsResponse) {
+func (d *ImportDb) contains(metaName, id string, update bool) (response *ExistsResponse) {
 	response = &ExistsResponse{}
 	var err error
 	for {
 		err = d.db.Update(func(txn *badger.Txn) error {
-			item, err := txn.Get([]byte(uri.Host))
+			item, err := txn.Get([]byte(metaName))
 			if err == badger.ErrKeyNotFound {
 				response.Code = NEW
 				if id != "" {
@@ -269,7 +338,7 @@ func (d *ImportDb) contains(uri *url.URL, id string, update bool) (response *Exi
 				}
 				if update {
 					v := d.stringArrayToBytes(response.KnownIds)
-					txn.Set([]byte(uri.Host), v)
+					_ = txn.Set([]byte(metaName), v)
 				}
 				return nil
 			}
@@ -290,7 +359,7 @@ func (d *ImportDb) contains(uri *url.URL, id string, update bool) (response *Exi
 					val = append(val, id)
 					if update {
 						v := d.stringArrayToBytes(val)
-						txn.Set([]byte(uri.Host), v)
+						_ = txn.Set([]byte(metaName), v)
 					}
 				}
 
@@ -332,19 +401,23 @@ func (d *ImportDb) Close() {
 	}
 
 	d.gc.Stop()
-	d.db.Close()
+	_ = d.db.Close()
 }
 
 func (d *ImportDb) stringArrayToBytes(v []string) []byte {
 	buf := &bytes.Buffer{}
-	gob.NewEncoder(buf).Encode(v)
+	if err := gob.NewEncoder(buf).Encode(v); err != nil {
+		log.Fatal(err)
+	}
 	return buf.Bytes()
 }
 
 func (d *ImportDb) bytesToStringArray(v []byte) []string {
 	buf := bytes.NewBuffer(v)
 	strs := []string{}
-	gob.NewDecoder(buf).Decode(&strs)
+	if err := gob.NewDecoder(buf).Decode(&strs); err != nil {
+		log.Fatal(err)
+	}
 	return strs
 }
 

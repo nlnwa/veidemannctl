@@ -30,75 +30,74 @@ var updateflags struct {
 	name        string
 	filter      string
 	updateField string
-	file        string
-	format      string
-	goTemplate  string
 	pageSize    int32
-	page        int32
 }
 
 // updateCmd represents the get command
 var updateCmd = &cobra.Command{
 	Use:   "update [object_type]",
 	Short: "Update the value(s) for an object type",
-	Long: `Display one or many objects.
+	Long:  `Update one or many objects with new values.`,
+	Example: `# Add CrawlJob for a seed.
+veidemannctl update seed -n "http://www.gwpda.org/" -u seed.jobRef+=crawlJob:e46863ae-d076-46ca-8be3-8a8ef72e709
 
-` +
-		printValidObjectTypes() +
-		`Examples:
-  #List all seeds.
-  veidemannctl get seed
+# Replace all configured CrawlJobs for a seed with a new one.
+veidemannctl update seed -n "http://www.gwpda.org/" -u seed.jobRef=crawlJob:e46863ae-d076-46ca-8be3-8a8ef72e709`,
 
-  #List all seeds in yaml output format.
-  veidemannctl get seed -f yaml`,
-
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			configClient, conn := connection.NewConfigClient()
-			defer conn.Close()
-
-			k := format.GetKind(args[0])
-
-			var ids []string
-
-			if len(args) == 2 {
-				ids = args[1:]
-			}
-
-			if k == configV1.Kind_undefined {
-				fmt.Printf("Unknown object type\n")
-				cmd.Usage()
-				return
-			}
-
-			selector, err := apiutil.CreateListRequest(k, ids, updateflags.name, updateflags.label, updateflags.filter, updateflags.pageSize, updateflags.page)
-			if err != nil {
-				log.Fatalf("Error creating request: %v", err)
-			}
-
-			mask, obj, err := apiutil.CreateTemplateFilter(updateflags.updateField, &configV1.ConfigObject{})
-			if err != nil {
-				log.Fatalf("Error creating request: %v", err)
-			}
-
-			updateRequest := &configV1.UpdateRequest{
-				ListRequest:    selector,
-				UpdateMask:     mask,
-				UpdateTemplate: obj.(*configV1.ConfigObject),
-			}
-
-			u, err := configClient.UpdateConfigObjects(context.Background(), updateRequest)
-			if err != nil {
-				log.Fatalf("Error from controller: %v", err)
-			}
-			fmt.Printf("Objects updated: %v\n", u.Updated)
-		} else {
-			fmt.Print("You must specify the object type to update. ")
-			fmt.Println(printValidObjectTypes())
-			fmt.Println("See 'veidemannctl get -h' for help")
+	Args: func(cmd *cobra.Command, args []string) error {
+		if err := cobra.ExactArgs(1)(cmd, args); err != nil {
+			msg := "An object type must be specified. %sSee 'veidemannctl update -h' for help"
+			return fmt.Errorf(msg, printValidObjectTypes())
 		}
+		if err := cobra.OnlyValidArgs(cmd, args); err != nil {
+			msg := "%s is not a valid object type. %vSee 'veidemannctl update -h' for help"
+			return fmt.Errorf(msg, args[0], printValidObjectTypes())
+		}
+		return nil
 	},
-	ValidArgs: format.GetObjectNames(),
+	Run: func(cmd *cobra.Command, args []string) {
+		configClient, conn := connection.NewConfigClient()
+		defer conn.Close()
+
+		k := format.GetKind(args[0])
+
+		var ids []string
+
+		if len(args) == 2 {
+			ids = args[1:]
+		}
+
+		if k == configV1.Kind_undefined {
+			fmt.Printf("Unknown object type\n")
+			_ = cmd.Usage()
+			return
+		}
+
+		selector, err := apiutil.CreateListRequest(k, ids, updateflags.name, updateflags.label, updateflags.filter, updateflags.pageSize, 0)
+		if err != nil {
+			log.Fatalf("Error creating request: %v", err)
+		}
+
+		mask, obj, err := apiutil.CreateTemplateFilter(updateflags.updateField, &configV1.ConfigObject{})
+		if err != nil {
+			log.Fatalf("Error creating request: %v", err)
+		}
+
+		updateRequest := &configV1.UpdateRequest{
+			ListRequest:    selector,
+			UpdateMask:     mask,
+			UpdateTemplate: obj.(*configV1.ConfigObject),
+		}
+
+		u, err := configClient.UpdateConfigObjects(context.Background(), updateRequest)
+		if err != nil {
+			log.Fatalf("Error from controller: %v", err)
+		}
+		fmt.Printf("Objects updated: %v\n", u.Updated)
+	},
+	ValidArgs:     format.GetObjectNames(),
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 func init() {
@@ -111,11 +110,8 @@ func init() {
 	annotation[cobra.BashCompCustom] = []string{"__veidemannctl_get_name"}
 	updateCmd.PersistentFlags().Lookup("name").Annotations = annotation
 
-	updateCmd.PersistentFlags().StringVarP(&updateflags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
-	updateCmd.PersistentFlags().StringVarP(&updateflags.updateField, "updateField", "u", "", "Filter objects by field (i.e. meta.description=foo")
-	updateCmd.PersistentFlags().StringVarP(&updateflags.format, "output", "o", "table", "Output format (table|json|yaml|template|template-file)")
-	updateCmd.PersistentFlags().StringVarP(&updateflags.goTemplate, "template", "t", "", "A Go template used to format the output")
-	updateCmd.PersistentFlags().StringVarP(&updateflags.file, "filename", "f", "", "File name to write to")
-	updateCmd.PersistentFlags().Int32VarP(&updateflags.pageSize, "pagesize", "s", 10, "Number of objects to get")
-	updateCmd.PersistentFlags().Int32VarP(&updateflags.page, "page", "p", 0, "The page number")
+	updateCmd.PersistentFlags().StringVarP(&updateflags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo)")
+	updateCmd.PersistentFlags().StringVarP(&updateflags.updateField, "updateField", "u", "", "Filter objects by field (i.e. meta.description=foo)")
+	_ = updateCmd.MarkPersistentFlagRequired("updateField")
+	updateCmd.PersistentFlags().Int32VarP(&updateflags.pageSize, "limit", "s", 0, "Limit the number of objects to update. 0 = no limit")
 }

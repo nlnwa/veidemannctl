@@ -56,8 +56,6 @@ var importFlags struct {
 	dryRun          bool
 }
 
-var httpClient *http.Client
-
 // importSeedCmd represents the import command
 var importSeedCmd = &cobra.Command{
 	Use:   "seed",
@@ -70,7 +68,7 @@ var importSeedCmd = &cobra.Command{
 		// Check inputflag
 		if importFlags.filename == "" {
 			fmt.Printf("Import file is required. See --filename\n")
-			cmd.Usage()
+			_ = cmd.Usage()
 			os.Exit(1)
 		}
 
@@ -87,17 +85,30 @@ var importSeedCmd = &cobra.Command{
 			}
 		}
 
+		processorLogger := &log.Logger{
+			Out:       os.Stderr,
+			Formatter: new(log.TextFormatter),
+			Hooks:     make(log.LevelHooks),
+			Level:     log.InfoLevel,
+		}
+
 		// Create Veidemann config client
 		client, conn := connection.NewConfigClient()
 		defer conn.Close()
+		i.configClient = client
 
 		// Create http client
 		i.httpClient = importutil.NewHttpClient(importFlags.checkUriTimeout)
 
 		// Create state Database based on seeds in Veidemann
-		impf := importutil.NewImportDb(client, importFlags.dbDir, importFlags.resetDb)
-		impf.ImportExisting()
-		defer impf.Close()
+		impEntity := importutil.NewImportDb(client, importFlags.dbDir, configV1.Kind_crawlEntity, importFlags.resetDb)
+		impEntity.ImportExisting()
+		defer impEntity.Close()
+
+		// Create state Database based on seeds in Veidemann
+		impSeed := importutil.NewImportDb(client, importFlags.dbDir, configV1.Kind_seed, importFlags.resetDb)
+		impSeed.ImportExisting()
+		defer impSeed.Close()
 
 		// Create Record reader for file input
 		rr, err := importutil.NewRecordReader(importFlags.filename, &importutil.JsonYamlDecoder{}, "*.json")
@@ -107,12 +118,15 @@ var importSeedCmd = &cobra.Command{
 		}
 
 		// Processor for converting oos records into import records
-		proc := func(value interface{}) error {
+		proc := func(value interface{}, readerState *importutil.State) error {
 			sd := value.(*seedDesc)
-			if err := i.topLevelUri(sd); err != nil {
+			if err := i.normalizeUri(sd); err != nil {
 				return err
 			}
-			exists, err := impf.Check(sd.Uri)
+			exists, err := impSeed.Check(sd.Uri)
+			if err != nil {
+				return err
+			}
 			if exists.Code.ExistsInVeidemann() {
 				return fmt.Errorf("seed already exists: %v", sd.Uri)
 			}
@@ -120,25 +134,38 @@ var importSeedCmd = &cobra.Command{
 				return err
 			}
 
-			exists, err = impf.CheckAndUpdateVeidemann(sd.Uri, sd, func(client configV1.ConfigClient, data interface{}) (id string, err error) {
+			exists, err = impSeed.CheckAndUpdateVeidemann(sd.Uri, sd, func(client configV1.ConfigClient, data interface{}) (id string, err error) {
 				if importFlags.dryRun {
 					return "", nil
 				} else {
 					obj := data.(*seedDesc)
-					e := &configV1.ConfigObject{
-						ApiVersion: "v1",
-						Kind:       configV1.Kind_crawlEntity,
-						Meta: &configV1.Meta{
-							Name:        obj.EntityName,
-							Description: obj.EntityDescription,
-							Label:       obj.EntityLabel,
-						},
-					}
-					ctx := context.Background()
-					log.Debugf("store entity: %v", e)
-					e, err = client.SaveConfigObject(ctx, e)
+
+					var eId string
+					entityExists, err := impEntity.Check(obj.EntityName)
 					if err != nil {
-						return "", fmt.Errorf("Error writing crawl entity: %v", err)
+						return "", err
+					}
+					if entityExists.Code.ExistsInVeidemann() {
+						processorLogger.Infof("entity already exists: %v", obj.EntityName)
+						eId = entityExists.KnownIds[0]
+					} else {
+						e := &configV1.ConfigObject{
+							ApiVersion: "v1",
+							Kind:       configV1.Kind_crawlEntity,
+							Meta: &configV1.Meta{
+								Name:        obj.EntityName,
+								Description: obj.EntityDescription,
+								Label:       obj.EntityLabel,
+							},
+						}
+						ctx := context.Background()
+						processorLogger.Debugf("store entity: %v", e)
+						e, err = client.SaveConfigObject(ctx, e)
+
+						if err != nil {
+							return "", fmt.Errorf("Error writing crawl entity: %v", err)
+						}
+						eId = e.Id
 					}
 
 					s := &configV1.ConfigObject{
@@ -153,16 +180,17 @@ var importSeedCmd = &cobra.Command{
 							Seed: &configV1.Seed{
 								EntityRef: &configV1.ConfigRef{
 									Kind: configV1.Kind_crawlEntity,
-									Id:   e.Id,
+									Id:   eId,
 								},
 								JobRef: obj.crawlJobRef,
 							},
 						},
 					}
-					log.Debugf("store seed: %v", s)
+					processorLogger.Debugf("store seed: %v", s)
+					ctx := context.Background()
 					s, err = client.SaveConfigObject(ctx, s)
-					if err != nil {
-						if d, err := client.DeleteConfigObject(ctx, e); err == nil {
+					if err != nil && !entityExists.Code.ExistsInVeidemann() {
+						if d, err := client.DeleteConfigObject(ctx, &configV1.ConfigObject{Kind: configV1.Kind_crawlEntity, Id: eId}); err == nil {
 							fmt.Println("Delete entity: ", d)
 						} else {
 							fmt.Println("Failed deletion of entity: ", err)
@@ -224,10 +252,6 @@ var importSeedCmd = &cobra.Command{
 	},
 }
 
-type importer struct {
-	httpClient *http.Client
-}
-
 func init() {
 	ImportCmd.AddCommand(importSeedCmd)
 
@@ -243,7 +267,12 @@ func init() {
 	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.dryRun, "dry-run", "", false, "Run the import without writing anything to Veidemann")
 }
 
-func (i *importer) topLevelUri(s *seedDesc) (err error) {
+type importer struct {
+	httpClient   *http.Client
+	configClient configV1.ConfigClient
+}
+
+func (i *importer) normalizeUri(s *seedDesc) (err error) {
 	uri, err := url.Parse(s.Uri)
 	if err != nil {
 		return fmt.Errorf("unparseable URL '%v', cause: %v", s.Uri, err)
@@ -253,11 +282,13 @@ func (i *importer) topLevelUri(s *seedDesc) (err error) {
 		return errors.New("unparseable URL")
 	}
 
+	uri.Fragment = ""
 	if importFlags.toplevel {
 		uri.Path = ""
 		uri.RawQuery = ""
-		uri.Fragment = ""
 		s.Uri = uri.Scheme + "://" + uri.Host
+	} else {
+		s.Uri = uri.String()
 	}
 	return
 }
@@ -296,7 +327,7 @@ func (i *importer) checkRedirect(uri string, s *seedDesc, count int) {
 			}
 		}
 	} else {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if resp.StatusCode == 301 {
 			uri = resp.Header.Get("Location")
 			if uri != "" {
