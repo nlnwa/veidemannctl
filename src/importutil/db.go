@@ -415,7 +415,7 @@ func (d *ImportDb) stringArrayToBytes(v []string) []byte {
 func (d *ImportDb) bytesToStringArray(v []byte) []string {
 	buf := bytes.NewBuffer(v)
 	strs := []string{}
-	if err := gob.NewDecoder(buf).Decode(&strs); err != nil {
+	if err := gob.NewDecoder(buf).Decode(&strs); err != nil && err != io.EOF {
 		log.Fatal(err)
 	}
 	return strs
