@@ -40,8 +40,9 @@ var RootCmd = &cobra.Command{
 	Short: "Veidemann command line client",
 	Long:  `A command line client for Veidemann which can manipulate configs and request status of the crawler.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
+	DisableAutoGenTag: true,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -66,6 +67,8 @@ func init() {
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.veidemannctl.yaml)")
 
+	RootCmd.PersistentFlags().StringVar(&configutil.GlobalFlags.Context, "context", "", "The name of the veidemannconfig context to use.")
+
 	RootCmd.PersistentFlags().StringVarP(&configutil.GlobalFlags.ControllerAddress, "controllerAddress", "c", "localhost:50051", "Address to the Controller service")
 
 	RootCmd.PersistentFlags().StringVar(&configutil.GlobalFlags.ServerNameOverride, "serverNameOverride", "",
@@ -77,7 +80,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Turn on debugging")
 
 	RootCmd.PersistentFlags().BoolVar(&configutil.GlobalFlags.IsShellCompletion, "comp", false, "Clean output used for shell completion")
-	RootCmd.PersistentFlags().MarkHidden("comp")
+	_ = RootCmd.PersistentFlags().MarkHidden("comp")
 
 	RootCmd.SetVersionTemplate("{{.Version}}")
 
@@ -95,8 +98,6 @@ func initConfig() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	configutil.GlobalFlags.Context = "default"
-
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -112,7 +113,7 @@ func initConfig() {
 		viper.AddConfigPath(contextDir)
 		viper.SetConfigName(configutil.GlobalFlags.Context)
 
-		log.Debug("Using context:", configutil.GlobalFlags.Context)
+		log.Debug("Using context: ", configutil.GlobalFlags.Context)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -120,6 +121,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		log.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	} else {
+		log.Debugf("Setting config file to the non-existing file: %s", filepath.Join(contextDir, configutil.GlobalFlags.Context+".yaml"))
 		viper.SetConfigFile(filepath.Join(contextDir, configutil.GlobalFlags.Context+".yaml"))
 	}
 
