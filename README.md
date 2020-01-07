@@ -10,6 +10,15 @@ Install the latest release version
 curl -sL https://raw.githubusercontent.com/nlnwa/veidemannctl/master/install.sh | bash
 ```
 
+## Usage
+To get a list of available commands and configuration flags:
+```console
+veidemanctl -h
+```
+
+## Documentation
+Usage documentation: https://nlnwa.github.io/veidemannctl
+
 ## Build instructions
 ```console
 go generate
