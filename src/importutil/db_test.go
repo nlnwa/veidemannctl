@@ -84,23 +84,23 @@ func TestExistsCode_ExistsInVeidemann(t *testing.T) {
 }
 
 func TestImportDb_CheckAndUpdateVeidemann(t *testing.T) {
-	s1 := "https://www.eiksenteret.no"
-	s2 := "http://www.eiksenteret.no"
-	s3 := "http://www.eiksenteret.no/foo"
-	s4 := "https://www.foo.no"
-	s5 := "http://www.foo.no"
-	s6 := "http://www.foo.no/foo"
+	s1u := "https://www.eiksenteret.no"
+	s2u := "https://www.eiksenteret.no"
+	s4u := "https://www.foo.no"
+	s4d := "https://www.foo.no"
+	s5u := "https://www.foo.no"
+	s5d := "http://www.foo.no"
+	s6u := "https://www.foo.no"
+	s6d := "http://www.foo.no"
 	f := func(client configV1.ConfigClient, data interface{}) (id string, err error) {
 		switch data {
-		case s1:
+		case s1u:
 			return "s1", nil
-		case s2:
+		case s2u:
 			return "s2", nil
-		case s3:
-			return "s3", nil
-		case s5:
+		case s5d:
 			return "s5", nil
-		case s6:
+		case s6d:
 			return "s6", nil
 		default:
 			return "", nil
@@ -118,15 +118,14 @@ func TestImportDb_CheckAndUpdateVeidemann(t *testing.T) {
 		want    *ExistsResponse
 		wantErr bool
 	}{
-		{"first", args{s1, s1, f}, &ExistsResponse{Code: NEW}, false},
-		{"duplicate", args{s2, s2, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s1"}}, false},
-		{"duplicate_with_path", args{s3, s3, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s1"}}, false},
-		{"no_id_first", args{s4, s4, f}, &ExistsResponse{Code: NEW}, false},
-		{"no_id_duplicate", args{s5, s5, f}, &ExistsResponse{Code: DUPLICATE_NEW}, false},
-		{"no_id_duplicate_with_path", args{s6, s6, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s5"}}, false},
+		{"first", args{s1u, s1u, f}, &ExistsResponse{Code: NEW}, false},
+		{"duplicate", args{s2u, s2u, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s1"}}, false},
+		{"no_id_first", args{s4u, s4d, f}, &ExistsResponse{Code: NEW}, false},
+		{"no_id_duplicate", args{s5u, s5d, f}, &ExistsResponse{Code: DUPLICATE_NEW}, false},
+		{"no_id_duplicate_with_path", args{s6u, s6d, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s5"}}, false},
 	}
 
-	d := NewImportDb(nil, "/tmp/vmtest", true)
+	d := NewImportDb(nil, "/tmp/vmtest", configV1.Kind_seed, true)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := d.CheckAndUpdateVeidemann(tt.args.uri, tt.args.data, tt.args.createFunc)

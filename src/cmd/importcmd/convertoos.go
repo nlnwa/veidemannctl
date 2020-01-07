@@ -55,14 +55,14 @@ var convertOosCmd = &cobra.Command{
 		// Check inputflag
 		if convertFlags.filename == "" {
 			fmt.Printf("Import file is required. See --filename\n")
-			cmd.Usage()
+			_ = cmd.Usage()
 			os.Exit(1)
 		}
 
 		// Check ouput flag
 		if convertFlags.outFile == "" {
 			fmt.Printf("Output file is required. See --outfile\n")
-			cmd.Usage()
+			_ = cmd.Usage()
 			os.Exit(1)
 		}
 
@@ -96,7 +96,7 @@ var convertOosCmd = &cobra.Command{
 		c.httpClient = importutil.NewHttpClient(convertFlags.checkUriTimeout)
 
 		// Create state Database based on seeds in Veidemann
-		impf := importutil.NewImportDb(client, convertFlags.dbDir, convertFlags.resetDb)
+		impf := importutil.NewImportDb(client, convertFlags.dbDir, configV1.Kind_seed, convertFlags.resetDb)
 		impf.ImportExisting()
 		defer impf.Close()
 
@@ -108,14 +108,8 @@ var convertOosCmd = &cobra.Command{
 		}
 
 		// Processor for converting oos records into import records
-		proc := func(value interface{}) error {
+		proc := func(value interface{}, state *importutil.State) error {
 			v := value.(string)
-			if exists, err := impf.Check(v); err != nil {
-				return err
-			} else if exists.Code > importutil.NEW {
-				return fmt.Errorf("%v already exists", v)
-			}
-
 			seed := &seedDesc{
 				Uri:         v,
 				SeedLabel:   []*configV1.Label{{Key: "source", Value: "oosh"}},
@@ -127,6 +121,12 @@ var convertOosCmd = &cobra.Command{
 				return err
 			}
 
+			if exists, err := impf.Check(seed.Uri); err != nil {
+				return err
+			} else if exists.Code > importutil.NEW {
+				return fmt.Errorf("%v already exists", v)
+			}
+
 			if seed.EntityName == "" {
 				seed.EntityName = seed.Uri
 			}
@@ -135,7 +135,9 @@ var convertOosCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(out, "%s\n", json)
+			if _, err = fmt.Fprintf(out, "%s\n", json); err != nil {
+				return err
+			}
 
 			return nil
 		}
@@ -195,11 +197,13 @@ func (c *converter) checkUri(s *seedDesc) (err error) {
 		return errors.New("unparseable URL")
 	}
 
+	uri.Fragment = ""
 	if convertFlags.toplevel {
 		uri.Path = ""
 		uri.RawQuery = ""
-		uri.Fragment = ""
 		s.Uri = uri.Scheme + "://" + uri.Host
+	} else {
+		s.Uri = uri.String()
 	}
 
 	if convertFlags.checkUri {
@@ -235,7 +239,7 @@ func (c *converter) checkRedirect(uri string, s *seedDesc, count int) {
 			}
 		}
 	} else {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if resp.StatusCode == 301 {
 			uri = resp.Header.Get("Location")
 			if uri != "" {

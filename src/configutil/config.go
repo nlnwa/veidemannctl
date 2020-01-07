@@ -22,6 +22,7 @@ import (
 	yaml2 "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -62,12 +63,16 @@ func WriteConfig() {
 
 	f, err := os.Create(viper.ConfigFileUsed())
 	if err != nil {
-		log.Fatalf("Could not create file '%s': %v", viper.ConfigFileUsed(), err)
+		log.Fatalf("Could not create config file '%s': %v", viper.ConfigFileUsed(), err)
 	}
-	f.Chmod(0600)
+	if err = f.Chmod(0600); err != nil {
+		log.Fatalf("Could not set access mode on config file '%s': %v", viper.ConfigFileUsed(), err)
+	}
 	defer f.Close()
 
-	f.Write(y)
+	if _, err = f.Write(y); err != nil {
+		log.Fatalf("Could write to config file '%s': %v", viper.ConfigFileUsed(), err)
+	}
 }
 
 func GetConfigDir(subdir string) string {
@@ -85,38 +90,52 @@ type context struct {
 }
 
 func GetCurrentContext() (string, error) {
-	contextDir := GetConfigDir("contexts")
-	log.Debugf("Creating context directory: %s", contextDir)
-	if err := os.MkdirAll(contextDir, 0777); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	contextFile := GetConfigDir("context.yaml")
-	f, err := os.Open(contextFile)
-	if err != nil {
-		err = SetCurrentContext("default")
-		if err != nil {
-			return "", err
+	switch GlobalFlags.Context {
+	case "":
+		if GlobalFlags.Context == "kubectl" {
+		}
+		contextDir := GetConfigDir("contexts")
+		log.Debugf("Creating context directory: %s", contextDir)
+		if err := os.MkdirAll(contextDir, 0777); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 
-		f, err = os.Open(contextFile)
+		contextFile := GetConfigDir("context.yaml")
+		f, err := os.Open(contextFile)
+		if err != nil {
+			err = SetCurrentContext("default")
+			if err != nil {
+				return "", err
+			}
+
+			f, err = os.Open(contextFile)
+			if err != nil {
+				log.Fatalf("Could not read file '%s': %v", contextFile, err)
+				return "", err
+			}
+		}
+		defer f.Close()
+
+		var c context
+		dec := yaml2.NewDecoder(f)
+		err = dec.Decode(&c)
 		if err != nil {
 			log.Fatalf("Could not read file '%s': %v", contextFile, err)
 			return "", err
 		}
-	}
-	defer f.Close()
 
-	var c context
-	dec := yaml2.NewDecoder(f)
-	err = dec.Decode(&c)
-	if err != nil {
-		log.Fatalf("Could not read file '%s': %v", contextFile, err)
-		return "", err
+		return c.Context, err
+	case "kubectl":
+		output, err := exec.Command("kubectl", "config", "current-context").CombinedOutput()
+		if err != nil {
+			_, _ = os.Stderr.WriteString(err.Error())
+			return "", err
+		}
+		return strings.TrimSpace(string(output)), nil
+	default:
+		return GlobalFlags.Context, nil
 	}
-
-	return c.Context, err
 }
 
 func SetCurrentContext(ctx string) error {
@@ -132,8 +151,8 @@ func SetCurrentContext(ctx string) error {
 		log.Fatalf("Could not write file '%s': %v", contextFile, err)
 		return err
 	}
-	enc.Close()
-	w.Close()
+	_ = enc.Close()
+	_ = w.Close()
 
 	return nil
 }

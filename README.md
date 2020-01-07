@@ -4,15 +4,14 @@
 
 # veidemannctl
 
-## Build instructions
+## Install
+Install the latest release version
+```console
+curl -sL https://raw.githubusercontent.com/nlnwa/veidemannctl/master/install.sh | bash
+```
 
+## Build instructions
 ```console
 go generate
 go build
-```
-
-## Install
-
-```console
-curl -sL https://raw.githubusercontent.com/nlnwa/veidemannctl/master/install.sh | bash
 ```

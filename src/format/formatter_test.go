@@ -175,8 +175,8 @@ seed:
 
 		{"Seed-table", args{format: "table", kind: "seed"},
 			seed,
-			`Id                                               Url EntityId     Surt JobId                    Disabled                
-                                 id1 http://www.example.com entityRef [] false
+			`Id                                   Url                                      EntityId                             Disabled
+                                 id1 http://www.example.com                                              entityRef    false
 `},
 
 		{"Seed-template", args{format: "template", template: "ID: {{.Id}}, Url: {{.Meta.Name}}"},

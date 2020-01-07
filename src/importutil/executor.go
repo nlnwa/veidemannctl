@@ -23,19 +23,20 @@ type executor struct {
 	Count      int
 	Success    int
 	Failed     int
-	Processor  func(value interface{}) error
+	Processor  func(value interface{}, state *State) error
 	ErrHandler func(state *StateVal)
+	LogHandler func(state *StateVal)
 
 	threadCount  int
 	dataChan     chan *StateVal
 	completeChan chan *processorResponse
 	errorChan    chan *StateVal
-	errsHandled int
+	errsHandled  int
 }
 
 type StateVal struct {
 	*State
-	Val   interface{}
+	Val interface{}
 }
 
 type processorResponse struct {
@@ -44,7 +45,7 @@ type processorResponse struct {
 	failed  int
 }
 
-func NewExecutor(threadCount int, proc func(value interface{}) error, errorHandler func(state *StateVal)) *executor {
+func NewExecutor(threadCount int, proc func(value interface{}, state *State) error, errorHandler func(state *StateVal)) *executor {
 	e := &executor{
 		threadCount:  threadCount,
 		Processor:    proc,
@@ -92,7 +93,7 @@ func (e *executor) execute() {
 
 	for request := range e.dataChan {
 		res.count++
-		err := e.Processor(request.Val)
+		err := e.Processor(request.Val, request.State)
 		if err != nil {
 			request.State.err = err
 			e.errorChan <- request
@@ -113,8 +114,8 @@ func (e *executor) handleError() {
 
 func (e *executor) printProgress() {
 	// Print progress
-	fmt.Fprint(os.Stderr, ".")
+	_, _ = fmt.Fprint(os.Stderr, ".")
 	if e.Count%100 == 0 {
-		fmt.Fprintln(os.Stderr, e.Count)
+		_, _ = fmt.Fprintln(os.Stderr, e.Count)
 	}
 }

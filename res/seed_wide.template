@@ -1,5 +1,6 @@
 {{define "HEADER" -}}
-    {{printf `%-36.36s %15s %8s %8s %-24s %-24s` "Id" "Url" "EntityId" "Surt" "JobId" "Disabled"}}
+    {{printf `%-36.36s %-40s %-36s %-8s %-60s %-36s` "Id" "Url" "EntityId" "Disabled" "Labels" "JobId"}}
 {{end -}}
 
-{{printf `%36s %15s %8s %s %v` .Id .Meta.Name .Spec.Seed.EntityRef.Id .Spec.Seed.JobRef .Spec.Seed.Disabled}}
+{{printLabels .Meta.Label | printf `%36s %-40.40s %36.36s %8v %-60.60s` .Id .Meta.Name .Spec.Seed.EntityRef.Id .Spec.Seed.Disabled -}}
+{{` [`}}{{flatMap .Spec.Seed.JobRef "Id" | join `, `}}{{`]`}}

@@ -23,6 +23,7 @@ import (
 var version = "master"
 
 //go:generate go run -tags=dev bindata/assets_generate.go
+//go:generate go run gendoc/md_docs.go
 func main() {
 	v.Version.SetGitVersion(version)
 	cmd.Execute()
