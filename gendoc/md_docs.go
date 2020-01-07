@@ -28,7 +28,7 @@ import (
 func main() {
 	// Find 'this' directory relative to this file to allow callers to be in any package
 	var _, b, _, _ = runtime.Caller(0)
-	var dir = filepath.Join(filepath.Dir(b), "../doc")
+	var dir = filepath.Join(filepath.Dir(b), "../docs")
 	fmt.Println("generating documentation")
 	err := doc.GenMarkdownTree(cmd.RootCmd, dir)
 	if err != nil {
