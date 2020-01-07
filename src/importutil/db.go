@@ -120,7 +120,12 @@ func (d *ImportDb) ImportExisting() {
 		log.Fatalf("Error reading %s from Veidemann: %v", d.kind.String(), err)
 	}
 
-	i := 0
+	var stat struct {
+		processed int
+		imported  int
+		err       int
+	}
+
 	start := time.Now()
 	for {
 		msg, err := r.Recv()
@@ -147,8 +152,10 @@ func (d *ImportDb) ImportExisting() {
 		exists := d.contains(metaName, msg.Id, true)
 		switch exists.Code {
 		case ERROR:
+			stat.err++
 			log.Infof("Failed handling: %v", metaName)
 		case NEW:
+			stat.imported++
 			log.Debugf("New key '%v' added", metaName)
 		case EXISTS_VEIDEMANN:
 			log.Debugf("Already exists in Veidemann: %v", metaName)
@@ -157,10 +164,10 @@ func (d *ImportDb) ImportExisting() {
 		case DUPLICATE_VEIDEMANN:
 			log.Infof("Found duplicate already existing in Veidemann: %v", metaName)
 		}
-		i++
+		stat.processed++
 	}
 	elapsed := time.Since(start)
-	fmt.Printf("Imported %v %s from Veidemann in %s\n", i, d.kind.String(), elapsed)
+	fmt.Printf("Processed %v %s from Veidemann in %s. %v imported, %v errors\n", stat.processed, d.kind.String(), elapsed, stat.imported, stat.err)
 }
 
 type SeedDuplicateReportRecord struct {
@@ -185,7 +192,8 @@ func (d *ImportDb) SeedDuplicateReport(w io.Writer) error {
 	stream.LogPrefix = "Badger.Streaming" // For identifying stream logs. Outputs to Logger.
 	// -- End of optional settings.
 
-	var duplicateCount int32
+	var uniqueDuplicatedNames int32
+	var duplicatedNames int32
 
 	// Send is called serially, while Stream.Orchestrate is running.
 	stream.Send = func(list *pb.KVList) error {
@@ -215,7 +223,8 @@ func (d *ImportDb) SeedDuplicateReport(w io.Writer) error {
 						log.Warnf("error getting seed from Veidemann: %v", err)
 					}
 				}
-				atomic.AddInt32(&duplicateCount, 1)
+				atomic.AddInt32(&uniqueDuplicatedNames, 1)
+				atomic.AddInt32(&duplicatedNames, int32(len(val)))
 				b, err := json.Marshal(rec)
 				if err == nil {
 					d.vmMux.Lock()
@@ -238,7 +247,7 @@ func (d *ImportDb) SeedDuplicateReport(w io.Writer) error {
 	if err := stream.Orchestrate(context.Background()); err != nil {
 		return err
 	}
-	fmt.Printf("Number of duplicates %v\n", duplicateCount)
+	fmt.Printf("%v seed urls exist more than once. Total duplicates: %v.\n", uniqueDuplicatedNames, duplicatedNames)
 	return nil
 }
 
@@ -259,7 +268,8 @@ func (d *ImportDb) CrawlEntityDuplicateReport(w io.Writer) error {
 	stream.LogPrefix = "Badger.Streaming" // For identifying stream logs. Outputs to Logger.
 	// -- End of optional settings.
 
-	var duplicateCount int32
+	var uniqueDuplicatedNames int32
+	var duplicatedNames int32
 
 	// Send is called serially, while Stream.Orchestrate is running.
 	stream.Send = func(list *pb.KVList) error {
@@ -273,7 +283,8 @@ func (d *ImportDb) CrawlEntityDuplicateReport(w io.Writer) error {
 					}
 					rec.CrawlEntities = append(rec.CrawlEntities, sr)
 				}
-				atomic.AddInt32(&duplicateCount, 1)
+				atomic.AddInt32(&uniqueDuplicatedNames, 1)
+				atomic.AddInt32(&duplicatedNames, int32(len(val)))
 				b, err := json.Marshal(rec)
 				if err == nil {
 					d.vmMux.Lock()
@@ -296,7 +307,7 @@ func (d *ImportDb) CrawlEntityDuplicateReport(w io.Writer) error {
 	if err := stream.Orchestrate(context.Background()); err != nil {
 		return err
 	}
-	fmt.Printf("Number of duplicates %v\n", duplicateCount)
+	fmt.Printf("%v crawl entities names exist more than once. Total duplicates: %v.\n", uniqueDuplicatedNames, duplicatedNames)
 	return nil
 }
 
