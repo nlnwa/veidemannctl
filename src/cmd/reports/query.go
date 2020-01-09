@@ -134,7 +134,7 @@ func getQueryDef(queryArg string) queryDef {
 
 	out, err := format.ResolveWriter(queryFlags.file)
 	if err != nil {
-		log.Fatalf("Could not resolve output '%v': %v", crawlExecFlags.file, err)
+		log.Fatalf("Could not resolve output '%v': %v", queryFlags.file, err)
 	}
 	if queryDef.Template == "" {
 		queryDef.marshalSpec, err = format.NewFormatter("", out, queryFlags.format, queryFlags.goTemplate)

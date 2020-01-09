@@ -41,13 +41,8 @@ var crawllogFlags struct {
 // crawllogCmd represents the crawllog command
 var crawllogCmd = &cobra.Command{
 	Use:   "crawllog",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "View crawl log",
+	Long:  `View crawl log.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, conn := connection.NewReportClient()
 		defer conn.Close()
@@ -70,7 +65,7 @@ to quickly create a Cobra application.`,
 
 		out, err := format.ResolveWriter(crawllogFlags.file)
 		if err != nil {
-			log.Fatalf("Could not resolve output '%v': %v", crawlExecFlags.file, err)
+			log.Fatalf("Could not resolve output '%v': %v", crawllogFlags.file, err)
 		}
 		s, err := format.NewFormatter("CrawlLog", out, crawllogFlags.format, crawllogFlags.goTemplate)
 		if err != nil {
