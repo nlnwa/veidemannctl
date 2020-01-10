@@ -24,16 +24,6 @@ import (
 )
 
 func TestCreateJobExecutionsListRequest(t *testing.T) {
-	type flags struct {
-		filter     string
-		pageSize   int32
-		page       int32
-		goTemplate string
-		format     string
-		file       string
-		watch      bool
-	}
-
 	tests := []struct {
 		name    string
 		ids     []string

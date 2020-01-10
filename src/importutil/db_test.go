@@ -118,14 +118,14 @@ func TestImportDb_CheckAndUpdateVeidemann(t *testing.T) {
 		want    *ExistsResponse
 		wantErr bool
 	}{
-		{"first", args{s1u, s1u, f}, &ExistsResponse{Code: NEW}, false},
-		{"duplicate", args{s2u, s2u, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s1"}}, false},
-		{"no_id_first", args{s4u, s4d, f}, &ExistsResponse{Code: NEW}, false},
-		{"no_id_duplicate", args{s5u, s5d, f}, &ExistsResponse{Code: DUPLICATE_NEW}, false},
-		{"no_id_duplicate_with_path", args{s6u, s6d, f}, &ExistsResponse{EXISTS_VEIDEMANN, []string{"s5"}}, false},
+		{"first", args{s1u, s1u, f}, &ExistsResponse{Code: NEW, NormalizedKey: s1u}, false},
+		{"duplicate", args{s2u, s2u, f}, &ExistsResponse{Code: EXISTS_VEIDEMANN, NormalizedKey: s2u, KnownIds: []string{"s1"}}, false},
+		{"no_id_first", args{s4u, s4d, f}, &ExistsResponse{Code: NEW, NormalizedKey: s4u}, false},
+		{"no_id_duplicate", args{s5u, s5d, f}, &ExistsResponse{Code: DUPLICATE_NEW, NormalizedKey: s5u}, false},
+		{"no_id_duplicate_with_path", args{s6u, s6d, f}, &ExistsResponse{Code: EXISTS_VEIDEMANN, NormalizedKey: s6u, KnownIds: []string{"s5"}}, false},
 	}
 
-	d := NewImportDb(nil, "/tmp/vmtest", configV1.Kind_seed, true)
+	d := NewImportDb(nil, "/tmp/vmtest", configV1.Kind_seed, &NoopKeyNormalizer{}, true)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := d.CheckAndUpdateVeidemann(tt.args.uri, tt.args.data, tt.args.createFunc)

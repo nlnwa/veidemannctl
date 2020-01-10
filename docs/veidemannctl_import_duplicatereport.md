@@ -15,8 +15,10 @@ veidemannctl import duplicatereport [kind] [flags]
 ```
   -b, --db-directory string   Directory for storing state db (default "/tmp/veidemannctl")
   -h, --help                  help for duplicatereport
+      --ignore-scheme         Ignore the URL's scheme when checking for duplicates.
   -o, --outFile string        File to write output.
   -r, --reset-db              Clean state db
+      --toplevel              Convert URI to toplevel by removing path before checking for duplicates.
 ```
 
 ### Options inherited from parent commands

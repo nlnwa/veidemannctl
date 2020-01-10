@@ -30,9 +30,9 @@ veidemannctl report [flags]
 ### SEE ALSO
 
 * [veidemannctl](veidemannctl.md)	 - Veidemann command line client
-* [veidemannctl report crawlexecution](veidemannctl_report_crawlexecution.md)	 - A brief description of your command
-* [veidemannctl report crawllog](veidemannctl_report_crawllog.md)	 - A brief description of your command
-* [veidemannctl report jobexecution](veidemannctl_report_jobexecution.md)	 - A brief description of your command
-* [veidemannctl report pagelog](veidemannctl_report_pagelog.md)	 - A brief description of your command
+* [veidemannctl report crawlexecution](veidemannctl_report_crawlexecution.md)	 - Get current status for crawl executions
+* [veidemannctl report crawllog](veidemannctl_report_crawllog.md)	 - View crawl log
+* [veidemannctl report jobexecution](veidemannctl_report_jobexecution.md)	 - Get current status for job executions
+* [veidemannctl report pagelog](veidemannctl_report_pagelog.md)	 - View page log
 * [veidemannctl report query](veidemannctl_report_query.md)	 - Run a databse query
 

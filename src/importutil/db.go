@@ -25,7 +25,6 @@ import (
 	"github.com/nlnwa/veidemannctl/src/configutil"
 	log "github.com/sirupsen/logrus"
 	"io"
-	"net/url"
 	"os"
 	"path"
 	"sync"
@@ -61,19 +60,32 @@ func (e ExistsCode) String() string {
 }
 
 type ExistsResponse struct {
-	Code     ExistsCode
-	KnownIds []string
+	NormalizedKey string
+	Code          ExistsCode
+	KnownIds      []string
 }
 
 type ImportDb struct {
-	db     *badger.DB
-	gc     *time.Ticker
-	client configV1.ConfigClient
-	kind   configV1.Kind
-	vmMux  sync.Mutex
+	db            *badger.DB
+	gc            *time.Ticker
+	client        configV1.ConfigClient
+	kind          configV1.Kind
+	keyNormalizer KeyNormalizer
+	vmMux         sync.Mutex
 }
 
-func NewImportDb(client configV1.ConfigClient, dbDir string, kind configV1.Kind, resetDb bool) *ImportDb {
+type KeyNormalizer interface {
+	Normalize(key string) (string, error)
+}
+
+type NoopKeyNormalizer struct {
+}
+
+func (u *NoopKeyNormalizer) Normalize(s string) (key string, err error) {
+	return s, nil
+}
+
+func NewImportDb(client configV1.ConfigClient, dbDir string, kind configV1.Kind, keyNormalizer KeyNormalizer, resetDb bool) *ImportDb {
 	kindName := kind.String()
 	dbDir = path.Join(dbDir, configutil.GlobalFlags.Context, kindName)
 	if err := os.MkdirAll(dbDir, 0777); err != nil {
@@ -92,9 +104,10 @@ func NewImportDb(client configV1.ConfigClient, dbDir string, kind configV1.Kind,
 	}
 
 	d := &ImportDb{
-		db:     db,
-		client: client,
-		kind:   kind,
+		db:            db,
+		client:        client,
+		kind:          kind,
+		keyNormalizer: keyNormalizer,
 	}
 
 	d.gc = time.NewTicker(5 * time.Minute)
@@ -136,18 +149,7 @@ func (d *ImportDb) ImportExisting() {
 			log.Fatalf("Error reading %s from Veidemann: %v", d.kind.String(), err)
 		}
 
-		var metaName string
-		switch d.kind {
-		case configV1.Kind_seed:
-			uri, err := url.Parse(msg.GetMeta().GetName())
-			if err != nil {
-				log.Warnf("error parsing uri '%v': %v", uri, err)
-				continue
-			}
-			metaName = uri.String()
-		default:
-			metaName = msg.GetMeta().GetName()
-		}
+		metaName := msg.GetMeta().GetName()
 
 		exists := d.contains(metaName, msg.Id, true)
 		switch exists.Code {
@@ -156,13 +158,13 @@ func (d *ImportDb) ImportExisting() {
 			log.Infof("Failed handling: %v", metaName)
 		case NEW:
 			stat.imported++
-			log.Debugf("New key '%v' added", metaName)
+			log.Debugf("New key '%v' added", exists.NormalizedKey)
 		case EXISTS_VEIDEMANN:
-			log.Debugf("Already exists in Veidemann: %v", metaName)
+			log.Debugf("Already exists in Veidemann: %v", exists.NormalizedKey)
 		case DUPLICATE_NEW:
-			log.Infof("Found new duplicate: %v", metaName)
+			log.Infof("Found new duplicate: %v", exists.NormalizedKey)
 		case DUPLICATE_VEIDEMANN:
-			log.Infof("Found duplicate already existing in Veidemann: %v", metaName)
+			log.Infof("Found duplicate already existing in Veidemann: %v", exists.NormalizedKey)
 		}
 		stat.processed++
 	}
@@ -338,10 +340,17 @@ func (d *ImportDb) CheckAndUpdateVeidemann(metaName string, data interface{},
 
 func (d *ImportDb) contains(metaName, id string, update bool) (response *ExistsResponse) {
 	response = &ExistsResponse{}
+
 	var err error
+	response.NormalizedKey, err = d.keyNormalizer.Normalize(metaName)
+	if err != nil {
+		response.Code = ERROR
+		return
+	}
+
 	for {
 		err = d.db.Update(func(txn *badger.Txn) error {
-			item, err := txn.Get([]byte(metaName))
+			item, err := txn.Get([]byte(response.NormalizedKey))
 			if err == badger.ErrKeyNotFound {
 				response.Code = NEW
 				if id != "" {
@@ -349,7 +358,7 @@ func (d *ImportDb) contains(metaName, id string, update bool) (response *ExistsR
 				}
 				if update {
 					v := d.stringArrayToBytes(response.KnownIds)
-					_ = txn.Set([]byte(metaName), v)
+					_ = txn.Set([]byte(response.NormalizedKey), v)
 				}
 				return nil
 			}
@@ -370,7 +379,7 @@ func (d *ImportDb) contains(metaName, id string, update bool) (response *ExistsR
 					val = append(val, id)
 					if update {
 						v := d.stringArrayToBytes(val)
-						_ = txn.Set([]byte(metaName), v)
+						_ = txn.Set([]byte(response.NormalizedKey), v)
 					}
 				}
 

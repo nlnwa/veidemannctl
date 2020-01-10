@@ -24,9 +24,11 @@ import (
 )
 
 var dupFlags struct {
-	outFile string
-	dbDir   string
-	resetDb bool
+	outFile      string
+	dbDir        string
+	resetDb      bool
+	toplevel     bool
+	ignoreScheme bool
 }
 
 // duplicateReportCmd represents the duplicatereport command
@@ -58,7 +60,13 @@ var duplicateReportCmd = &cobra.Command{
 		defer conn.Close()
 
 		// Create state Database based on seeds in Veidemann
-		impf := importutil.NewImportDb(client, dupFlags.dbDir, kind, dupFlags.resetDb)
+		var keyNormalizer importutil.KeyNormalizer
+		if kind == configV1.Kind_seed {
+			keyNormalizer = &UriKeyNormalizer{toplevel: dupFlags.toplevel, ignoreScheme: dupFlags.ignoreScheme}
+		} else {
+			keyNormalizer = &importutil.NoopKeyNormalizer{}
+		}
+		impf := importutil.NewImportDb(client, dupFlags.dbDir, kind, keyNormalizer, dupFlags.resetDb)
 		impf.ImportExisting()
 		defer impf.Close()
 
@@ -81,4 +89,6 @@ func init() {
 	duplicateReportCmd.PersistentFlags().StringVarP(&dupFlags.outFile, "outFile", "o", "", "File to write output.")
 	duplicateReportCmd.PersistentFlags().StringVarP(&dupFlags.dbDir, "db-directory", "b", "/tmp/veidemannctl", "Directory for storing state db")
 	duplicateReportCmd.PersistentFlags().BoolVarP(&dupFlags.resetDb, "reset-db", "r", false, "Clean state db")
+	duplicateReportCmd.PersistentFlags().BoolVarP(&dupFlags.toplevel, "toplevel", "", false, "Convert URI to toplevel by removing path before checking for duplicates.")
+	duplicateReportCmd.PersistentFlags().BoolVarP(&dupFlags.toplevel, "ignore-scheme", "", false, "Ignore the URL's scheme when checking for duplicates.")
 }

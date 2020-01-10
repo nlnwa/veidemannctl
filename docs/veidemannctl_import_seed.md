@@ -4,7 +4,14 @@ Import seeds
 
 ### Synopsis
 
-Import seeds
+Import new seeds and entities from a line oriented JSON file on the following format: 
+
+{"entityName":"foo","uri":"https://www.example.com/","entityDescription":"desc","entityLabel":[{"key":"foo","value":"bar"}],"seedLabel":[{"key":"foo","value":"bar"},{"key":"foo2","value":"bar"}],"seedDescription":"foo"}
+
+Every record must be formatted on a single line.
+
+
+
 
 ```
 veidemannctl import seed [flags]
@@ -21,6 +28,7 @@ veidemannctl import seed [flags]
   -e, --errorfile string       File to write errors to.
   -f, --filename string        Filename or directory to read from. If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.
   -h, --help                   help for seed
+      --ignore-scheme          Ignore the URL's scheme when checking if this URL is already imported.
   -r, --reset-db               Clean state db
       --toplevel               Convert URI to toplevel by removing path.
 ```

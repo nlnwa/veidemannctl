@@ -42,13 +42,8 @@ var jobExecFlags = &jobExecConf{}
 // jobexecutionCmd represents the jobexecution command
 var jobexecutionCmd = &cobra.Command{
 	Use:   "jobexecution",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Get current status for job executions",
+	Long:  `Get current status for job executions.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, conn := connection.NewReportClient()
 		defer conn.Close()
@@ -69,11 +64,11 @@ to quickly create a Cobra application.`,
 			log.Fatalf("Error from controller: %v", err)
 		}
 
-		out, err := format.ResolveWriter(pagelogFlags.file)
+		out, err := format.ResolveWriter(jobExecFlags.file)
 		if err != nil {
-			log.Fatalf("Could not resolve output '%v': %v", crawlExecFlags.file, err)
+			log.Fatalf("Could not resolve output '%v': %v", jobExecFlags.file, err)
 		}
-		s, err := format.NewFormatter("JobExecutionStatus", out, pagelogFlags.format, pagelogFlags.goTemplate)
+		s, err := format.NewFormatter("JobExecutionStatus", out, jobExecFlags.format, jobExecFlags.goTemplate)
 		if err != nil {
 			log.Fatal(err)
 		}

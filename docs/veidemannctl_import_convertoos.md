@@ -19,6 +19,7 @@ veidemannctl import convertoos [flags]
   -e, --errorfile string       File to write errors to.
   -f, --filename string        Filename or directory to read from. If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin. (required)
   -h, --help                   help for convertoos
+      --ignore-scheme          Ignore the URL's scheme when checking if this URL is already imported.
   -o, --outfile string         File to write result to. (required)
   -r, --reset-db               Clean state db
       --toplevel               Convert URI to toplevel by removing path. (default true)

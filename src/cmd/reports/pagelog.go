@@ -40,13 +40,8 @@ var pagelogFlags struct {
 // pagelogCmd represents the pagelog command
 var pagelogCmd = &cobra.Command{
 	Use:   "pagelog",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "View page log",
+	Long:  `View page log.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, conn := connection.NewReportClient()
 		defer conn.Close()
@@ -69,7 +64,7 @@ to quickly create a Cobra application.`,
 
 		out, err := format.ResolveWriter(pagelogFlags.file)
 		if err != nil {
-			log.Fatalf("Could not resolve output '%v': %v", crawlExecFlags.file, err)
+			log.Fatalf("Could not resolve output '%v': %v", pagelogFlags.file, err)
 		}
 		s, err := format.NewFormatter("PageLog", out, pagelogFlags.format, pagelogFlags.goTemplate)
 		if err != nil {

@@ -28,11 +28,13 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 type seedDesc struct {
-	EntityName        string
-	Uri               string
+	EntityName string
+	Uri        string
+	//UriDupCheckKey    string
 	EntityLabel       []*configV1.Label
 	SeedLabel         []*configV1.Label
 	EntityDescription string
@@ -48,6 +50,7 @@ var importFlags struct {
 	filename        string
 	errorFile       string
 	toplevel        bool
+	ignoreScheme    bool
 	checkUri        bool
 	checkUriTimeout int64
 	crawlJobId      string
@@ -60,7 +63,15 @@ var importFlags struct {
 var importSeedCmd = &cobra.Command{
 	Use:   "seed",
 	Short: "Import seeds",
-	Long:  ``,
+	Long: `Import new seeds and entities from a line oriented JSON file on the following format: 
+
+{"entityName":"foo","uri":"https://www.example.com/","entityDescription":"desc","entityLabel":[{"key":"foo","value":"bar"}],"seedLabel":[{"key":"foo","value":"bar"},{"key":"foo2","value":"bar"}],"seedDescription":"foo"}
+
+Every record must be formatted on a single line.
+
+
+`,
+
 	Run: func(cmd *cobra.Command, args []string) {
 		i := &importer{}
 		var err error
@@ -101,12 +112,13 @@ var importSeedCmd = &cobra.Command{
 		i.httpClient = importutil.NewHttpClient(importFlags.checkUriTimeout)
 
 		// Create state Database based on seeds in Veidemann
-		impEntity := importutil.NewImportDb(client, importFlags.dbDir, configV1.Kind_crawlEntity, importFlags.resetDb)
+		impEntity := importutil.NewImportDb(client, importFlags.dbDir, configV1.Kind_crawlEntity, &importutil.NoopKeyNormalizer{}, importFlags.resetDb)
 		impEntity.ImportExisting()
 		defer impEntity.Close()
 
 		// Create state Database based on seeds in Veidemann
-		impSeed := importutil.NewImportDb(client, importFlags.dbDir, configV1.Kind_seed, importFlags.resetDb)
+		keyNormalizer := &UriKeyNormalizer{ignoreScheme: importFlags.ignoreScheme, toplevel: importFlags.toplevel}
+		impSeed := importutil.NewImportDb(client, importFlags.dbDir, configV1.Kind_seed, keyNormalizer, importFlags.resetDb)
 		impSeed.ImportExisting()
 		defer impSeed.Close()
 
@@ -259,6 +271,7 @@ func init() {
 		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
 	importSeedCmd.PersistentFlags().StringVarP(&importFlags.errorFile, "errorfile", "e", "", "File to write errors to.")
 	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.toplevel, "toplevel", "", false, "Convert URI to toplevel by removing path.")
+	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.toplevel, "ignore-scheme", "", false, "Ignore the URL's scheme when checking if this URL is already imported.")
 	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.checkUri, "checkuri", "", false, "Check the uri for liveness and follow 301")
 	importSeedCmd.PersistentFlags().Int64VarP(&importFlags.checkUriTimeout, "checkuri-timeout", "", 500, "Timeout in ms when checking uri for liveness.")
 	importSeedCmd.PersistentFlags().StringVarP(&importFlags.crawlJobId, "crawljob-id", "", "", "Set crawlJob ID for new seeds.")
@@ -283,13 +296,19 @@ func (i *importer) normalizeUri(s *seedDesc) (err error) {
 	}
 
 	uri.Fragment = ""
+	uri.Host = strings.ToLower(uri.Host)
+
 	if importFlags.toplevel {
-		uri.Path = ""
+		uri.Path = "/"
 		uri.RawQuery = ""
-		s.Uri = uri.Scheme + "://" + uri.Host
-	} else {
-		s.Uri = uri.String()
 	}
+
+	if uri.Path == "" {
+		uri.Path = "/"
+	}
+
+	s.Uri = uri.String()
+
 	return
 }
 
