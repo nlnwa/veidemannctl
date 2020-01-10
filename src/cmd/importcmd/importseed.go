@@ -32,9 +32,8 @@ import (
 )
 
 type seedDesc struct {
-	EntityName string
-	Uri        string
-	//UriDupCheckKey    string
+	EntityName        string
+	Uri               string
 	EntityLabel       []*configV1.Label
 	SeedLabel         []*configV1.Label
 	EntityDescription string
