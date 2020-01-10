@@ -37,6 +37,7 @@ var convertFlags struct {
 	errorFile       string
 	outFile         string
 	toplevel        bool
+	ignoreScheme    bool
 	checkUri        bool
 	checkUriTimeout int64
 	dbDir           string
@@ -96,7 +97,8 @@ var convertOosCmd = &cobra.Command{
 		c.httpClient = importutil.NewHttpClient(convertFlags.checkUriTimeout)
 
 		// Create state Database based on seeds in Veidemann
-		impf := importutil.NewImportDb(client, convertFlags.dbDir, configV1.Kind_seed, convertFlags.resetDb)
+		keyNormalizer := &UriKeyNormalizer{ignoreScheme: convertFlags.ignoreScheme, toplevel: convertFlags.toplevel}
+		impf := importutil.NewImportDb(client, convertFlags.dbDir, configV1.Kind_seed, keyNormalizer, convertFlags.resetDb)
 		impf.ImportExisting()
 		defer impf.Close()
 
@@ -177,6 +179,7 @@ func init() {
 	convertOosCmd.PersistentFlags().StringVarP(&convertFlags.errorFile, "errorfile", "e", "", "File to write errors to.")
 	convertOosCmd.PersistentFlags().StringVarP(&convertFlags.outFile, "outfile", "o", "", "File to write result to. (required)")
 	convertOosCmd.PersistentFlags().BoolVarP(&convertFlags.toplevel, "toplevel", "", true, "Convert URI to toplevel by removing path.")
+	convertOosCmd.PersistentFlags().BoolVarP(&convertFlags.ignoreScheme, "ignore-scheme", "", false, "Ignore the URL's scheme when checking if this URL is already imported.")
 	convertOosCmd.PersistentFlags().BoolVarP(&convertFlags.checkUri, "checkuri", "", true, "Check the uri for liveness and follow 301")
 	convertOosCmd.PersistentFlags().Int64VarP(&convertFlags.checkUriTimeout, "checkuri-timeout", "", 2000, "Timeout in ms when checking uri for liveness.")
 	convertOosCmd.PersistentFlags().StringVarP(&convertFlags.dbDir, "db-directory", "b", "/tmp/veidemannctl", "Directory for storing state db")
