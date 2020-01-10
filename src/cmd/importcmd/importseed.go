@@ -270,7 +270,7 @@ func init() {
 		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
 	importSeedCmd.PersistentFlags().StringVarP(&importFlags.errorFile, "errorfile", "e", "", "File to write errors to.")
 	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.toplevel, "toplevel", "", false, "Convert URI to toplevel by removing path.")
-	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.toplevel, "ignore-scheme", "", false, "Ignore the URL's scheme when checking if this URL is already imported.")
+	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.ignoreScheme, "ignore-scheme", "", false, "Ignore the URL's scheme when checking if this URL is already imported.")
 	importSeedCmd.PersistentFlags().BoolVarP(&importFlags.checkUri, "checkuri", "", false, "Check the uri for liveness and follow 301")
 	importSeedCmd.PersistentFlags().Int64VarP(&importFlags.checkUriTimeout, "checkuri-timeout", "", 500, "Timeout in ms when checking uri for liveness.")
 	importSeedCmd.PersistentFlags().StringVarP(&importFlags.crawlJobId, "crawljob-id", "", "", "Set crawlJob ID for new seeds.")
