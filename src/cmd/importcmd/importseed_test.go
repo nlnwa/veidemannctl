@@ -25,24 +25,27 @@ func Test_importer_normalizeUri(t *testing.T) {
 		name           string
 		seedDescriptor *seedDesc
 		wantUri        string
-		wantDedupKey   string
 		wantErr        bool
 	}{
-		{"1", &seedDesc{Uri: "http://www.example.com"}, "http://www.example.com/", "http://www.example.com/", false},
-		{"2", &seedDesc{Uri: "http://www.example.com#hash"}, "http://www.example.com/", "http://www.example.com/", false},
-		{"3", &seedDesc{Uri: "http://www.example.com?query"}, "http://www.example.com/?query", "http://www.example.com/?query", false},
-		{"4", &seedDesc{Uri: "http://www.example.com?query#hash"}, "http://www.example.com/?query", "http://www.example.com/?query", false},
-		{"5", &seedDesc{Uri: "http://www.example.com/"}, "http://www.example.com/", "http://www.example.com/", false},
-		{"6", &seedDesc{Uri: "http://www.example.com/#hash"}, "http://www.example.com/", "http://www.example.com/", false},
-		{"7", &seedDesc{Uri: "http://www.example.com/?query"}, "http://www.example.com/?query", "http://www.example.com/?query", false},
-		{"8", &seedDesc{Uri: "http://www.example.com/?query#hash"}, "http://www.example.com/?query", "http://www.example.com/?query", false},
-		{"9", &seedDesc{Uri: "http://www.example.com/foo/bar"}, "http://www.example.com/foo/bar", "http://www.example.com/foo/bar", false},
-		{"10", &seedDesc{Uri: "http://www.example.com/foo/bar#hash"}, "http://www.example.com/foo/bar", "http://www.example.com/foo/bar", false},
-		{"11", &seedDesc{Uri: "http://www.example.com/foo/bar?query"}, "http://www.example.com/foo/bar?query", "http://www.example.com/foo/bar?query", false},
-		{"12", &seedDesc{Uri: "http://www.example.com/foo/bar?query#hash"}, "http://www.example.com/foo/bar?query", "http://www.example.com/foo/bar?query", false},
-		{"13", &seedDesc{Uri: "https://www.example.com/foo/bar#hash"}, "https://www.example.com/foo/bar", "https://www.example.com/foo/bar", false},
-		{"14", &seedDesc{Uri: "HTTPS://www.example.com/foo/bar#hash"}, "https://www.example.com/foo/bar", "https://www.example.com/foo/bar", false},
-		{"15", &seedDesc{Uri: "https://www.Example.Com/foo/bar#hash"}, "https://www.example.com/foo/bar", "https://www.example.com/foo/bar", false},
+		{"1", &seedDesc{Uri: "http://www.example.com"}, "http://www.example.com/", false},
+		{"2", &seedDesc{Uri: "http://www.example.com#hash"}, "http://www.example.com/", false},
+		{"3", &seedDesc{Uri: "http://www.example.com?query"}, "http://www.example.com/?query", false},
+		{"4", &seedDesc{Uri: "http://www.example.com?query#hash"}, "http://www.example.com/?query", false},
+		{"5", &seedDesc{Uri: "http://www.example.com/"}, "http://www.example.com/", false},
+		{"6", &seedDesc{Uri: "http://www.example.com/#hash"}, "http://www.example.com/", false},
+		{"7", &seedDesc{Uri: "http://www.example.com/?query"}, "http://www.example.com/?query", false},
+		{"8", &seedDesc{Uri: "http://www.example.com/?query#hash"}, "http://www.example.com/?query", false},
+		{"9", &seedDesc{Uri: "http://www.example.com/foo/bar"}, "http://www.example.com/foo/bar", false},
+		{"10", &seedDesc{Uri: "http://www.example.com/foo/bar#hash"}, "http://www.example.com/foo/bar", false},
+		{"11", &seedDesc{Uri: "http://www.example.com/foo/bar?query"}, "http://www.example.com/foo/bar?query", false},
+		{"12", &seedDesc{Uri: "http://www.example.com/foo/bar?query#hash"}, "http://www.example.com/foo/bar?query", false},
+		{"13", &seedDesc{Uri: "https://www.example.com/foo/bar#hash"}, "https://www.example.com/foo/bar", false},
+		{"14", &seedDesc{Uri: "HTTPS://www.example.com/foo/bar#hash"}, "https://www.example.com/foo/bar", false},
+		{"15", &seedDesc{Uri: "https://www.Example.Com/foo/bar#hash"}, "https://www.example.com/foo/bar", false},
+		{"16", &seedDesc{Uri: "http://www.example.com/foo/"}, "http://www.example.com/foo/", false},
+		{"17", &seedDesc{Uri: "http://www.example.com/foo"}, "http://www.example.com/foo", false},
+		{"18", &seedDesc{Uri: "https://www.example.com/foo/"}, "https://www.example.com/foo/", false},
+		{"19", &seedDesc{Uri: "https://www.example.com/foo"}, "https://www.example.com/foo", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -80,6 +83,10 @@ func Test_UriKeyNormalizer_toplevelFlag(t *testing.T) {
 		{"13", "https://www.example.com/foo/bar#hash", "https://www.example.com/", false},
 		{"14", "HTTPS://www.example.com/foo/bar#hash", "https://www.example.com/", false},
 		{"15", "https://www.Example.Com/foo/bar#hash", "https://www.example.com/", false},
+		{"16", "http://www.example.com/foo/", "http://www.example.com/", false},
+		{"17", "http://www.example.com/foo", "http://www.example.com/", false},
+		{"18", "https://www.example.com/foo/", "https://www.example.com/", false},
+		{"19", "https://www.example.com/foo", "https://www.example.com/", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -117,6 +124,10 @@ func Test_UriKeyNormalizer_ignoreSchemeFlag(t *testing.T) {
 		{"13", "https://www.example.com/foo/bar#hash", "//www.example.com/foo/bar", false},
 		{"14", "HTTPS://www.example.com/foo/bar#hash", "//www.example.com/foo/bar", false},
 		{"15", "https://www.Example.Com/foo/bar#hash", "//www.example.com/foo/bar", false},
+		{"16", "http://www.example.com/foo/", "//www.example.com/foo/", false},
+		{"17", "http://www.example.com/foo", "//www.example.com/foo", false},
+		{"18", "https://www.example.com/foo/", "//www.example.com/foo/", false},
+		{"19", "https://www.example.com/foo", "//www.example.com/foo", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
