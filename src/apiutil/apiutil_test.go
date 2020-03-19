@@ -14,6 +14,10 @@
 package apiutil
 
 import (
+	commonsV1 "github.com/nlnwa/veidemann-api-go/commons/v1"
+	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
+	"google.golang.org/protobuf/proto"
 	"reflect"
 	"testing"
 
@@ -87,6 +91,102 @@ func TestCreateListRequest(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CreateListRequest() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCreateTemplateFilter(t *testing.T) {
+	type args struct {
+		filterString string
+		templateObj  proto.Message
+	}
+	tests := []struct {
+		name         string
+		args         args
+		wantMask     *commonsV1.FieldMask
+		wantTemplate proto.Message
+		wantErr      bool
+	}{
+		{"message/string",
+			args{filterString: "meta.name=foo", templateObj: &configV1.ConfigObject{}},
+			&commonsV1.FieldMask{Paths: []string{"meta.name"}},
+			&configV1.ConfigObject{Meta: &configV1.Meta{Name: "foo"}},
+			false,
+		},
+		{"message/storageRef",
+			args{filterString: "crawlConfig.browserConfigRef=browserConfig:foo", templateObj: &configV1.ConfigObject{}},
+			&commonsV1.FieldMask{Paths: []string{"crawlConfig.browserConfigRef"}},
+			&configV1.ConfigObject{Spec: &configV1.ConfigObject_CrawlConfig{CrawlConfig: &configV1.CrawlConfig{BrowserConfigRef: &configV1.ConfigRef{Kind: configV1.Kind_browserConfig, Id: "foo"}}}},
+			false,
+		},
+		{"illegal message/storageRef",
+			args{filterString: "crawlConfig.browserConfigRef=foo", templateObj: &configV1.ConfigObject{}},
+			nil,
+			&configV1.ConfigObject{Spec: &configV1.ConfigObject_CrawlConfig{CrawlConfig: &configV1.CrawlConfig{}}},
+			true,
+		},
+		{"message/label",
+			args{filterString: "meta.label=foo:bar", templateObj: &configV1.ConfigObject{}},
+			&commonsV1.FieldMask{Paths: []string{"meta.label"}},
+			&configV1.ConfigObject{Meta: &configV1.Meta{Label: []*api.Label{{Key: "foo", Value: "bar"}}}},
+			false,
+		},
+		{"oneof/int",
+			args{filterString: "browserConfig.pageLoadTimeoutMs=100", templateObj: &configV1.ConfigObject{}},
+			&commonsV1.FieldMask{Paths: []string{"browserConfig.pageLoadTimeoutMs"}},
+			&configV1.ConfigObject{Spec: &configV1.ConfigObject_BrowserConfig{&configV1.BrowserConfig{PageLoadTimeoutMs: 100}}},
+			false,
+		},
+		{"illegal filter for template",
+			args{filterString: "meta.name=foo", templateObj: &frontierV1.CrawlExecutionStatus{}},
+			nil,
+			&frontierV1.CrawlExecutionStatus{},
+			true,
+		},
+		{"enum",
+			args{filterString: "state=FINISHED", templateObj: &frontierV1.CrawlExecutionStatus{}},
+			&commonsV1.FieldMask{Paths: []string{"state"}},
+			&frontierV1.CrawlExecutionStatus{State: frontierV1.CrawlExecutionStatus_FINISHED},
+			false,
+		},
+		{"illegal enum value",
+			args{filterString: "state=FOO", templateObj: &frontierV1.CrawlExecutionStatus{}},
+			nil,
+			&frontierV1.CrawlExecutionStatus{},
+			true,
+		},
+		{"array/set",
+			args{filterString: "browserScript.urlRegexp=foo", templateObj: &configV1.ConfigObject{}},
+			&commonsV1.FieldMask{Paths: []string{"browserScript.urlRegexp"}},
+			&configV1.ConfigObject{Spec: &configV1.ConfigObject_BrowserScript{BrowserScript: &configV1.BrowserScript{UrlRegexp: []string{"foo"}}}},
+			false,
+		},
+		{"array/add",
+			args{filterString: "browserScript.urlRegexp+=foo", templateObj: &configV1.ConfigObject{}},
+			&commonsV1.FieldMask{Paths: []string{"browserScript.urlRegexp+"}},
+			&configV1.ConfigObject{Spec: &configV1.ConfigObject_BrowserScript{BrowserScript: &configV1.BrowserScript{UrlRegexp: []string{"foo"}}}},
+			false,
+		},
+		{"array/remove",
+			args{filterString: "browserScript.urlRegexp-=foo", templateObj: &configV1.ConfigObject{}},
+			&commonsV1.FieldMask{Paths: []string{"browserScript.urlRegexp-"}},
+			&configV1.ConfigObject{Spec: &configV1.ConfigObject_BrowserScript{BrowserScript: &configV1.BrowserScript{UrlRegexp: []string{"foo"}}}},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotMask, gotTemplate, err := CreateTemplateFilter(tt.args.filterString, tt.args.templateObj)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CreateTemplateFilter() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !proto.Equal(gotMask, tt.wantMask) {
+				t.Errorf("CreateTemplateFilter() gotMask = %v, wantMask %v", gotMask, tt.wantMask)
+			}
+			if !proto.Equal(gotTemplate, tt.wantTemplate) {
+				t.Errorf("CreateTemplateFilter() gotTemplate = %v, wantTemplate %v", gotTemplate, tt.wantTemplate)
 			}
 		})
 	}
