@@ -17,6 +17,7 @@ package reports
 import (
 	"github.com/nlnwa/veidemann-api-go/commons/v1"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/proto"
 	"testing"
 
 	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
@@ -65,7 +66,9 @@ func TestCreateJobExecutionsListRequest(t *testing.T) {
 				return
 			}
 			assert.IsType(t, &reportV1.JobExecutionsListRequest{}, got)
-			assert.Equal(t, tt.want, got)
+			if !proto.Equal(got, tt.want) {
+				t.Errorf("CreateJobExecutionsListRequest() got = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
