@@ -10,7 +10,7 @@ require (
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/magiconair/properties v1.8.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nlnwa/veidemann-api-go v1.0.0-beta12
+	github.com/nlnwa/veidemann-api-go v1.0.0-beta12-1
 	github.com/pkg/errors v0.8.1
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/sirupsen/logrus v1.4.2
@@ -27,5 +27,3 @@ require (
 	gopkg.in/square/go-jose.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v2 v2.2.3
 )
-
-replace github.com/nlnwa/veidemann-api-go => /home/johnh/prosjekter/veidemann/veidemann-api-go
