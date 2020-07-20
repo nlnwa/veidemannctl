@@ -134,6 +134,7 @@ urisCrawled: "0"
     "createdBy": "",
     "description": "",
     "label": [],
+	"annotation": [],
     "lastModified": null,
     "lastModifiedBy": "",
     "name": "http://www.example.com"
@@ -159,6 +160,7 @@ meta:
   createdBy: ""
   description: ""
   label: []
+  annotation: []
   lastModified: null
   lastModifiedBy: ""
   name: http://www.example.com
