@@ -34,7 +34,8 @@ var statusCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("could not get crawler status: %v", err)
 		}
-		fmt.Printf("%v\n", crawlerStatus.RunStatus)
+		fmt.Printf("Status: %v, Url queue size: %v, Busy crawl host groups: %v\n",
+			crawlerStatus.RunStatus, crawlerStatus.QueueSize, crawlerStatus.BusyCrawlHostGroupCount)
 	},
 }
 

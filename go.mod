@@ -3,27 +3,39 @@ module github.com/nlnwa/veidemannctl
 go 1.13
 
 require (
-	github.com/coreos/go-oidc v2.0.0+incompatible
-	github.com/dgraph-io/badger/v2 v2.0.0
+	github.com/DataDog/zstd v1.4.5 // indirect
+	github.com/coreos/go-oidc v2.2.1+incompatible
+	github.com/dgraph-io/badger/v2 v2.2007.2
+	github.com/dgraph-io/ristretto v0.0.3 // indirect
+	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
+	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/ghodss/yaml v1.0.0
-	github.com/golang/protobuf v1.4.2
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/magiconair/properties v1.8.0
+	github.com/golang/protobuf v1.4.3
+	github.com/golang/snappy v0.0.2 // indirect
+	github.com/magiconair/properties v1.8.4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nlnwa/veidemann-api-go v1.0.0-beta17
-	github.com/pkg/errors v0.8.1
-	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
-	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/afero v1.2.1 // indirect
-	github.com/spf13/cobra v0.0.5
+	github.com/mitchellh/mapstructure v1.3.3 // indirect
+	github.com/nlnwa/veidemann-api-go v1.0.0-beta19
+	github.com/pelletier/go-toml v1.8.1 // indirect
+	github.com/pkg/errors v0.9.1
+	github.com/pquerna/cachecontrol v0.0.0-20200921180117-858c6e7e6b7e // indirect
+	github.com/sirupsen/logrus v1.7.0
+	github.com/spf13/afero v1.4.1 // indirect
+	github.com/spf13/cast v1.3.1 // indirect
+	github.com/spf13/cobra v1.1.1
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.3.2
-	github.com/stretchr/testify v1.4.0
-	golang.org/x/crypto v0.0.0-20190313024323-a1f597ede03a // indirect
-	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
-	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
-	google.golang.org/grpc v1.29.1
-	google.golang.org/protobuf v1.24.0
-	gopkg.in/square/go-jose.v2 v2.3.0 // indirect
-	gopkg.in/yaml.v2 v2.2.3
+	github.com/spf13/viper v1.7.1
+	github.com/stretchr/testify v1.6.1
+	golang.org/x/crypto v0.0.0-20201117144127-c1f2f97bffc9 // indirect
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
+	golang.org/x/oauth2 v0.0.0-20201109201403-9fd604954f58
+	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
+	golang.org/x/text v0.3.4 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/genproto v0.0.0-20201119123407-9b1e624d6bc4 // indirect
+	google.golang.org/grpc v1.33.2
+	google.golang.org/protobuf v1.25.0
+	gopkg.in/ini.v1 v1.62.0 // indirect
+	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
+	gopkg.in/yaml.v2 v2.3.0
 )
