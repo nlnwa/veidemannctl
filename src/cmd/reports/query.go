@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ghodss/yaml"
-	reportV1 "github.com/nlnwa/veidemann-api-go/report/v1"
+	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
 	"github.com/nlnwa/veidemannctl/src/configutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"

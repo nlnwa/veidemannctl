@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/importutil"
 	log "github.com/sirupsen/logrus"

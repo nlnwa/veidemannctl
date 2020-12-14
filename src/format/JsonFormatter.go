@@ -14,11 +14,9 @@
 package format
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"reflect"
 )
@@ -69,28 +67,10 @@ func (jf *jsonFormatter) WriteRecord(record interface{}) error {
 }
 
 func marshalElementJson(w io.Writer, msg proto.Message) error {
-	r, err := EncodeJson(msg)
-	if err != nil {
-		return err
+	if b, err := jsonMarshaler.Marshal(msg); err != nil {
+		return errors.New(fmt.Sprintf("Could not convert %v to JSON: %v", msg, err))
+	} else {
+		fmt.Fprintln(w, string(b))
+		return nil
 	}
-
-	var out bytes.Buffer
-	json.Indent(&out, r, "", "  ")
-
-	fmt.Fprintln(w, out.String())
-	return nil
-}
-
-func EncodeJson(msg proto.Message) ([]byte, error) {
-	var buf bytes.Buffer
-	if err := jsonMarshaler.Marshal(&buf, msg); err != nil {
-		return nil, errors.New(fmt.Sprintf("Could not convert %v to JSON: %v", msg, err))
-	}
-
-	values := make(map[string]interface{})
-	json.Unmarshal(buf.Bytes(), &values)
-
-	b, _ := json.Marshal(values)
-
-	return b, nil
 }

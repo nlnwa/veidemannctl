@@ -2,10 +2,6 @@
 
 Convert Out of Scope file(s) to seed import file
 
-### Synopsis
-
-Convert Out of Scope file(s) to seed import file
-
 ```
 veidemannctl import convertoos [flags]
 ```

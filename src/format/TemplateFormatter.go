@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/nlnwa/veidemann-api-go/config/v1"
+	"github.com/nlnwa/veidemann-api/go/config/v1"
 	log "github.com/sirupsen/logrus"
 	"reflect"
 	"strings"

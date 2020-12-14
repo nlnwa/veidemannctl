@@ -16,8 +16,8 @@ package format
 import (
 	"bytes"
 	"github.com/golang/protobuf/ptypes"
-	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
-	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
+	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -145,8 +145,7 @@ urisCrawled: "0"
       "id": "entityRef",
       "kind": "crawlEntity"
     },
-    "jobRef": [],
-    "scope": null
+    "jobRef": []
   }
 }`},
 
@@ -170,7 +169,6 @@ seed:
     id: entityRef
     kind: crawlEntity
   jobRef: []
-  scope: null
 
 ---
 `},

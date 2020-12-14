@@ -19,7 +19,7 @@ import (
 	"log"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/nlnwa/veidemann-api-go/controller/v1"
+	"github.com/nlnwa/veidemann-api/go/controller/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/spf13/cobra"
 )

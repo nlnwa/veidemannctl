@@ -15,13 +15,13 @@
 package reports
 
 import (
-	"github.com/nlnwa/veidemann-api-go/commons/v1"
+	"github.com/nlnwa/veidemann-api/go/commons/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/proto"
 	"testing"
 
-	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
-	reportV1 "github.com/nlnwa/veidemann-api-go/report/v1"
+	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
+	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
 )
 
 func TestCreateJobExecutionsListRequest(t *testing.T) {

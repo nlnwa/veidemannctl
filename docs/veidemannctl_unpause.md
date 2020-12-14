@@ -1,20 +1,19 @@
-## veidemannctl import duplicatereport
+## veidemannctl unpause
 
-List duplicated seeds in Veidemann
+Unpause crawler
+
+### Synopsis
+
+Unpause crawler
 
 ```
-veidemannctl import duplicatereport [kind] [flags]
+veidemannctl unpause [flags]
 ```
 
 ### Options
 
 ```
-  -b, --db-directory string   Directory for storing state db (default "/tmp/veidemannctl")
-  -h, --help                  help for duplicatereport
-      --ignore-scheme         Ignore the URL's scheme when checking for duplicates.
-  -o, --outFile string        File to write output.
-  -r, --reset-db              Clean state db
-      --toplevel              Convert URI to toplevel by removing path before checking for duplicates.
+  -h, --help   help for unpause
 ```
 
 ### Options inherited from parent commands
@@ -30,5 +29,5 @@ veidemannctl import duplicatereport [kind] [flags]
 
 ### SEE ALSO
 
-* [veidemannctl import](veidemannctl_import.md)	 - Import data into Veidemann using subcommands
+* [veidemannctl](veidemannctl.md)	 - Veidemann command line client
 

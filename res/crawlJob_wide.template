@@ -1,5 +1,7 @@
+{{- /*gotype: github.com/nlnwa/veidemann-api/go/config/v1.ConfigObject*/ -}}
+
 {{define "HEADER" -}}
-    {{printf `%-36.36s %-15s %8s %6s %14s %12s` "Id" "Name" "Disabled" "Depth" "MaxBytes" "MaxDuration"}}
+    {{printf `%-36.36s %-15s %8s %14s %12s` "Id" "Name" "Disabled" "MaxBytes" "MaxDuration"}}
 {{end -}}
 
-{{printf `%36s %-15s %8v %6d %14v %12v` .Id .Meta.Name .Spec.CrawlJob.Disabled .Spec.CrawlJob.Limits.Depth .Spec.CrawlJob.Limits.MaxBytes .Spec.CrawlJob.Limits.MaxDurationS}}
+{{printf `%36s %-15s %8v %14v %12v` .Id .Meta.Name .Spec.CrawlJob.Disabled .Spec.CrawlJob.Limits.MaxBytes .Spec.CrawlJob.Limits.MaxDurationS}}

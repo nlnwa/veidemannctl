@@ -2,10 +2,6 @@
 
 Import data into Veidemann using subcommands
 
-### Synopsis
-
-Import data into Veidemann using subcommands
-
 ```
 veidemannctl import [flags]
 ```

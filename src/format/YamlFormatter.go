@@ -17,7 +17,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ghodss/yaml"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"reflect"
 )
@@ -80,7 +80,7 @@ func (yf *yamlFormatter) WriteRecord(record interface{}) error {
 }
 
 func marshalElementYaml(w io.Writer, msg proto.Message) error {
-	r, err := EncodeJson(msg)
+	r, err := jsonMarshaler.Marshal(msg)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Could not convert %v to JSON: %v", msg, err))
 	}

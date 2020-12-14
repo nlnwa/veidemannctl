@@ -2,10 +2,6 @@
 
 Modify veidemannctl config files using subcommands
 
-### Synopsis
-
-Modify veidemannctl config files using subcommands
-
 ```
 veidemannctl config [flags]
 ```

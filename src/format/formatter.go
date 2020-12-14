@@ -20,17 +20,17 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ghodss/yaml"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/nlnwa/veidemann-api-go/config/v1"
+	"github.com/nlnwa/veidemann-api/go/config/v1"
 	"github.com/nlnwa/veidemannctl/bindata"
+	"google.golang.org/protobuf/encoding/protojson"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 )
 
-var jsonMarshaler = jsonpb.Marshaler{EmitDefaults: true}
-var jsonUnMarshaler = jsonpb.Unmarshaler{}
+var jsonMarshaler = &protojson.MarshalOptions{EmitUnpopulated: true, Indent: "  "}
+var jsonUnMarshaler = &protojson.UnmarshalOptions{DiscardUnknown: true}
 
 type Formatter interface {
 	WriteRecord(record interface{}) error
@@ -255,14 +255,21 @@ func UnmarshalYaml(r io.Reader, result []*config.ConfigObject) ([]*config.Config
 			return nil, readErr
 		}
 
+		data = bytes.TrimSpace(data)
+		if len(data) == 0 {
+			continue
+		}
+
 		b, err := yaml.YAMLToJSON(data)
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("Error decoding: %v, %v", err, data))
 		}
-		buf := bytes.NewBuffer(b)
 
 		target := &config.ConfigObject{}
-		jsonUnMarshaler.Unmarshal(buf, target)
+		err = jsonUnMarshaler.Unmarshal(b, target)
+		if err != nil {
+			return nil, err
+		}
 		result = append(result, target)
 	}
 	return result, nil
@@ -270,10 +277,15 @@ func UnmarshalYaml(r io.Reader, result []*config.ConfigObject) ([]*config.Config
 
 func UnmarshalJson(r io.Reader, result []*config.ConfigObject) ([]*config.ConfigObject, error) {
 	dec := json.NewDecoder(r)
-	for dec.More() {
+	var err error
+	for err == nil {
+		var msg json.RawMessage
+		err = dec.Decode(&msg)
 		target := &config.ConfigObject{}
-		jsonUnMarshaler.UnmarshalNext(dec, target)
-		result = append(result, target)
+		jsonUnMarshaler.Unmarshal(msg, target)
+		if err == nil {
+			result = append(result, target)
+		}
 	}
 
 	return result, nil

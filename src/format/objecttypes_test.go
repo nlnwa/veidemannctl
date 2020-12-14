@@ -18,7 +18,7 @@ import (
 	"reflect"
 	"testing"
 
-	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 )
 
 func TestGetKind(t *testing.T) {
