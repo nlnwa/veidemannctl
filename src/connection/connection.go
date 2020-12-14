@@ -16,9 +16,9 @@ package connection
 import (
 	"crypto/x509"
 	"github.com/golang/protobuf/ptypes/empty"
-	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
-	controllerV1 "github.com/nlnwa/veidemann-api-go/controller/v1"
-	reportV1 "github.com/nlnwa/veidemann-api-go/report/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
+	controllerV1 "github.com/nlnwa/veidemann-api/go/controller/v1"
+	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
 	"github.com/nlnwa/veidemannctl/src/configutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

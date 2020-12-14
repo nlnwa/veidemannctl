@@ -1,4 +1,4 @@
-{{- /*gotype: github.com/nlnwa/veidemann-api-go/config/v1.ConfigObject*/ -}}
+{{- /*gotype: github.com/nlnwa/veidemann-api/go/config/v1.ConfigObject*/ -}}
 
 {{define "HEADER" -}}
     {{printf `%-36.36s %-15s %18s %11s %12s %12s` "Id" "Name" "UserAgent" "WindowSize" "PageTimeout" "MaxInactivity"}}

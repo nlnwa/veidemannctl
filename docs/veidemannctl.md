@@ -36,7 +36,11 @@ veidemannctl [flags]
 * [veidemannctl logconfig](veidemannctl_logconfig.md)	 - Configure logging
 * [veidemannctl login](veidemannctl_login.md)	 - Initiate browser session for logging in to Veidemann
 * [veidemannctl logout](veidemannctl_logout.md)	 - Log out of Veidemann
+* [veidemannctl pause](veidemannctl_pause.md)	 - Pause crawler
 * [veidemannctl report](veidemannctl_report.md)	 - Get log report
 * [veidemannctl run](veidemannctl_run.md)	 - Immediately run a crawl
+* [veidemannctl script-parameters](veidemannctl_script-parameters.md)	 - Get the active script parameters for a Crawl Job
+* [veidemannctl status](veidemannctl_status.md)	 - Get crawler status
+* [veidemannctl unpause](veidemannctl_unpause.md)	 - Unpause crawler
 * [veidemannctl update](veidemannctl_update.md)	 - Update the value(s) for an object type
 

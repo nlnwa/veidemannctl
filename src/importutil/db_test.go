@@ -14,7 +14,7 @@
 package importutil
 
 import (
-	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"reflect"
 	"testing"
 )

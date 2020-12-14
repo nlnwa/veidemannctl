@@ -14,12 +14,12 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
-	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"
 	"github.com/spf13/cobra"
-	"golang.org/x/net/context"
 	"log"
 	"os"
 )
@@ -64,7 +64,7 @@ var createCmd = &cobra.Command{
 
 func handleError(msg *configV1.ConfigObject, err error) {
 	if err != nil {
-		log.Fatalf("Could not save %v: %v", msg, err)
+		fmt.Printf("Could not save %v: %v. Cause: %v\n", msg.Kind, msg.Meta.Name, err)
 		os.Exit(2)
 	}
 }

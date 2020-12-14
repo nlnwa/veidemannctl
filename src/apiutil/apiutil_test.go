@@ -14,14 +14,14 @@
 package apiutil
 
 import (
-	commonsV1 "github.com/nlnwa/veidemann-api-go/commons/v1"
-	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
-	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
+	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
+	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
 	"google.golang.org/protobuf/proto"
 	"reflect"
 	"testing"
 
-	api "github.com/nlnwa/veidemann-api-go/config/v1"
+	api "github.com/nlnwa/veidemann-api/go/config/v1"
 )
 
 func TestCreateSelector(t *testing.T) {

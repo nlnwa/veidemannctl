@@ -15,8 +15,8 @@ package apiutil
 
 import (
 	"fmt"
-	commonsV1 "github.com/nlnwa/veidemann-api-go/commons/v1"
-	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"reflect"

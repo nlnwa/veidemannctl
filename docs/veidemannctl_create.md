@@ -2,10 +2,6 @@
 
 Create or update a config object
 
-### Synopsis
-
-Create or update a config object
-
 ```
 veidemannctl create [flags]
 ```

@@ -1,4 +1,4 @@
-{{- /*gotype: github.com/nlnwa/veidemann-api-go/frontier/v1.JobExecutionStatus*/ -}}
+{{- /*gotype: github.com/nlnwa/veidemann-api/go/frontier/v1.JobExecutionStatus*/ -}}
 
 {{define "HEADER" -}}
     {{inverse}}{{printf `%-36.36s %-36.36s %15s %8s %8s %-24s %-24s` "Id" "JobId" "State" "Docs" "Uris" "Start time" "End time"}}{{reset}}

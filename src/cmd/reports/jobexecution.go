@@ -16,8 +16,8 @@ package reports
 
 import (
 	"context"
-	frontierV1 "github.com/nlnwa/veidemann-api-go/frontier/v1"
-	reportV1 "github.com/nlnwa/veidemann-api-go/report/v1"
+	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
+	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"

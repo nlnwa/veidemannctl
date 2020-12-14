@@ -1,20 +1,27 @@
-## veidemannctl import duplicatereport
+## veidemannctl script-parameters
 
-List duplicated seeds in Veidemann
+Get the active script parameters for a Crawl Job
+
+### Synopsis
+
+Get the active script parameters for a Crawl Job
+
+Examples:
+  # See active script parameters for a Crawl Job
+  veidemannctl script-parameters 5604f0cc-315d-4091-8d6e-1b17a7eb990b
+
+  # See active script parameters for a Crawl Job and eventual overrides from Seed and Entity
+  veidemannctl script-parameters 5604f0cc-315d-4091-8d6e-1b17a7eb990b 9f89ca44-afe0-4f8f-808f-9df1a0fe64c9
+
 
 ```
-veidemannctl import duplicatereport [kind] [flags]
+veidemannctl script-parameters CRAWLJOB_CONFIG_ID [SEED_ID] [flags]
 ```
 
 ### Options
 
 ```
-  -b, --db-directory string   Directory for storing state db (default "/tmp/veidemannctl")
-  -h, --help                  help for duplicatereport
-      --ignore-scheme         Ignore the URL's scheme when checking for duplicates.
-  -o, --outFile string        File to write output.
-  -r, --reset-db              Clean state db
-      --toplevel              Convert URI to toplevel by removing path before checking for duplicates.
+  -h, --help   help for script-parameters
 ```
 
 ### Options inherited from parent commands
@@ -30,5 +37,5 @@ veidemannctl import duplicatereport [kind] [flags]
 
 ### SEE ALSO
 
-* [veidemannctl import](veidemannctl_import.md)	 - Import data into Veidemann using subcommands
+* [veidemannctl](veidemannctl.md)	 - Veidemann command line client
 

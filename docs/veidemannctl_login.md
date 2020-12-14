@@ -2,10 +2,6 @@
 
 Initiate browser session for logging in to Veidemann
 
-### Synopsis
-
-Initiate browser session for logging in to Veidemann
-
 ```
 veidemannctl login [flags]
 ```

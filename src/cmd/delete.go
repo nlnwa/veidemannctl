@@ -15,7 +15,7 @@ package cmd
 
 import (
 	"fmt"
-	configV1 "github.com/nlnwa/veidemann-api-go/config/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"
@@ -139,8 +139,7 @@ var deleteCmd = &cobra.Command{
 			fmt.Println("See 'veidemannctl get -h' for help")
 		}
 	},
-	ValidArgs:
-	format.GetObjectNames(),
+	ValidArgs: format.GetObjectNames(),
 }
 
 func init() {

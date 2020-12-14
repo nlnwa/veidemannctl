@@ -14,7 +14,7 @@
 package cmd
 
 import (
-	controllerV1 "github.com/nlnwa/veidemann-api-go/controller/v1"
+	controllerV1 "github.com/nlnwa/veidemann-api/go/controller/v1"
 
 	"context"
 	"github.com/nlnwa/veidemannctl/src/connection"
