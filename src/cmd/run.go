@@ -14,6 +14,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	controllerV1 "github.com/nlnwa/veidemann-api/go/controller/v1"
@@ -45,7 +46,7 @@ If seedId is not submitted then all the seeds wich are configured to use the sub
 					log.Fatalf("could not run job: %v", err)
 				}
 
-				println("Job Execution ID: ", r.GetJobExecutionId())
+				fmt.Printf("Job Execution ID: %v\n", r.GetJobExecutionId())
 			case 2:
 				// Two arguments (jobId and seedId)
 				request := controllerV1.RunCrawlRequest{JobId: args[0], SeedId: args[1]}
@@ -54,7 +55,7 @@ If seedId is not submitted then all the seeds wich are configured to use the sub
 					log.Fatalf("could not run job: %v", err)
 				}
 
-				println("Job Execution ID: ", r.GetJobExecutionId())
+				fmt.Printf("Job Execution ID: %v\n", r.GetJobExecutionId())
 			}
 		} else {
 			cmd.Usage()
