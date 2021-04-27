@@ -16,6 +16,7 @@ package connection
 import (
 	"crypto/x509"
 	"github.com/golang/protobuf/ptypes/empty"
+	logV1 "github.com/nlnwa/veidemann-api/go/log/v1"
 	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	controllerV1 "github.com/nlnwa/veidemann-api/go/controller/v1"
 	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
@@ -39,6 +40,12 @@ func NewControllerClient() (controllerV1.ControllerClient, *grpc.ClientConn) {
 func NewReportClient() (reportV1.ReportClient, *grpc.ClientConn) {
 	conn := newConnection()
 	c := reportV1.NewReportClient(conn)
+	return c, conn
+}
+
+func NewLogClient() (logV1.LogClient, *grpc.ClientConn) {
+	conn := newConnection()
+	c := logV1.NewLogClient(conn)
 	return c, conn
 }
 

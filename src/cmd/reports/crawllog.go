@@ -16,8 +16,7 @@ package reports
 
 import (
 	"context"
-	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
-	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
+	logV1 "github.com/nlnwa/veidemann-api/go/log/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"
@@ -44,7 +43,7 @@ var crawllogCmd = &cobra.Command{
 	Short: "View crawl log",
 	Long:  `View crawl log.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, conn := connection.NewReportClient()
+		client, conn := connection.NewLogClient()
 		defer conn.Close()
 
 		var ids []string
@@ -101,8 +100,8 @@ func init() {
 	ReportCmd.AddCommand(crawllogCmd)
 }
 
-func CreateCrawlLogListRequest(ids []string) (*reportV1.CrawlLogListRequest, error) {
-	request := &reportV1.CrawlLogListRequest{}
+func CreateCrawlLogListRequest(ids []string) (*logV1.CrawlLogListRequest, error) {
+	request := &logV1.CrawlLogListRequest{}
 	request.WarcId = ids
 	request.Watch = crawllogFlags.watch
 	if crawllogFlags.watch {
@@ -113,12 +112,12 @@ func CreateCrawlLogListRequest(ids []string) (*reportV1.CrawlLogListRequest, err
 	request.PageSize = crawllogFlags.pageSize
 
 	if crawllogFlags.filter != "" {
-		m, o, err := apiutil.CreateTemplateFilter(crawllogFlags.filter, &frontierV1.CrawlLog{})
+		m, o, err := apiutil.CreateTemplateFilter(crawllogFlags.filter, &logV1.CrawlLog{})
 		if err != nil {
 			return nil, err
 		}
 		request.QueryMask = m
-		request.QueryTemplate = o.(*frontierV1.CrawlLog)
+		request.QueryTemplate = o.(*logV1.CrawlLog)
 	}
 
 	return request, nil

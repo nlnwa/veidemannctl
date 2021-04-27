@@ -15,10 +15,10 @@ package format
 
 import (
 	"bytes"
-	"github.com/golang/protobuf/ptypes"
 	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"testing"
 	"time"
 )
@@ -50,9 +50,9 @@ func TestHasSuffix(t *testing.T) {
 
 func TestNewFormatter(t *testing.T) {
 	ts, _ := time.Parse(time.RFC3339, "2019-12-24T17:00:00Z")
-	startTime, _ := ptypes.TimestampProto(ts)
+	startTime := timestamppb.New(ts)
 	ts, _ = time.Parse(time.RFC3339, "2019-12-31T23:59:59Z")
-	endTime, _ := ptypes.TimestampProto(ts)
+	endTime := timestamppb.New(ts)
 
 	jobExec := &frontierV1.JobExecutionStatus{Id: "id1", StartTime: startTime, EndTime: endTime}
 
@@ -80,6 +80,7 @@ func TestNewFormatter(t *testing.T) {
 			jobExec,
 			`{
   "bytesCrawled": "0",
+  "desiredState": "UNDEFINED",
   "documentsCrawled": "0",
   "documentsDenied": "0",
   "documentsFailed": "0",
@@ -110,6 +111,7 @@ id: id1
 jobId: ""
 startTime: "2019-12-24T17:00:00Z"
 state: UNDEFINED
+desiredState: UNDEFINED
 urisCrawled: "0"
 `},
 

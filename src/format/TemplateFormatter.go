@@ -20,13 +20,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
-	tspb "github.com/golang/protobuf/ptypes/timestamp"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"github.com/nlnwa/veidemann-api/go/config/v1"
 	log "github.com/sirupsen/logrus"
 	"reflect"
 	"strings"
 	"text/template"
+	"time"
 )
 
 type templateFormatter struct {
@@ -78,7 +78,7 @@ func (tf *templateFormatter) WriteRecord(record interface{}) error {
 }
 
 func parseTemplate(templateString string) (*template.Template, error) {
-	ESC := string(0x1b)
+	ESC := fmt.Sprint(0x1b)
 	funcMap := template.FuncMap{
 		"reset":         func() string { return ESC + "[0m" },
 		"bold":          func() string { return ESC + "[1m" },
@@ -97,11 +97,11 @@ func parseTemplate(templateString string) (*template.Template, error) {
 		"brightcyan":    func() string { return ESC + "[1;36m" },
 		"bgwhite":       func() string { return ESC + "[47m" },
 		"bgbrightblack": func() string { return ESC + "[100m" },
-		"time": func(ts *tspb.Timestamp) string {
+		"time": func(ts *timestamppb.Timestamp) string {
 			if ts == nil {
 				return "                        "
 			} else {
-				return fmt.Sprintf("%-24.24s", ptypes.TimestampString(ts))
+				return fmt.Sprintf("%-24.24s", ts.AsTime().Format(time.RFC3339))
 			}
 		},
 		"rethinktime": func(ts map[string]interface{}) string {
