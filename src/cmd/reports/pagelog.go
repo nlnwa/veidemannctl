@@ -16,8 +16,7 @@ package reports
 
 import (
 	"context"
-	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
-	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
+	logV1 "github.com/nlnwa/veidemann-api/go/log/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"
@@ -43,7 +42,7 @@ var pagelogCmd = &cobra.Command{
 	Short: "View page log",
 	Long:  `View page log.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, conn := connection.NewReportClient()
+		client, conn := connection.NewLogClient()
 		defer conn.Close()
 
 		var ids []string
@@ -100,8 +99,8 @@ func init() {
 	ReportCmd.AddCommand(pagelogCmd)
 }
 
-func CreatePageLogListRequest(ids []string) (*reportV1.PageLogListRequest, error) {
-	request := &reportV1.PageLogListRequest{}
+func CreatePageLogListRequest(ids []string) (*logV1.PageLogListRequest, error) {
+	request := &logV1.PageLogListRequest{}
 	request.WarcId = ids
 	request.Watch = pagelogFlags.watch
 	if pagelogFlags.watch {
@@ -112,12 +111,12 @@ func CreatePageLogListRequest(ids []string) (*reportV1.PageLogListRequest, error
 	request.PageSize = pagelogFlags.pageSize
 
 	if pagelogFlags.filter != "" {
-		m, o, err := apiutil.CreateTemplateFilter(pagelogFlags.filter, &frontierV1.PageLog{})
+		m, o, err := apiutil.CreateTemplateFilter(pagelogFlags.filter, &logV1.PageLog{})
 		if err != nil {
 			return nil, err
 		}
 		request.QueryMask = m
-		request.QueryTemplate = o.(*frontierV1.PageLog)
+		request.QueryTemplate = o.(*logV1.PageLog)
 	}
 
 	return request, nil
