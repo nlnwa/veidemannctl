@@ -78,7 +78,7 @@ func (tf *templateFormatter) WriteRecord(record interface{}) error {
 }
 
 func parseTemplate(templateString string) (*template.Template, error) {
-	ESC := fmt.Sprint(0x1b)
+	ESC := string(rune(0x1b))
 	funcMap := template.FuncMap{
 		"reset":         func() string { return ESC + "[0m" },
 		"bold":          func() string { return ESC + "[1m" },
