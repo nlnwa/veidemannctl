@@ -19,7 +19,6 @@ import (
 	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"reflect"
 	"strconv"
 	"strings"
 )
@@ -202,4 +201,3 @@ func CreateListRequest(kind configV1.Kind, ids []string, name string, labelStrin
 	return request, nil
 }
 
-var typeRegistry = make(map[string]reflect.Type)
