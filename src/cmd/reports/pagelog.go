@@ -16,6 +16,7 @@ package reports
 
 import (
 	"context"
+	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
 	logV1 "github.com/nlnwa/veidemann-api/go/log/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
@@ -111,12 +112,14 @@ func CreatePageLogListRequest(ids []string) (*logV1.PageLogListRequest, error) {
 	request.PageSize = pagelogFlags.pageSize
 
 	if pagelogFlags.filter != "" {
-		m, o, err := apiutil.CreateTemplateFilter(pagelogFlags.filter, &logV1.PageLog{})
+		queryMask := new(commonsV1.FieldMask)
+		queryTemplate := new(logV1.PageLog)
+		err := apiutil.CreateTemplateFilter(pagelogFlags.filter, queryTemplate, queryMask)
 		if err != nil {
 			return nil, err
 		}
-		request.QueryMask = m
-		request.QueryTemplate = o.(*logV1.PageLog)
+		request.QueryMask = queryMask
+		request.QueryTemplate = queryTemplate
 	}
 
 	return request, nil

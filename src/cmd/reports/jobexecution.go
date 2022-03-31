@@ -16,25 +16,28 @@ package reports
 
 import (
 	"context"
+	"fmt"
+	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
 	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
 	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
-	"os"
 )
 
 type jobExecConf struct {
-	filter     string
-	pageSize   int32
-	page       int32
-	goTemplate string
-	format     string
-	file       string
-	watch      bool
+	filters     []string
+	states      []string
+	pageSize    int32
+	page        int32
+	orderByPath string
+	orderDesc   bool
+	goTemplate  string
+	format      string
+	file        string
+	watch       bool
 }
 
 var jobExecFlags = &jobExecConf{}
@@ -44,7 +47,7 @@ var jobexecutionCmd = &cobra.Command{
 	Use:   "jobexecution",
 	Short: "Get current status for job executions",
 	Long:  `Get current status for job executions.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		client, conn := connection.NewReportClient()
 		defer conn.Close()
 
@@ -54,23 +57,25 @@ var jobexecutionCmd = &cobra.Command{
 			ids = args
 		}
 
-		request, err := CreateJobExecutionsListRequest(ids)
+		request, err := createJobExecutionsListRequest(ids)
 		if err != nil {
-			log.Fatalf("Error creating request: %v", err)
+			return fmt.Errorf("error creating request: %w", err)
 		}
+
+		cmd.SilenceUsage = true
 
 		r, err := client.ListJobExecutions(context.Background(), request)
 		if err != nil {
-			log.Fatalf("Error from controller: %v", err)
+			return fmt.Errorf("error from controller: %v", err)
 		}
 
 		out, err := format.ResolveWriter(jobExecFlags.file)
 		if err != nil {
-			log.Fatalf("Could not resolve output '%v': %v", jobExecFlags.file, err)
+			return fmt.Errorf("could not resolve output '%v': %v", jobExecFlags.file, err)
 		}
 		s, err := format.NewFormatter("JobExecutionStatus", out, jobExecFlags.format, jobExecFlags.goTemplate)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		defer s.Close()
 
@@ -80,13 +85,13 @@ var jobexecutionCmd = &cobra.Command{
 				break
 			}
 			if err != nil {
-				log.Fatalf("Error getting object: %v", err)
+				return err
 			}
-			log.Debugf("Outputting page log record with id '%s'", msg.Id)
-			if s.WriteRecord(msg) != nil {
-				os.Exit(1)
+			if err := s.WriteRecord(msg); err != nil {
+				return err
 			}
 		}
+		return nil
 	},
 }
 
@@ -95,31 +100,51 @@ func init() {
 	jobexecutionCmd.Flags().Int32VarP(&jobExecFlags.page, "page", "p", 0, "The page number")
 	jobexecutionCmd.Flags().StringVarP(&jobExecFlags.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
 	jobexecutionCmd.Flags().StringVarP(&jobExecFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
-	jobexecutionCmd.Flags().StringVarP(&jobExecFlags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
+	jobexecutionCmd.Flags().StringSliceVarP(&jobExecFlags.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo")
+	jobexecutionCmd.Flags().StringSliceVar(&jobExecFlags.states, "state", nil, "Filter objects by state(s)")
 	jobexecutionCmd.Flags().StringVarP(&jobExecFlags.file, "filename", "f", "", "File name to write to")
+	jobexecutionCmd.Flags().StringVar(&jobExecFlags.orderByPath, "order-by", "", "Order by path")
+	jobexecutionCmd.Flags().BoolVar(&jobExecFlags.orderDesc, "desc", false, "Order descending")
 	jobexecutionCmd.Flags().BoolVarP(&jobExecFlags.watch, "watch", "w", false, "Get a continous stream of changes")
 
 	ReportCmd.AddCommand(jobexecutionCmd)
 }
 
-func CreateJobExecutionsListRequest(ids []string) (*reportV1.JobExecutionsListRequest, error) {
-	request := &reportV1.JobExecutionsListRequest{}
-	request.Id = ids
-	request.Watch = jobExecFlags.watch
+func createJobExecutionsListRequest(ids []string) (*reportV1.JobExecutionsListRequest, error) {
+	request := &reportV1.JobExecutionsListRequest{
+		Id:              ids,
+		Watch:           jobExecFlags.watch,
+		PageSize:        jobExecFlags.pageSize,
+		Offset:          jobExecFlags.page,
+		OrderByPath:     jobExecFlags.orderByPath,
+		OrderDescending: jobExecFlags.orderDesc,
+	}
 	if jobExecFlags.watch {
-		jobExecFlags.pageSize = 0
+		request.PageSize = 0
 	}
 
-	request.Offset = jobExecFlags.page
-	request.PageSize = jobExecFlags.pageSize
-
-	if jobExecFlags.filter != "" {
-		m, o, err := apiutil.CreateTemplateFilter(jobExecFlags.filter, &frontierV1.JobExecutionStatus{})
-		if err != nil {
-			return nil, err
+	if len(jobExecFlags.states) > 0 {
+		for _, state := range jobExecFlags.states {
+			if s, ok := frontierV1.JobExecutionStatus_State_value[state]; !ok {
+				return nil, fmt.Errorf("not a jobexecution state: %s", state)
+			} else {
+				request.State = append(request.State, frontierV1.JobExecutionStatus_State(s))
+			}
 		}
-		request.QueryMask = m
-		request.QueryTemplate = o.(*frontierV1.JobExecutionStatus)
+	}
+
+	if len(jobExecFlags.filters) > 0 {
+		queryMask := new(commonsV1.FieldMask)
+		queryTemplate := new(frontierV1.JobExecutionStatus)
+
+		for _, filter := range jobExecFlags.filters {
+			err := apiutil.CreateTemplateFilter(filter, queryTemplate, queryMask)
+			if err != nil {
+				return nil, err
+			}
+		}
+		request.QueryMask = queryMask
+		request.QueryTemplate = queryTemplate
 	}
 
 	return request, nil

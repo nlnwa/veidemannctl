@@ -16,6 +16,7 @@ package reports
 
 import (
 	"context"
+	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
 	logV1 "github.com/nlnwa/veidemann-api/go/log/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
@@ -112,12 +113,14 @@ func CreateCrawlLogListRequest(ids []string) (*logV1.CrawlLogListRequest, error)
 	request.PageSize = crawllogFlags.pageSize
 
 	if crawllogFlags.filter != "" {
-		m, o, err := apiutil.CreateTemplateFilter(crawllogFlags.filter, &logV1.CrawlLog{})
+		queryMask := new(commonsV1.FieldMask)
+		queryTemplate := new(logV1.CrawlLog)
+		err := apiutil.CreateTemplateFilter(crawllogFlags.filter, queryTemplate, queryMask)
 		if err != nil {
 			return nil, err
 		}
-		request.QueryMask = m
-		request.QueryTemplate = o.(*logV1.CrawlLog)
+		request.QueryMask = queryMask
+		request.QueryTemplate = queryTemplate
 	}
 
 	return request, nil

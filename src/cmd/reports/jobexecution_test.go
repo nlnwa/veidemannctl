@@ -60,7 +60,7 @@ func TestCreateJobExecutionsListRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			jobExecFlags = tt.flags
-			got, err := CreateJobExecutionsListRequest(tt.ids)
+			got, err := createJobExecutionsListRequest(tt.ids)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CreateJobExecutionsListRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return

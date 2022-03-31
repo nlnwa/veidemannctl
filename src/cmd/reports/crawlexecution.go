@@ -16,25 +16,28 @@ package reports
 
 import (
 	"context"
+	"fmt"
+	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
 	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
 	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
 	"github.com/nlnwa/veidemannctl/src/connection"
 	"github.com/nlnwa/veidemannctl/src/format"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
-	"os"
 )
 
 var crawlExecFlags struct {
-	filter     string
-	pageSize   int32
-	page       int32
-	goTemplate string
-	format     string
-	file       string
-	watch      bool
+	filters     []string
+	pageSize    int32
+	page        int32
+	goTemplate  string
+	format      string
+	file        string
+	orderByPath string
+	orderDesc   bool
+	watch       bool
+	states      []string
 }
 
 // crawlexecutionCmd represents the crawlexecution command
@@ -42,7 +45,7 @@ var crawlexecutionCmd = &cobra.Command{
 	Use:   "crawlexecution",
 	Short: "Get current status for crawl executions",
 	Long:  `Get current status for crawl executions.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		client, conn := connection.NewReportClient()
 		defer conn.Close()
 
@@ -54,21 +57,22 @@ var crawlexecutionCmd = &cobra.Command{
 
 		request, err := CreateCrawlExecutionsListRequest(ids)
 		if err != nil {
-			log.Fatalf("Error creating request: %v", err)
+			return fmt.Errorf("failed creating request: %w", err)
 		}
+
+		cmd.SilenceUsage = true
 
 		r, err := client.ListExecutions(context.Background(), request)
 		if err != nil {
-			log.Fatalf("Error from controller: %v", err)
+			return fmt.Errorf("error from controller: %w", err)
 		}
-
 		out, err := format.ResolveWriter(crawlExecFlags.file)
 		if err != nil {
-			log.Fatalf("Could not resolve output '%v': %v", crawlExecFlags.file, err)
+			return fmt.Errorf("could not resolve output '%s': %w", crawlExecFlags.file, err)
 		}
 		s, err := format.NewFormatter("CrawlExecutionStatus", out, crawlExecFlags.format, crawlExecFlags.goTemplate)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		defer s.Close()
 
@@ -78,13 +82,13 @@ var crawlexecutionCmd = &cobra.Command{
 				break
 			}
 			if err != nil {
-				log.Fatalf("Error getting object: %v", err)
+				return err
 			}
-			log.Debugf("Outputting page log record with id '%s'", msg.Id)
-			if s.WriteRecord(msg) != nil {
-				os.Exit(1)
+			if err := s.WriteRecord(msg); err != nil {
+				return err
 			}
 		}
+		return nil
 	},
 }
 
@@ -93,31 +97,53 @@ func init() {
 	crawlexecutionCmd.Flags().Int32VarP(&crawlExecFlags.page, "page", "p", 0, "The page number")
 	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
 	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
-	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
+	crawlexecutionCmd.Flags().StringSliceVarP(&crawlExecFlags.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo")
+	crawlexecutionCmd.Flags().StringSliceVar(&crawlExecFlags.states, "state", nil, "Filter objects by state(s)")
 	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.file, "filename", "f", "", "File name to write to")
+	crawlexecutionCmd.Flags().StringVar(&crawlExecFlags.orderByPath, "order-by", "", "Order by path")
+	crawlexecutionCmd.Flags().BoolVar(&crawlExecFlags.orderDesc, "desc", false, "Order descending")
 	crawlexecutionCmd.Flags().BoolVarP(&crawlExecFlags.watch, "watch", "w", false, "Get a continous stream of changes")
 
 	ReportCmd.AddCommand(crawlexecutionCmd)
 }
 
 func CreateCrawlExecutionsListRequest(ids []string) (*reportV1.CrawlExecutionsListRequest, error) {
-	request := &reportV1.CrawlExecutionsListRequest{}
-	request.Id = ids
-	request.Watch = crawlExecFlags.watch
-	if crawlExecFlags.watch {
-		crawlExecFlags.pageSize = 0
+	request := &reportV1.CrawlExecutionsListRequest{
+		Id:       ids,
+		Watch:    crawlExecFlags.watch,
+		PageSize: crawlExecFlags.pageSize,
+		Offset:   crawlExecFlags.page,
+		OrderByPath: crawlExecFlags.orderByPath,
+		OrderDescending: crawlExecFlags.orderDesc,
 	}
 
-	request.Offset = crawlExecFlags.page
-	request.PageSize = crawlExecFlags.pageSize
+	if crawlExecFlags.watch {
+		request.PageSize = 0
+	}
 
-	if crawlExecFlags.filter != "" {
-		m, o, err := apiutil.CreateTemplateFilter(crawlExecFlags.filter, &frontierV1.CrawlExecutionStatus{})
-		if err != nil {
-			return nil, err
+	if len(crawlExecFlags.states) > 0 {
+		for _, state := range crawlExecFlags.states {
+			if s, ok := frontierV1.CrawlExecutionStatus_State_value[state]; !ok {
+				return nil, fmt.Errorf("not a crawlexecution state: %s", state)
+			} else {
+				request.State = append(request.State, frontierV1.CrawlExecutionStatus_State(s))
+			}
 		}
-		request.QueryMask = m
-		request.QueryTemplate = o.(*frontierV1.CrawlExecutionStatus)
+	}
+
+	if len(crawlExecFlags.filters) > 0 {
+		queryTemplate := new(frontierV1.CrawlExecutionStatus)
+		queryMask := new(commonsV1.FieldMask)
+
+		for _, filter := range crawlExecFlags.filters {
+			err := apiutil.CreateTemplateFilter(filter, queryTemplate, queryMask)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		request.QueryMask = queryMask
+		request.QueryTemplate = queryTemplate
 	}
 
 	return request, nil
