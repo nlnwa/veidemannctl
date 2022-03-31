@@ -20,12 +20,6 @@ import (
 // reportCmd represents the report command
 var ReportCmd = &cobra.Command{
 	Use:   "report",
-	Short: "Get log report",
+	Short: "Get report",
 	Long:  `Request a report.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
-
-func init() {
 }
