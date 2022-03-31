@@ -13,7 +13,7 @@
 
 package apiutil
 
-import (
+import 	(
 	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
 	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
@@ -177,12 +177,15 @@ func TestCreateTemplateFilter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotMask, gotTemplate, err := CreateTemplateFilter(tt.args.filterString, tt.args.templateObj)
+			gotMask := new(commonsV1.FieldMask)
+			gotTemplate := tt.args.templateObj
+
+			err := CreateTemplateFilter(tt.args.filterString, gotTemplate, gotMask)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CreateTemplateFilter() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !proto.Equal(gotMask, tt.wantMask) {
+			if tt.wantMask != nil && !proto.Equal(gotMask, tt.wantMask) {
 				t.Errorf("CreateTemplateFilter() gotMask = %v, wantMask %v", gotMask, tt.wantMask)
 			}
 			if !proto.Equal(gotTemplate, tt.wantTemplate) {

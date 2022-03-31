@@ -16,6 +16,7 @@ package reports
 
 import (
 	"context"
+	"fmt"
 	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
 	logV1 "github.com/nlnwa/veidemann-api/go/log/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
@@ -24,7 +25,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
-	"os"
 )
 
 var pagelogFlags struct {
@@ -42,7 +42,7 @@ var pagelogCmd = &cobra.Command{
 	Use:   "pagelog",
 	Short: "View page log",
 	Long:  `View page log.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		client, conn := connection.NewLogClient()
 		defer conn.Close()
 
@@ -52,23 +52,23 @@ var pagelogCmd = &cobra.Command{
 			ids = args
 		}
 
-		request, err := CreatePageLogListRequest(ids)
+		request, err := createPageLogListRequest(ids)
 		if err != nil {
-			log.Fatalf("Error creating request: %v", err)
+			return fmt.Errorf("Error creating request: %v", err)
 		}
 
 		r, err := client.ListPageLogs(context.Background(), request)
 		if err != nil {
-			log.Fatalf("Error from controller: %v", err)
+			return fmt.Errorf("Error from controller: %v", err)
 		}
 
 		out, err := format.ResolveWriter(pagelogFlags.file)
 		if err != nil {
-			log.Fatalf("Could not resolve output '%v': %v", pagelogFlags.file, err)
+			return fmt.Errorf("Could not resolve output '%v': %v", pagelogFlags.file, err)
 		}
 		s, err := format.NewFormatter("PageLog", out, pagelogFlags.format, pagelogFlags.goTemplate)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		defer s.Close()
 
@@ -78,13 +78,14 @@ var pagelogCmd = &cobra.Command{
 				break
 			}
 			if err != nil {
-				log.Fatalf("Error getting object: %v", err)
+				return fmt.Errorf("Error getting object: %v", err)
 			}
 			log.Debugf("Outputting page log record with WARC id '%s'", msg.WarcId)
-			if s.WriteRecord(msg) != nil {
-				os.Exit(1)
+			if err := s.WriteRecord(msg); err != nil {
+				return err
 			}
 		}
+		return nil
 	},
 }
 
@@ -96,11 +97,9 @@ func init() {
 	pagelogCmd.Flags().StringVarP(&pagelogFlags.filter, "filter", "q", "", "Filter objects by field (i.e. meta.description=foo")
 	pagelogCmd.Flags().StringVarP(&pagelogFlags.file, "filename", "f", "", "File name to write to")
 	pagelogCmd.Flags().BoolVarP(&pagelogFlags.watch, "watch", "w", false, "Get a continous stream of changes")
-
-	ReportCmd.AddCommand(pagelogCmd)
 }
 
-func CreatePageLogListRequest(ids []string) (*logV1.PageLogListRequest, error) {
+func createPageLogListRequest(ids []string) (*logV1.PageLogListRequest, error) {
 	request := &logV1.PageLogListRequest{}
 	request.WarcId = ids
 	request.Watch = pagelogFlags.watch

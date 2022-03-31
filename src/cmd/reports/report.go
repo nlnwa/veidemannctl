@@ -17,9 +17,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// reportCmd represents the report command
-var ReportCmd = &cobra.Command{
-	Use:   "report",
-	Short: "Get report",
-	Long:  `Request a report.`,
+func NewReportCmd() *cobra.Command {
+	// reportCmd represents the report command
+	var cmd = &cobra.Command{
+		Use:   "report",
+		Short: "Get report",
+		Long:  `Request a report.`,
+	}
+
+	cmd.AddCommand(newJobExecutionCmd())
+	cmd.AddCommand(newCrawlExecutionCmd())
+	cmd.AddCommand(crawllogCmd)
+	cmd.AddCommand(queryCmd)
+	cmd.AddCommand(pagelogCmd)
+
+	return cmd
 }

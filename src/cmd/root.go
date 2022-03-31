@@ -82,7 +82,7 @@ func init() {
 
 	RootCmd.SetVersionTemplate("{{.Version}}")
 
-	RootCmd.AddCommand(reports.ReportCmd)
+	RootCmd.AddCommand(reports.NewReportCmd())
 	RootCmd.AddCommand(logconfig.LogconfigCmd)
 	RootCmd.AddCommand(config.ConfigCmd)
 	RootCmd.AddCommand(importcmd.ImportCmd)

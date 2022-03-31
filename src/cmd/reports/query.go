@@ -46,14 +46,17 @@ var queryCmd = &cobra.Command{
 	Use:   "query [queryString|file] args...",
 	Short: "Run a databse query",
 	Long:  `Run a databse query. The query should be a java script string like the ones used by RethinkDb javascript driver.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
 			client, conn := connection.NewReportClient()
 			defer conn.Close()
 
 			request := reportV1.ExecuteDbQueryRequest{}
 
-			queryDef := getQueryDef(args[0])
+			queryDef, err := getQueryDef(args[0])
+			if err != nil {
+				return err
+			}
 			defer queryDef.marshalSpec.Close()
 
 			var params []interface{}
@@ -67,9 +70,12 @@ var queryCmd = &cobra.Command{
 			request.Limit = queryFlags.pageSize
 			log.Debugf("Executing query: %s", request.GetQuery())
 
+			// from now on we don't want usage when error occurs
+			cmd.SilenceUsage = true
+
 			stream, err := client.ExecuteDbQuery(context.Background(), &request)
 			if err != nil {
-				log.Fatalf("Failed executing query: %v", err)
+				return fmt.Errorf("Failed executing query: %v", err)
 			}
 
 			for {
@@ -78,9 +84,11 @@ var queryCmd = &cobra.Command{
 					break
 				}
 				if err != nil {
-					log.Fatalf("Query error: %v", err)
+					return fmt.Errorf("Query error: %v", err)
 				}
-				queryDef.marshalSpec.WriteRecord(value.GetRecord())
+				if err := queryDef.marshalSpec.WriteRecord(value.GetRecord()); err != nil {
+					return err
+				}
 			}
 		} else {
 			d := configutil.GetConfigDir("query")
@@ -100,6 +108,7 @@ var queryCmd = &cobra.Command{
 				}
 			}
 		}
+		return nil
 	},
 }
 
@@ -109,8 +118,6 @@ func init() {
 	queryCmd.PersistentFlags().StringVarP(&queryFlags.format, "output", "o", "json", "Output format (json|yaml|template|template-file)")
 	queryCmd.PersistentFlags().StringVarP(&queryFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
 	queryCmd.Flags().StringVarP(&queryFlags.file, "filename", "f", "", "File name to write to")
-
-	ReportCmd.AddCommand(queryCmd)
 }
 
 type queryDef struct {
@@ -121,20 +128,26 @@ type queryDef struct {
 	marshalSpec format.Formatter
 }
 
-func getQueryDef(queryArg string) queryDef {
+func getQueryDef(queryArg string) (queryDef, error) {
 	var queryDef queryDef
 
 	if strings.HasPrefix(queryArg, "r.") {
 		queryDef.Query = queryArg
 	} else {
-		filename := findFile(queryArg)
+		filename, err := findFile(queryArg)
+		if err != nil {
+			return queryDef, err
+		}
 		log.Debugf("Using query definition from file '%s'", filename)
-		readFile(filename, &queryDef)
+		err = readFile(filename, &queryDef)
+		if err != nil {
+			return queryDef, err
+		}
 	}
 
 	out, err := format.ResolveWriter(queryFlags.file)
 	if err != nil {
-		log.Fatalf("Could not resolve output '%v': %v", queryFlags.file, err)
+		return queryDef, fmt.Errorf("Could not resolve output '%v': %v", queryFlags.file, err)
 	}
 	if queryDef.Template == "" {
 		queryDef.marshalSpec, err = format.NewFormatter("", out, queryFlags.format, queryFlags.goTemplate)
@@ -142,39 +155,38 @@ func getQueryDef(queryArg string) queryDef {
 		queryDef.marshalSpec, err = format.NewFormatter("", out, "template", queryDef.Template)
 	}
 	if err != nil {
-		log.Fatal(err)
+		return queryDef, err
 	}
-	return queryDef
+	return queryDef, nil
 }
 
-func findFile(name string) string {
+func findFile(name string) (string, error) {
 	filename := name
 	if _, err := os.Stat(filename); !os.IsNotExist(err) {
-		return filename
+		return filename, nil
 	}
 
 	queryDir := configutil.GetConfigDir("query")
 
 	filename = filepath.Join(queryDir, name)
 	if _, err := os.Stat(filename); !os.IsNotExist(err) {
-		return filename
+		return filename, nil
 	}
 	filename = filepath.Join(queryDir, name) + ".yml"
 	if _, err := os.Stat(filename); !os.IsNotExist(err) {
-		return filename
+		return filename, nil
 	}
 	filename = filepath.Join(queryDir, name) + ".yaml"
 	if _, err := os.Stat(filename); !os.IsNotExist(err) {
-		return filename
+		return filename, nil
 	}
-	log.Fatalf("Query not found: %s", name)
-	return ""
+	return "", fmt.Errorf("query not found: %s", name)
 }
 
-func readFile(name string, queryDef *queryDef) {
+func readFile(name string, queryDef *queryDef) error {
 	data, err := ioutil.ReadFile(name)
 	if err != nil {
-		log.Fatalf("Query not found: %v", err)
+		return fmt.Errorf("failed to read file: %s: %w", name, err)
 	}
 	// Found file
 	if strings.HasSuffix(name, ".yml") || strings.HasSuffix(name, ".yaml") {
@@ -183,6 +195,7 @@ func readFile(name string, queryDef *queryDef) {
 		queryDef.Query = string(data)
 	}
 	queryDef.Name = strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
+	return nil
 }
 
 func listStoredQueries(path string) []queryDef {
