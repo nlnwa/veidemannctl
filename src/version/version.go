@@ -26,7 +26,7 @@ func (v *VeidemannVersion) SetGitVersion(version string) {
 	v.gitVersion = version
 }
 
-func (v *VeidemannVersion) GetVersionString() string {
+func (v *VeidemannVersion) String() string {
 	return fmt.Sprintf("Client version: %s, Go version: %s, Platform: %s/%s\n",
 		v.gitVersion,
 		runtime.Version(),
