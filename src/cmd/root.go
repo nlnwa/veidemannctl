@@ -86,7 +86,6 @@ func init() {
 	RootCmd.AddCommand(logconfig.LogconfigCmd)
 	RootCmd.AddCommand(config.ConfigCmd)
 	RootCmd.AddCommand(importcmd.ImportCmd)
-	RootCmd.AddCommand(scriptParametersCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.

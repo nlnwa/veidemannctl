@@ -66,3 +66,7 @@ Examples:
 		}
 	},
 }
+
+func init() {
+	RootCmd.AddCommand(scriptParametersCmd)
+}
