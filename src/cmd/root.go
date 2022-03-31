@@ -14,7 +14,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/nlnwa/veidemannctl/bindata"
 	"github.com/nlnwa/veidemannctl/src/cmd/config"
 	"github.com/nlnwa/veidemannctl/src/cmd/importcmd"
@@ -57,7 +56,6 @@ func Execute() {
 	RootCmd.BashCompletionFunction = string(data)
 
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }
