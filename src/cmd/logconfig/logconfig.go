@@ -22,10 +22,4 @@ var LogconfigCmd = &cobra.Command{
 	Use:   "logconfig",
 	Short: "Configure logging",
 	Long:  `Configure logging.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
-
-func init() {
 }

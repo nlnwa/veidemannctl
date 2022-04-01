@@ -19,24 +19,20 @@ import (
 	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"reflect"
 	"strconv"
 	"strings"
 )
 
 func CreateSelector(labelString string) []string {
-	var result []string
 	if labelString != "" {
-		result = strings.Split(labelString, ",")
+		return strings.Split(labelString, ",")
 	}
-	return result
+	return nil
 }
 
-func CreateTemplateFilter(filterString string, templateObj proto.Message) (*commonsV1.FieldMask, proto.Message, error) {
+func CreateTemplateFilter(filterString string, obj proto.Message, mask *commonsV1.FieldMask) error {
 	q := strings.Split(filterString, "=")
-	mask := &commonsV1.FieldMask{}
 	mask.Paths = append(mask.Paths, q[0])
-	obj := templateObj
 	path := strings.TrimRight(q[0], "+-")
 	value := q[1]
 	tokens := strings.Split(path, ".")
@@ -51,13 +47,13 @@ func CreateTemplateFilter(filterString string, templateObj proto.Message) (*comm
 			for i := 0; i < msgType.Fields().Len(); i++ {
 				sa[i] = msgType.Fields().Get(i).JSONName()
 			}
-			return nil, templateObj, fmt.Errorf("no field with name '%s' in '%s'. Valid field names: %s", token, msgType.FullName(), strings.Join(sa, ", "))
+			return fmt.Errorf("no field with name '%s' in '%s'. Valid field names: %s", token, msgType.FullName(), strings.Join(sa, ", "))
 		}
 		switch fieldType.Kind() {
 		case protoreflect.BoolKind:
 			v, err := strconv.ParseBool(value)
 			if err != nil {
-				return nil, templateObj, fmt.Errorf("error converting %v to boolean: %w", value, err)
+				return fmt.Errorf("error converting %v to boolean: %w", value, err)
 			}
 			setValue(protoreflect.ValueOfBool(v), obj, fieldType)
 
@@ -68,7 +64,7 @@ func CreateTemplateFilter(filterString string, templateObj proto.Message) (*comm
 		case protoreflect.Sfixed32Kind:
 			v, err := strconv.ParseInt(value, 0, 32)
 			if err != nil {
-				return nil, templateObj, fmt.Errorf("error converting %v to int: %w", value, err)
+				return fmt.Errorf("error converting %v to int: %w", value, err)
 			}
 			setValue(protoreflect.ValueOfInt32(int32(v)), obj, fieldType)
 
@@ -79,7 +75,7 @@ func CreateTemplateFilter(filterString string, templateObj proto.Message) (*comm
 		case protoreflect.Sfixed64Kind:
 			v, err := strconv.ParseInt(value, 0, 64)
 			if err != nil {
-				return nil, templateObj, fmt.Errorf("error converting %v to int: %w", value, err)
+				return fmt.Errorf("error converting %v to int: %w", value, err)
 			}
 			setValue(protoreflect.ValueOfInt64(v), obj, fieldType)
 
@@ -88,7 +84,7 @@ func CreateTemplateFilter(filterString string, templateObj proto.Message) (*comm
 		case protoreflect.Fixed32Kind:
 			v, err := strconv.ParseUint(value, 0, 32)
 			if err != nil {
-				return nil, templateObj, fmt.Errorf("error converting %v to uint: %w", value, err)
+				return fmt.Errorf("error converting %v to uint: %w", value, err)
 			}
 			setValue(protoreflect.ValueOfUint32(uint32(v)), obj, fieldType)
 
@@ -97,21 +93,21 @@ func CreateTemplateFilter(filterString string, templateObj proto.Message) (*comm
 		case protoreflect.Fixed64Kind:
 			v, err := strconv.ParseUint(value, 0, 64)
 			if err != nil {
-				return nil, templateObj, fmt.Errorf("error converting %v to uint: %w", value, err)
+				return fmt.Errorf("error converting %v to uint: %w", value, err)
 			}
 			setValue(protoreflect.ValueOfUint64(v), obj, fieldType)
 
 		case protoreflect.FloatKind:
 			v, err := strconv.ParseFloat(value, 32)
 			if err != nil {
-				return nil, templateObj, fmt.Errorf("error converting %v to float: %w", value, err)
+				return fmt.Errorf("error converting %v to float: %w", value, err)
 			}
 			setValue(protoreflect.ValueOfFloat32(float32(v)), obj, fieldType)
 
 		case protoreflect.DoubleKind:
 			v, err := strconv.ParseFloat(value, 64)
 			if err != nil {
-				return nil, templateObj, fmt.Errorf("error converting %v to float: %w", value, err)
+				return fmt.Errorf("error converting %v to float: %w", value, err)
 			}
 			setValue(protoreflect.ValueOfFloat64(v), obj, fieldType)
 
@@ -128,7 +124,7 @@ func CreateTemplateFilter(filterString string, templateObj proto.Message) (*comm
 				for i := 0; i < fieldType.Enum().Values().Len(); i++ {
 					sa[i] = string(fieldType.Enum().Values().Get(i).Name())
 				}
-				return nil, templateObj, fmt.Errorf("not a valid enum value '%s' for '%s'. Valid values: %s", value, fieldType.FullName(), strings.Join(sa, ", "))
+				return fmt.Errorf("not a valid enum value '%s' for '%s'. Valid values: %s", value, fieldType.FullName(), strings.Join(sa, ", "))
 			}
 			setValue(protoreflect.ValueOfEnum(enumVal.Number()), obj, fieldType)
 
@@ -149,14 +145,14 @@ func CreateTemplateFilter(filterString string, templateObj proto.Message) (*comm
 			case *configV1.ConfigRef:
 				kindId := strings.SplitN(value, ":", 2)
 				if len(kindId) != 2 {
-					return nil, templateObj, fmt.Errorf("not a valid configRef value %v for: %v. ConfigRef should have format [kind]:[id]", value, fieldType.FullName())
+					return fmt.Errorf("not a valid configRef value %v for: %v. ConfigRef should have format [kind]:[id]", value, fieldType.FullName())
 				}
 				m.Kind = configV1.Kind(configV1.Kind_value[kindId[0]])
 				m.Id = kindId[1]
 			case *configV1.Label:
 				keyVal := strings.SplitN(value, ":", 2)
 				if len(keyVal) != 2 {
-					return nil, templateObj, fmt.Errorf("not a valid label value %v for: %v. Label should have format [name]:[value]", value, fieldType.FullName())
+					return fmt.Errorf("not a valid label value %v for: %v. Label should have format [name]:[value]", value, fieldType.FullName())
 				}
 				m.Key = keyVal[0]
 				m.Value = keyVal[1]
@@ -166,7 +162,7 @@ func CreateTemplateFilter(filterString string, templateObj proto.Message) (*comm
 		}
 	}
 
-	return mask, templateObj, nil
+	return nil
 }
 
 func setValue(v protoreflect.Value, obj proto.Message, fieldType protoreflect.FieldDescriptor) {
@@ -179,27 +175,25 @@ func setValue(v protoreflect.Value, obj proto.Message, fieldType protoreflect.Fi
 }
 
 func CreateListRequest(kind configV1.Kind, ids []string, name string, labelString string, filterString string, pageSize int32, page int32) (*configV1.ListRequest, error) {
-	selector := CreateSelector(labelString)
-
-	request := &configV1.ListRequest{}
-	request.Kind = kind
-	request.Id = ids
-	request.NameRegex = name
-	request.LabelSelector = selector
-
-	request.Offset = page
-	request.PageSize = pageSize
+	request := &configV1.ListRequest{
+		Kind: kind,
+		Id: ids,
+		NameRegex: name,
+		LabelSelector: CreateSelector(labelString),
+		Offset: page,
+		PageSize: pageSize,
+	}
 
 	if filterString != "" {
-		m, o, err := CreateTemplateFilter(filterString, &configV1.ConfigObject{})
-		if err != nil {
+		queryMask := new(commonsV1.FieldMask)
+		queryTemplate := new(configV1.ConfigObject)
+		if err := CreateTemplateFilter(filterString, queryTemplate, queryMask); err != nil {
 			return nil, err
 		}
-		request.QueryMask = m
-		request.QueryTemplate = o.(*configV1.ConfigObject)
+		request.QueryMask = queryMask
+		request.QueryTemplate = queryTemplate
 	}
 
 	return request, nil
 }
 
-var typeRegistry = make(map[string]reflect.Type)

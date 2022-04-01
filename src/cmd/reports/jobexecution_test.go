@@ -28,20 +28,20 @@ func TestCreateJobExecutionsListRequest(t *testing.T) {
 	tests := []struct {
 		name    string
 		ids     []string
-		flags   *jobExecConf
+		flags   jobExecFlags
 		want    *reportV1.JobExecutionsListRequest
 		wantErr bool
 	}{
 		{"1", nil,
-			&jobExecConf{pageSize: 10},
+			jobExecFlags{pageSize: 10},
 			&reportV1.JobExecutionsListRequest{PageSize: 10},
 			false},
 		{"2", []string{"id1", "id2"},
-			&jobExecConf{pageSize: 10},
+			jobExecFlags{pageSize: 10},
 			&reportV1.JobExecutionsListRequest{Id: []string{"id1", "id2"}, PageSize: 10},
 			false},
 		{"3", nil,
-			&jobExecConf{filter: "jobId=jobId1", pageSize: 10},
+			jobExecFlags{filters: []string{"jobId=jobId1"}, pageSize: 10},
 			&reportV1.JobExecutionsListRequest{
 				QueryTemplate: &frontierV1.JobExecutionStatus{JobId: "jobId1"},
 				QueryMask:     &commons.FieldMask{Paths: []string{"jobId"}},
@@ -49,7 +49,7 @@ func TestCreateJobExecutionsListRequest(t *testing.T) {
 			},
 			false},
 		{"4", nil,
-			&jobExecConf{filter: "jobId=jobId1", pageSize: 10, watch: true},
+			jobExecFlags{filters: []string{"jobId=jobId1"}, pageSize: 10, watch: true},
 			&reportV1.JobExecutionsListRequest{
 				QueryTemplate: &frontierV1.JobExecutionStatus{JobId: "jobId1"},
 				QueryMask:     &commons.FieldMask{Paths: []string{"jobId"}},
@@ -59,8 +59,8 @@ func TestCreateJobExecutionsListRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			jobExecFlags = tt.flags
-			got, err := CreateJobExecutionsListRequest(tt.ids)
+			jobExecConf = tt.flags
+			got, err := createJobExecutionsListRequest(tt.ids)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CreateJobExecutionsListRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return

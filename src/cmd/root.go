@@ -14,7 +14,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/nlnwa/veidemannctl/bindata"
 	"github.com/nlnwa/veidemannctl/src/cmd/config"
 	"github.com/nlnwa/veidemannctl/src/cmd/importcmd"
@@ -48,7 +47,7 @@ var RootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	RootCmd.Version = version.Version.GetVersionString()
+	RootCmd.Version = version.Version.String()
 
 	data, err := bindata.Asset("completion.sh")
 	if err != nil {
@@ -57,7 +56,6 @@ func Execute() {
 	RootCmd.BashCompletionFunction = string(data)
 
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }
@@ -84,11 +82,10 @@ func init() {
 
 	RootCmd.SetVersionTemplate("{{.Version}}")
 
-	RootCmd.AddCommand(reports.ReportCmd)
+	RootCmd.AddCommand(reports.NewReportCmd())
 	RootCmd.AddCommand(logconfig.LogconfigCmd)
 	RootCmd.AddCommand(config.ConfigCmd)
 	RootCmd.AddCommand(importcmd.ImportCmd)
-	RootCmd.AddCommand(scriptParametersCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.

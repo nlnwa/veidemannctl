@@ -15,6 +15,7 @@ package cmd
 
 import (
 	"fmt"
+	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
 	"github.com/nlnwa/veidemannctl/src/apiutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -78,15 +79,16 @@ veidemannctl update seed -n "http://www.gwpda.org/" -u seed.jobRef=crawlJob:e468
 			log.Fatalf("Error creating request: %v", err)
 		}
 
-		mask, obj, err := apiutil.CreateTemplateFilter(updateflags.updateField, &configV1.ConfigObject{})
-		if err != nil {
+		updateMask := new(commonsV1.FieldMask)
+		updateTemplate := new(configV1.ConfigObject)
+		if err := apiutil.CreateTemplateFilter(updateflags.updateField, updateTemplate, updateMask); err != nil {
 			log.Fatalf("Error creating request: %v", err)
 		}
 
 		updateRequest := &configV1.UpdateRequest{
 			ListRequest:    selector,
-			UpdateMask:     mask,
-			UpdateTemplate: obj.(*configV1.ConfigObject),
+			UpdateMask:     updateMask,
+			UpdateTemplate: updateTemplate,
 		}
 
 		u, err := configClient.UpdateConfigObjects(context.Background(), updateRequest)
