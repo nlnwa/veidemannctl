@@ -6,10 +6,6 @@ Configure logging
 
 Configure logging.
 
-```
-veidemannctl logconfig [flags]
-```
-
 ### Options
 
 ```

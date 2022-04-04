@@ -1,10 +1,10 @@
 ## veidemannctl report query
 
-Run a databse query
+Run a database query
 
 ### Synopsis
 
-Run a databse query. The query should be a java script string like the ones used by RethinkDb javascript driver.
+Run a database query. The query should be a java script string like the ones used by RethinkDb javascript driver.
 
 ```
 veidemannctl report query [queryString|file] args... [flags]
@@ -34,5 +34,5 @@ veidemannctl report query [queryString|file] args... [flags]
 
 ### SEE ALSO
 
-* [veidemannctl report](veidemannctl_report.md)	 - Get log report
+* [veidemannctl report](veidemannctl_report.md)	 - Get report
 

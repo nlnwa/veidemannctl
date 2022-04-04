@@ -36,5 +36,5 @@ veidemannctl report crawllog [flags]
 
 ### SEE ALSO
 
-* [veidemannctl report](veidemannctl_report.md)	 - Get log report
+* [veidemannctl report](veidemannctl_report.md)	 - Get report
 
