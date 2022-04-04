@@ -117,7 +117,7 @@ func newCrawlExecutionCmd() *cobra.Command {
 	crawlexecutionCmd.Flags().Int32VarP(&crawlExecFlags.page, "page", "p", 0, "The page number")
 	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
 	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.goTemplate, "template", "t", "", "A Go template used to format the output")
-	crawlexecutionCmd.Flags().StringSliceVarP(&crawlExecFlags.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo")
+	crawlexecutionCmd.Flags().StringSliceVarP(&crawlExecFlags.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo)")
 	crawlexecutionCmd.Flags().StringSliceVar(&crawlExecFlags.states, "state", nil, "Filter objects by state. Valid states are UNDEFINED, FETCHING, SLEEPING, FINISHED or FAILED")
 	crawlexecutionCmd.Flags().StringVarP(&crawlExecFlags.file, "filename", "f", "", "File name to write to")
 	crawlexecutionCmd.Flags().StringVar(&crawlExecFlags.orderByPath, "order-by", "", "Order by path")
