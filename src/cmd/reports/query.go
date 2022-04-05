@@ -44,8 +44,8 @@ var queryFlags = &queryConf{}
 // queryCmd represents the query command
 var queryCmd = &cobra.Command{
 	Use:   "query [queryString|file] args...",
-	Short: "Run a databse query",
-	Long:  `Run a databse query. The query should be a java script string like the ones used by RethinkDb javascript driver.`,
+	Short: "Run a database query",
+	Long:  `Run a database query. The query should be a java script string like the ones used by RethinkDb javascript driver.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
 			client, conn := connection.NewReportClient()

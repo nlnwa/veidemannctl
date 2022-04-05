@@ -1,14 +1,10 @@
 ## veidemannctl report
 
-Get log report
+Get report
 
 ### Synopsis
 
 Request a report.
-
-```
-veidemannctl report [flags]
-```
 
 ### Options
 
@@ -34,5 +30,5 @@ veidemannctl report [flags]
 * [veidemannctl report crawllog](veidemannctl_report_crawllog.md)	 - View crawl log
 * [veidemannctl report jobexecution](veidemannctl_report_jobexecution.md)	 - Get current status for job executions
 * [veidemannctl report pagelog](veidemannctl_report_pagelog.md)	 - View page log
-* [veidemannctl report query](veidemannctl_report_query.md)	 - Run a databse query
+* [veidemannctl report query](veidemannctl_report_query.md)	 - Run a database query
 
