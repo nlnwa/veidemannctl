@@ -15,12 +15,15 @@ To get a list of available commands and configuration flags:
 ```console
 veidemanctl -h
 ```
-
 ## Documentation
 Usage documentation: https://nlnwa.github.io/veidemannctl
 
 ## Build instructions
 ```console
-go generate
 go build
+```
+
+## Generate documentation and templates
+```console
+go generate
 ```
