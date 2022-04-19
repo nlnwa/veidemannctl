@@ -1,6 +1,6 @@
 module github.com/nlnwa/veidemannctl
 
-go 1.13
+go 1.16
 
 require (
 	github.com/coreos/go-oidc v2.2.1+incompatible
