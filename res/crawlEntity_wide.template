@@ -1,7 +1,0 @@
-{{- /*gotype: github.com/nlnwa/veidemann-api/go/config/v1.ConfigObject*/ -}}
-
-{{define "HEADER" -}}
-    {{printf `%-36.36s %-40.40s %-60s` "Id" "Name" "Labels"}}
-{{end -}}
-
-{{printLabels .Meta.Label | printf `%36s %-40.40s %-60.60s` .Id .Meta.Name}}

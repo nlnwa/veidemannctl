@@ -1,31 +1,34 @@
 ## veidemannctl import duplicatereport
 
-List duplicated seeds in Veidemann
+List duplicated seeds or crawl entities in Veidemann
 
 ```
-veidemannctl import duplicatereport [kind] [flags]
+veidemannctl import duplicatereport KIND [flags]
 ```
 
 ### Options
 
 ```
-  -b, --db-directory string   Directory for storing state db (default "/tmp/veidemannctl")
-  -h, --help                  help for duplicatereport
-      --ignore-scheme         Ignore the URL's scheme when checking for duplicates.
-  -o, --outFile string        File to write output.
-  -r, --reset-db              Clean state db
-      --toplevel              Convert URI to toplevel by removing path before checking for duplicates.
+  -b, --db-dir string     Directory for storing state db (default "/tmp/veidemannctl")
+  -h, --help              help for duplicatereport
+      --ignore-scheme     Ignore the URL's scheme when checking for duplicates.
+  -o, --out-file string   File to write output.
+      --skip-import       Do not import existing seeds into state database
+      --toplevel          Convert URI to toplevel by removing path before checking for duplicates.
+      --truncate          Truncate state database
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --apiKey string               Api-key used for authentication instead of interactive logon trough IDP.
-      --config string               config file (default is $HOME/.veidemannctl.yaml)
-      --context string              The name of the veidemannconfig context to use.
-  -c, --controllerAddress string    Address to the Controller service (default "localhost:50051")
-  -d, --debug                       Turn on debugging
-      --serverNameOverride string   If set, it will override the virtual host name of authority (e.g. :authority header field) in requests.
+      --api-key string                If set, it will be used as the bearer token for authentication
+      --config string                 Path to the config file to use (By default configuration file is stored under $HOME/.veidemann/contexts/
+      --context string                The name of the context to use
+      --log-caller                    include information about caller in log output
+      --log-format string             set log format, available formats are: "pretty" or "json" (default "pretty")
+      --log-level string              set log level, available levels are "panic", "fatal", "error", "warn", "info", "debug" and "trace" (default "info")
+      --server string                 The address of the Veidemann server to use
+      --server-name-override string   If set, it will override the virtual host name of authority (e.g. :authority header field) in requests
 ```
 
 ### SEE ALSO

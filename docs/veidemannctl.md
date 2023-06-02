@@ -1,46 +1,44 @@
 ## veidemannctl
 
-Veidemann command line client
+veidemannctl controls the Veidemann web crawler
 
 ### Synopsis
 
-A command line client for Veidemann which can manipulate configs and request status of the crawler.
-
-```
-veidemannctl [flags]
-```
+veidemannctl controls the Veidemann web crawler
 
 ### Options
 
 ```
-      --apiKey string               Api-key used for authentication instead of interactive logon trough IDP.
-      --config string               config file (default is $HOME/.veidemannctl.yaml)
-      --context string              The name of the veidemannconfig context to use.
-  -c, --controllerAddress string    Address to the Controller service (default "localhost:50051")
-  -d, --debug                       Turn on debugging
-  -h, --help                        help for veidemannctl
-      --serverNameOverride string   If set, it will override the virtual host name of authority (e.g. :authority header field) in requests.
+      --api-key string                If set, it will be used as the bearer token for authentication
+      --config string                 Path to the config file to use (By default configuration file is stored under $HOME/.veidemann/contexts/
+      --context string                The name of the context to use
+  -h, --help                          help for veidemannctl
+      --log-caller                    include information about caller in log output
+      --log-format string             set log format, available formats are: "pretty" or "json" (default "pretty")
+      --log-level string              set log level, available levels are "panic", "fatal", "error", "warn", "info", "debug" and "trace" (default "info")
+      --server string                 The address of the Veidemann server to use
+      --server-name-override string   If set, it will override the virtual host name of authority (e.g. :authority header field) in requests
 ```
 
 ### SEE ALSO
 
-* [veidemannctl abort](veidemannctl_abort.md)	 - Abort one or more crawl executions
-* [veidemannctl abortjobexecution](veidemannctl_abortjobexecution.md)	 - Abort one or more job executions
+* [veidemannctl abort](veidemannctl_abort.md)	 - Abort crawl executions
+* [veidemannctl abortjobexecution](veidemannctl_abortjobexecution.md)	 - Abort job executions
 * [veidemannctl activeroles](veidemannctl_activeroles.md)	 - Get the active roles for the currently logged in user
-* [veidemannctl completion](veidemannctl_completion.md)	 - Output bash completion code
-* [veidemannctl config](veidemannctl_config.md)	 - Modify veidemannctl config files using subcommands
-* [veidemannctl create](veidemannctl_create.md)	 - Create or update a config object
-* [veidemannctl delete](veidemannctl_delete.md)	 - Delete a config object
-* [veidemannctl get](veidemannctl_get.md)	 - Get the value(s) for an object type
+* [veidemannctl config](veidemannctl_config.md)	 - Modify or view configuration files
+* [veidemannctl create](veidemannctl_create.md)	 - Create or update config objects
+* [veidemannctl delete](veidemannctl_delete.md)	 - Delete config objects
+* [veidemannctl get](veidemannctl_get.md)	 - Display config objects
 * [veidemannctl import](veidemannctl_import.md)	 - Import data into Veidemann using subcommands
 * [veidemannctl logconfig](veidemannctl_logconfig.md)	 - Configure logging
-* [veidemannctl login](veidemannctl_login.md)	 - Initiate browser session for logging in to Veidemann
+* [veidemannctl login](veidemannctl_login.md)	 - Log in to Veidemann
 * [veidemannctl logout](veidemannctl_logout.md)	 - Log out of Veidemann
-* [veidemannctl pause](veidemannctl_pause.md)	 - Pause crawler
-* [veidemannctl report](veidemannctl_report.md)	 - Get report
-* [veidemannctl run](veidemannctl_run.md)	 - Immediately run a crawl
-* [veidemannctl script-parameters](veidemannctl_script-parameters.md)	 - Get the active script parameters for a Crawl Job
-* [veidemannctl status](veidemannctl_status.md)	 - Get crawler status
-* [veidemannctl unpause](veidemannctl_unpause.md)	 - Unpause crawler
-* [veidemannctl update](veidemannctl_update.md)	 - Update the value(s) for an object type
+* [veidemannctl pause](veidemannctl_pause.md)	 - Request crawler to pause
+* [veidemannctl report](veidemannctl_report.md)	 - Request a report
+* [veidemannctl run](veidemannctl_run.md)	 - Run a crawl job
+* [veidemannctl script-parameters](veidemannctl_script-parameters.md)	 - Get the effective script parameters for a crawl job
+* [veidemannctl status](veidemannctl_status.md)	 - Display crawler status
+* [veidemannctl unpause](veidemannctl_unpause.md)	 - Request crawler to unpause
+* [veidemannctl update](veidemannctl_update.md)	 - Update fields of config objects of the same kind
+* [veidemannctl version](veidemannctl_version.md)	 - Print the client version information
 
