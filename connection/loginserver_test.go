@@ -28,6 +28,9 @@ func TestLoginServer(t *testing.T) {
 		}
 	}()
 
+	// Wait for server to start
+	time.Sleep(100 * time.Millisecond)
+
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, autoRedirectURI, nil)
 	if err != nil {
 		t.Error(err)
@@ -39,7 +42,7 @@ func TestLoginServer(t *testing.T) {
 	req.URL.RawQuery = q.Encode()
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	defer resp.Body.Close()
 
