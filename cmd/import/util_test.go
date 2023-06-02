@@ -8,7 +8,7 @@ import (
 func TestUriChecker(t *testing.T) {
 
 	uriChecker := &UriChecker{
-		Client: NewHttpClient(1*time.Second, false),
+		Client: NewHttpClient(5*time.Second, false),
 	}
 
 	tests := []struct {
