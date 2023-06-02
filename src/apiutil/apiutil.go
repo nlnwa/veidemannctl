@@ -15,14 +15,16 @@ package apiutil
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
 	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"strconv"
-	"strings"
 )
 
+// CreateSelector creates a label selector from a string.
 func CreateSelector(labelString string) []string {
 	if labelString != "" {
 		return strings.Split(labelString, ",")
@@ -30,11 +32,30 @@ func CreateSelector(labelString string) []string {
 	return nil
 }
 
+// stringSliceContains checks if a string slice contains a string.
+func stringSliceContains(slice []string, s string) bool {
+	for _, v := range slice {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+// CreateTemplateFilter creates a filter from a string by parsing the string and setting the value in the message.
+//
+// The filter string should have the format: <field>[.<field>]*[+|-]=<value>.
+// The message should be a pointer to a proto message.
+// The mask will be updated with the fields that are set.
 func CreateTemplateFilter(filterString string, obj proto.Message, mask *commonsV1.FieldMask) error {
-	q := strings.Split(filterString, "=")
-	mask.Paths = append(mask.Paths, q[0])
-	path := strings.TrimRight(q[0], "+-")
-	value := q[1]
+	path, value, ok := strings.Cut(filterString, "=")
+	if !ok {
+		return fmt.Errorf("invalid filter: %s", filterString)
+	}
+	if !stringSliceContains(mask.Paths, path) {
+		mask.Paths = append(mask.Paths, path)
+	}
+	path = strings.TrimRight(path, "+-")
 	tokens := strings.Split(path, ".")
 
 	var fieldType protoreflect.FieldDescriptor
@@ -128,36 +149,46 @@ func CreateTemplateFilter(filterString string, obj proto.Message, mask *commonsV
 			}
 			setValue(protoreflect.ValueOfEnum(enumVal.Number()), obj, fieldType)
 
+		case protoreflect.GroupKind:
 		case protoreflect.MessageKind:
-			item := obj.ProtoReflect().NewField(fieldType)
-			var message protoreflect.Message
+			var item protoreflect.Value
+			isNewFieldValue := false
+			if obj.ProtoReflect().Has(fieldType) {
+				item = obj.ProtoReflect().Mutable(fieldType)
+			} else {
+				isNewFieldValue = true
+				item = obj.ProtoReflect().NewField(fieldType)
+			}
 
+			var message protoreflect.Message
 			if fieldType.IsList() {
-				v := item.List().NewElement()
-				item.List().Append(v)
-				message = v.Message()
+				fmt.Println(item.List().Len())
+				message = item.List().AppendMutable().Message()
 			} else {
 				message = item.Message()
+				msgType = fieldType.Message()
 			}
-			msgType = fieldType.Message()
 
 			switch m := message.Interface().(type) {
 			case *configV1.ConfigRef:
-				kindId := strings.SplitN(value, ":", 2)
-				if len(kindId) != 2 {
+				kind, id, ok := strings.Cut(value, ":")
+				if kind == "" || id == "" || !ok {
 					return fmt.Errorf("not a valid configRef value %v for: %v. ConfigRef should have format [kind]:[id]", value, fieldType.FullName())
 				}
-				m.Kind = configV1.Kind(configV1.Kind_value[kindId[0]])
-				m.Id = kindId[1]
+				m.Kind = configV1.Kind(configV1.Kind_value[kind])
+				m.Id = id
 			case *configV1.Label:
-				keyVal := strings.SplitN(value, ":", 2)
-				if len(keyVal) != 2 {
+				k, v, ok := strings.Cut(value, ":")
+				if k == "" || v == "" || !ok {
 					return fmt.Errorf("not a valid label value %v for: %v. Label should have format [name]:[value]", value, fieldType.FullName())
 				}
-				m.Key = keyVal[0]
-				m.Value = keyVal[1]
+				m.Key = k
+				m.Value = v
 			}
-			obj.ProtoReflect().Set(fieldType, item)
+			// Set the field value if it is a new field value
+			if isNewFieldValue {
+				obj.ProtoReflect().Set(fieldType, item)
+			}
 			obj = message.Interface()
 		}
 	}
@@ -176,12 +207,12 @@ func setValue(v protoreflect.Value, obj proto.Message, fieldType protoreflect.Fi
 
 func CreateListRequest(kind configV1.Kind, ids []string, name string, labelString string, filterString string, pageSize int32, page int32) (*configV1.ListRequest, error) {
 	request := &configV1.ListRequest{
-		Kind: kind,
-		Id: ids,
-		NameRegex: name,
+		Kind:          kind,
+		Id:            ids,
+		NameRegex:     name,
 		LabelSelector: CreateSelector(labelString),
-		Offset: page,
-		PageSize: pageSize,
+		Offset:        page,
+		PageSize:      pageSize,
 	}
 
 	if filterString != "" {
@@ -196,4 +227,3 @@ func CreateListRequest(kind configV1.Kind, ids []string, name string, labelStrin
 
 	return request, nil
 }
-
