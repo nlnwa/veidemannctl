@@ -11,5 +11,4 @@ archives:
     format: binary
 
 release:
-  draft: true
-  prerelease: "true"
+  prerelease: auto
