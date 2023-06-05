@@ -1,5 +1,5 @@
 // Copyright © 2017 National Library of Norway.
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, GitVersion 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -14,23 +14,20 @@
 package main
 
 import (
-	"github.com/nlnwa/veidemannctl/src/cmd"
-	v "github.com/nlnwa/veidemannctl/src/version"
-	log "github.com/sirupsen/logrus"
-	stdlogger "log"
+	"time"
+
+	"github.com/nlnwa/veidemannctl/cmd"
+	v "github.com/nlnwa/veidemannctl/version"
 )
 
-var version = "master"
+var (
+	version = ""
+	commit  = ""
+	date    = time.Now().Format(time.RFC3339)
+)
 
-//go:generate go run -tags=dev bindata/assets_generate.go
-//go:generate go run gendoc/md_docs.go
+//go:generate go run ./docs
 func main() {
-	v.Version.SetGitVersion(version)
+	v.Set(version, commit, date)
 	cmd.Execute()
-}
-
-func init() {
-	stdlogger.SetOutput(log.StandardLogger().Writer())
-
-	log.SetLevel(log.WarnLevel)
 }
