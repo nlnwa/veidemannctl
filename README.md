@@ -7,7 +7,7 @@
 
 ## Install
 
-Install the latest release version (linux/amd64)
+Install the latest release version
 
 ```console
 curl -sL https://raw.githubusercontent.com/nlnwa/veidemannctl/master/install.sh | bash
