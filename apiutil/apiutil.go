@@ -156,6 +156,7 @@ func CreateTemplateFilter(filterString string, msg proto.Message, mask *commonsV
 			setValue(protoreflect.ValueOfEnum(enumVal.Number()), msg, fieldType)
 
 		case protoreflect.GroupKind:
+			// unsupported
 		case protoreflect.MessageKind:
 			var item protoreflect.Value
 			isNewFieldValue := false
@@ -168,7 +169,6 @@ func CreateTemplateFilter(filterString string, msg proto.Message, mask *commonsV
 
 			var message protoreflect.Message
 			if fieldType.IsList() {
-				fmt.Println(item.List().Len())
 				message = item.List().AppendMutable().Message()
 			} else {
 				message = item.Message()
