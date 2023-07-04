@@ -33,7 +33,7 @@ import (
 // Config represents the persistent configuration.
 type Config struct {
 	Server             string        `yaml:"server,omitempty" mapstructure:"server"`
-	RootCAs            string        `yaml:"certificate-authority-data,omitempty" mastructure:"certificate-authority-data"`
+	RootCAs            string        `yaml:"certificate-authority-data,omitempty" mapstructure:"certificate-authority-data"`
 	ServerNameOverride string        `yaml:"server-name-override,omitempty" mapstructure:"server-name-override"`
 	AuthProvider       *AuthProvider `yaml:"auth-provider,omitempty" mapstructure:"auth-provider"`
 }
