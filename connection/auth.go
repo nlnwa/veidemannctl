@@ -191,7 +191,7 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	ctx := oidc.ClientContext(context.Background(), client)
 	p, err := oidc.NewProvider(ctx, op.idpIssuerUrl)
 	if err != nil {
-		log.Warn().Msgf("Could not connect to authentication server '%s': %v. Proceeding without authentication", op.idpIssuerUrl, err)
+		return nil, fmt.Errorf("could not connect to identity provider \"%s\": %w", op.idpIssuerUrl, err)
 	} else {
 		oc := oidc.Config{ClientID: op.clientID}
 		idTokenVerifier = p.Verifier(&oc)
