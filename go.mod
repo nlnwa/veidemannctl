@@ -11,7 +11,7 @@ require (
 	github.com/magiconair/properties v1.8.7
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/nlnwa/veidemann-api/go v0.0.0-20220110104816-ea13deeb9671
+	github.com/nlnwa/veidemann-api/go v1.0.0-rc.1
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
