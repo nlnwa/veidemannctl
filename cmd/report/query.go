@@ -59,7 +59,7 @@ func (o *queryCmdOptions) run() error {
 	}
 
 	request := reportV1.ExecuteDbQueryRequest{
-		Query: q.query,
+		Query: q.Query,
 		Limit: o.pageSize,
 	}
 
@@ -77,10 +77,10 @@ func (o *queryCmdOptions) run() error {
 	}
 
 	var formatter format.Formatter
-	if q.template == "" {
+	if q.Template == "" {
 		formatter, err = format.NewFormatter("", w, o.format, o.goTemplate)
 	} else {
-		formatter, err = format.NewFormatter("", w, "template", q.template)
+		formatter, err = format.NewFormatter("", w, "template", q.Template)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to create formatter: %w", err)
@@ -131,8 +131,8 @@ func newQueryCmd() *cobra.Command {
 			q := listStoredQueries(d)
 			var names []string
 			for _, s := range q {
-				if strings.HasPrefix(s.name, toComplete) {
-					names = append(names, s.name+"\t"+s.description)
+				if strings.HasPrefix(s.Name, toComplete) {
+					names = append(names, s.Name+"\t"+s.Description)
 				}
 			}
 			return names, cobra.ShellCompDirectiveDefault
@@ -157,10 +157,10 @@ func newQueryCmd() *cobra.Command {
 
 // query is a struct for holding query definitions
 type query struct {
-	name        string
-	description string
-	query       string
-	template    string
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Query       string `json:"query"`
+	Template    string `json:"template"`
 }
 
 func (o *queryCmdOptions) parseQuery() (*query, error) {
@@ -168,7 +168,7 @@ func (o *queryCmdOptions) parseQuery() (*query, error) {
 
 	if strings.HasPrefix(o.queryOrFile, "r.") {
 		q = &query{
-			query: o.queryOrFile,
+			Query: o.queryOrFile,
 		}
 	} else {
 		filename, err := findQueryFile(o.queryOrFile)
@@ -182,7 +182,7 @@ func (o *queryCmdOptions) parseQuery() (*query, error) {
 		}
 	}
 
-	q.query = fmt.Sprintf(q.query, o.queryArgs...)
+	q.Query = fmt.Sprintf(q.Query, o.queryArgs...)
 
 	return q, nil
 }
@@ -228,9 +228,9 @@ func readQuery(name string) (*query, error) {
 			return nil, err
 		}
 	} else {
-		qd.query = string(data)
+		qd.Query = string(data)
 	}
-	qd.name = strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
+	qd.Name = strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
 
 	return qd, nil
 }
