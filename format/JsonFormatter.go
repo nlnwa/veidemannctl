@@ -14,6 +14,7 @@
 package format
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"reflect"
@@ -28,17 +29,16 @@ type jsonFormatter struct {
 
 // newJsonFormatter creates a new json formatter
 func newJsonFormatter(s *MarshalSpec) Formatter {
-	return &jsonFormatter{
-		MarshalSpec: s,
+	return &preFormatter{
+		&jsonFormatter{
+			MarshalSpec: s,
+		},
 	}
 }
 
 // WriteRecord writes a record to the formatters writer
 func (jf *jsonFormatter) WriteRecord(record interface{}) error {
 	switch v := record.(type) {
-	case string:
-		_, err := fmt.Fprint(jf.rWriter, v)
-		return err
 	case proto.Message:
 		var values reflect.Value
 		values = reflect.ValueOf(v).Elem().FieldByName("Value")
@@ -65,7 +65,12 @@ func (jf *jsonFormatter) WriteRecord(record interface{}) error {
 			}
 		}
 	default:
-		return fmt.Errorf("illegal record type '%T'", record)
+		j, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+		_, err = fmt.Fprint(jf.rWriter, string(j))
+		return err
 	}
 	return nil
 }

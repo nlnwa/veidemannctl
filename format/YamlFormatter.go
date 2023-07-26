@@ -29,29 +29,16 @@ type yamlFormatter struct {
 
 // newYamlFormatter creates a new yaml formatter
 func newYamlFormatter(s *MarshalSpec) Formatter {
-	return &yamlFormatter{
-		MarshalSpec: s,
+	return &preFormatter{
+		&yamlFormatter{
+			MarshalSpec: s,
+		},
 	}
 }
 
 // WriteRecord writes a record to the formatters writer
 func (yf *yamlFormatter) WriteRecord(record interface{}) error {
 	switch v := record.(type) {
-	case string:
-		final, err := yaml.JSONToYAML([]byte(v))
-		if err != nil {
-			fmt.Printf("err: %v\n", err)
-			return err
-		}
-
-		_, err = fmt.Fprint(yf.rWriter, string(final))
-		if err != nil {
-			return err
-		}
-		_, err = fmt.Fprintln(yf.rWriter, "---")
-		if err != nil {
-			return err
-		}
 	case proto.Message:
 		var values reflect.Value
 		values = reflect.ValueOf(v).Elem().FieldByName("Value")
@@ -88,7 +75,20 @@ func (yf *yamlFormatter) WriteRecord(record interface{}) error {
 			return err
 		}
 	default:
-		return fmt.Errorf("illegal record type '%T'", record)
+		final, err := yaml.Marshal(record)
+		if err != nil {
+			fmt.Printf("err: %v\n", err)
+			return err
+		}
+
+		_, err = fmt.Fprint(yf.rWriter, string(final))
+		if err != nil {
+			return err
+		}
+		_, err = fmt.Fprintln(yf.rWriter, "---")
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

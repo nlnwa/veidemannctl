@@ -21,15 +21,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"os"
-	"strings"
-	"sync"
-
 	"github.com/invopop/yaml"
 	"github.com/nlnwa/veidemann-api/go/config/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/encoding/protojson"
+	"io"
+	"os"
+	"strings"
+	"sync"
+	"time"
 )
 
 var jsonMarshaler = &protojson.MarshalOptions{EmitUnpopulated: true}
@@ -45,6 +45,132 @@ const templateDir = "res/"
 type Formatter interface {
 	WriteRecord(interface{}) error
 	Close() error
+}
+
+type anyRecord struct {
+	v interface{}
+}
+
+func (r *anyRecord) UnmarshalJSON(b []byte) error {
+	var i interface{}
+	err := json.Unmarshal(b, &i)
+	if err != nil {
+		return err
+	}
+
+	switch j := i.(type) {
+	case map[string]interface{}:
+		if d, ok := r.formatDate(j); ok {
+			r.v = d
+			return nil
+		}
+
+		r.traverseMap(&j)
+		r.v = j
+	default:
+		r.v = i
+	}
+
+	return err
+}
+
+func (r *anyRecord) traverseMap(i *map[string]interface{}) {
+	for k, v := range *i {
+		if m, ok := v.(map[string]interface{}); ok {
+			if d, ok := r.formatDate(m); ok {
+				(*i)[k] = d
+			} else {
+				r.traverseMap(&m)
+			}
+		}
+	}
+}
+
+// getAsInt returns the value as an int if it is a float64 or int
+func getAsInt(v interface{}) (int, bool) {
+	switch i := v.(type) {
+	case float64:
+		return int(i), true
+	case int:
+		return i, true
+	default:
+		return 0, false
+	}
+}
+
+// formatDate if i is recognized as a RethinkDb date, the date is returned as a RFC3339 formatted string
+func (r *anyRecord) formatDate(i map[string]interface{}) (string, bool) {
+	var year, month, day, hour, minute, second, nano, offset int
+
+	if dateTime, ok := i["dateTime"].(map[string]interface{}); !ok {
+		return "", false
+	} else {
+		if date, ok := dateTime["date"].(map[string]interface{}); !ok {
+			return "", false
+		} else {
+			if year, ok = getAsInt(date["year"]); !ok {
+				return "", false
+			}
+			if month, ok = getAsInt(date["month"]); !ok {
+				return "", false
+			}
+			if day, ok = getAsInt(date["day"]); !ok {
+				return "", false
+			}
+		}
+		if tm, ok := dateTime["time"].(map[string]interface{}); !ok {
+			return "", false
+		} else {
+			if hour, ok = getAsInt(tm["hour"]); !ok {
+				return "", false
+			}
+			if minute, ok = getAsInt(tm["minute"]); !ok {
+				return "", false
+			}
+			if second, ok = getAsInt(tm["second"]); !ok {
+				return "", false
+			}
+			if nano, ok = getAsInt(tm["nano"]); !ok {
+				return "", false
+			}
+		}
+	}
+	if of, ok := i["offset"].(map[string]interface{}); !ok {
+		return "", false
+	} else {
+		if offset, ok = getAsInt(of["totalSeconds"]); !ok {
+			return "", false
+		}
+	}
+	tz := time.UTC
+	if offset != 0 {
+		tz = time.FixedZone(fmt.Sprintf("OFF%.d", offset), offset)
+	}
+	d := time.Date(year, time.Month(month), day, hour, minute, second, nano, tz)
+	return d.Format(time.RFC3339Nano), true
+}
+
+// preFormatter wraps a formatter and converts json strings to objects
+type preFormatter struct {
+	formatter Formatter
+}
+
+func (p *preFormatter) WriteRecord(record interface{}) error {
+	switch v := record.(type) {
+	case string:
+		var j anyRecord
+		err := json.Unmarshal([]byte(v), &j)
+		if err != nil {
+			return fmt.Errorf("failed to parse json: %w", err)
+		}
+		record = j.v
+	}
+
+	return p.formatter.WriteRecord(record)
+}
+
+func (p *preFormatter) Close() error {
+	return p.formatter.Close()
 }
 
 // MarshalSpec is the specification for a formatter
