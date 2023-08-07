@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/coreos/go-oidc/v3 v3.6.0
-	github.com/dgraph-io/badger/v4 v4.1.0
+	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/golang/protobuf v1.5.3
 	github.com/invopop/yaml v0.2.0
