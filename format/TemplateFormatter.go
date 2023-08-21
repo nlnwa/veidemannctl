@@ -46,7 +46,7 @@ func newTemplateFormatter(s *MarshalSpec) (Formatter, error) {
 		return nil, err
 	}
 	t.parsedTemplate = pt
-	return t, nil
+	return &preFormatter{t}, nil
 }
 
 // WriteRecord writes a record to the formatters writer
@@ -106,16 +106,6 @@ func parseTemplate(templateString string) (*template.Template, error) {
 				return "                        "
 			} else {
 				return fmt.Sprintf("%-24.24s", ts.AsTime().Format(time.RFC3339))
-			}
-		},
-		"rethinktime": func(ts map[string]interface{}) string {
-			if ts == nil {
-				return "                        "
-			} else {
-				dateTime, _ := ts["dateTime"].(map[string]interface{})
-				date, _ := dateTime["date"].(map[string]interface{})
-				time, _ := dateTime["time"].(map[string]interface{})
-				return fmt.Sprintf("%04.f-%02.f-%02.fT%02.f:%02.f:%02.f", date["year"], date["month"], date["day"], time["hour"], time["minute"], time["second"])
 			}
 		},
 		"json": func(v interface{}) (string, error) {

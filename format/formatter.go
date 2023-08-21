@@ -21,15 +21,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"os"
-	"strings"
-	"sync"
-
 	"github.com/invopop/yaml"
 	"github.com/nlnwa/veidemann-api/go/config/v1"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+	"io"
+	"os"
+	"strings"
+	"sync"
+	"time"
 )
 
 var jsonMarshaler = &protojson.MarshalOptions{EmitUnpopulated: true}
@@ -41,10 +42,156 @@ var res embed.FS
 // templateDir is the directory where the templates are located
 const templateDir = "res/"
 
-// Formatter is the interface for formatters
+// Formatter is the interface for formatters.
+// Formatters should not be instantiated directly, but through the NewFormatter function.
 type Formatter interface {
+	// WriteRecord writes a record to the formatter.
+	// The input record is guaranteed to be a protobuf message
+	// or the result of parsing a json formatted string into an interface (see https://pkg.go.dev/encoding/json#Unmarshal).
 	WriteRecord(interface{}) error
 	Close() error
+}
+
+// anyElement is a struct that can hold any type of element.
+// It is used as input to the json unmarshaler.
+type anyElement struct {
+	v interface{}
+}
+
+// UnmarshalJSON implements the encoding/json.Unmarshaler interface.
+// The function uses encoding.json.Unmarshal to unmarshal the input.
+// If the input is a map[string]interface{}, the map is traversed to find any RethinkDb dates
+// which are converted to RFC3339 formatted strings.
+func (r *anyElement) UnmarshalJSON(b []byte) error {
+	var i interface{}
+	err := json.Unmarshal(b, &i)
+	if err != nil {
+		return err
+	}
+
+	switch j := i.(type) {
+	case map[string]interface{}:
+		if d, ok := r.formatDate(j); ok {
+			r.v = d
+			return nil
+		}
+
+		r.traverseMap(&j)
+		r.v = j
+	default:
+		r.v = i
+	}
+
+	return err
+}
+
+func (r *anyElement) traverseMap(i *map[string]interface{}) {
+	for k, v := range *i {
+		if m, ok := v.(map[string]interface{}); ok {
+			if d, ok := r.formatDate(m); ok {
+				(*i)[k] = d
+			} else {
+				r.traverseMap(&m)
+			}
+		}
+	}
+}
+
+// getAsInt returns the value as an int if it is a float64 or int
+func getAsInt(v interface{}) (int, bool) {
+	switch i := v.(type) {
+	case float64:
+		return int(i), true
+	case int:
+		return i, true
+	default:
+		return 0, false
+	}
+}
+
+// formatDate first checks if i is a RethinkDb date.
+// If so, date is the result of converting the date to a RFC3339 formatted string and isDate is true.
+// Otherwise, date is the empty string and isDate is false.
+func (r *anyElement) formatDate(element map[string]interface{}) (date string, isDate bool) {
+	var year, month, day, hour, minute, second, nano, offset int
+
+	if dateTime, ok := element["dateTime"].(map[string]interface{}); !ok {
+		return "", false
+	} else {
+		if date, ok := dateTime["date"].(map[string]interface{}); !ok {
+			return "", false
+		} else {
+			if year, ok = getAsInt(date["year"]); !ok {
+				return "", false
+			}
+			if month, ok = getAsInt(date["month"]); !ok {
+				return "", false
+			}
+			if day, ok = getAsInt(date["day"]); !ok {
+				return "", false
+			}
+		}
+		if tm, ok := dateTime["time"].(map[string]interface{}); !ok {
+			return "", false
+		} else {
+			if hour, ok = getAsInt(tm["hour"]); !ok {
+				return "", false
+			}
+			if minute, ok = getAsInt(tm["minute"]); !ok {
+				return "", false
+			}
+			if second, ok = getAsInt(tm["second"]); !ok {
+				return "", false
+			}
+			if nano, ok = getAsInt(tm["nano"]); !ok {
+				return "", false
+			}
+		}
+	}
+	if of, ok := element["offset"].(map[string]interface{}); !ok {
+		return "", false
+	} else {
+		if offset, ok = getAsInt(of["totalSeconds"]); !ok {
+			return "", false
+		}
+	}
+	tz := time.UTC
+	if offset != 0 {
+		tz = time.FixedZone(fmt.Sprintf("OFF%.d", offset), offset)
+	}
+	d := time.Date(year, time.Month(month), day, hour, minute, second, nano, tz)
+	return d.Format(time.RFC3339Nano), true
+}
+
+// preFormatter wraps a formatter and converts json strings to objects
+type preFormatter struct {
+	formatter Formatter
+}
+
+// WriteRecord implements the Formatter interface.
+// If the input record is a string, it is parsed as json and the result is passed to the wrapped formatter.
+// If the input record is a protobuf message, it is passed to the wrapped formatter.
+// Otherwise, an error is returned.
+func (p *preFormatter) WriteRecord(record interface{}) error {
+	switch v := record.(type) {
+	case string:
+		var j anyElement
+		err := json.Unmarshal([]byte(v), &j)
+		if err != nil {
+			return fmt.Errorf("failed to parse json: %w", err)
+		}
+		record = j.v
+	case proto.Message:
+		// Do nothing, just pass through
+	default:
+		return fmt.Errorf("unsupported type '%T'", v)
+	}
+
+	return p.formatter.WriteRecord(record)
+}
+
+func (p *preFormatter) Close() error {
+	return p.formatter.Close()
 }
 
 // MarshalSpec is the specification for a formatter
