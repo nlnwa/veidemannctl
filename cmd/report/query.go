@@ -151,15 +151,14 @@ func (o *queryCmdOptions) parseQuery(args []string) (*query, error) {
 	q := &query{
 		queryOrFile: args[0],
 		queryArgs:   make([]any, len(args[1:])),
+		opts:        o,
 	}
 	for i, arg := range args[1:] {
 		q.queryArgs[i] = arg
 	}
 
 	if strings.HasPrefix(q.queryOrFile, "r.") {
-		q = &query{
-			Query: q.queryOrFile,
-		}
+		q.Query = q.queryOrFile
 	} else {
 		filename, err := findQueryFile(q.queryOrFile)
 		if err != nil {
@@ -173,12 +172,12 @@ func (o *queryCmdOptions) parseQuery(args []string) (*query, error) {
 		if o.goTemplate != "" {
 			q.Template = o.goTemplate
 		}
-		if o.format == "" {
-			if q.Template != "" {
-				o.format = "template"
-			} else {
-				o.format = "json"
-			}
+	}
+	if o.format == "" {
+		if q.Template != "" {
+			o.format = "template"
+		} else {
+			o.format = "json"
 		}
 	}
 
