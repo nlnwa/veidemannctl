@@ -231,7 +231,7 @@ func (d *ImportDb) Get(key string) (ids []string, err error) {
 			}
 
 			return item.Value(func(v []byte) error {
-				ids = bytesToStringArray(v)
+				ids = d.bytesToStringArray(v)
 				return nil
 			})
 		})
@@ -250,7 +250,7 @@ func (d *ImportDb) Set(key string, id string) (code ExistsCode, ids []string, er
 			if errors.Is(err, badger.ErrKeyNotFound) {
 				code = NewKey
 				ids = append(ids, id)
-				v := stringArrayToBytes(ids)
+				v := d.stringArrayToBytes(ids)
 				return txn.Set([]byte(key), v)
 			}
 			if err != nil {
@@ -258,7 +258,7 @@ func (d *ImportDb) Set(key string, id string) (code ExistsCode, ids []string, er
 			}
 
 			err = item.Value(func(v []byte) error {
-				ids = bytesToStringArray(v)
+				ids = d.bytesToStringArray(v)
 				return nil
 			})
 			if err != nil {
@@ -267,7 +267,7 @@ func (d *ImportDb) Set(key string, id string) (code ExistsCode, ids []string, er
 			if !stringArrayContains(ids, id) {
 				code = NewId
 				ids = append(ids, id)
-				v := stringArrayToBytes(ids)
+				v := d.stringArrayToBytes(ids)
 				return txn.Set([]byte(key), v)
 			} else {
 				code = Exists
@@ -282,7 +282,7 @@ func (d *ImportDb) Set(key string, id string) (code ExistsCode, ids []string, er
 }
 
 // stringArrayToBytes returns a byte array from a string array
-func stringArrayToBytes(v []string) []byte {
+func (d *ImportDb) stringArrayToBytes(v []string) []byte {
 	buf := &bytes.Buffer{}
 	if err := gob.NewEncoder(buf).Encode(v); err != nil {
 		panic(err)
@@ -291,7 +291,7 @@ func stringArrayToBytes(v []string) []byte {
 }
 
 // bytesToStringArray returns a string array from a byte array
-func bytesToStringArray(v []byte) []string {
+func (d *ImportDb) bytesToStringArray(v []byte) []string {
 	buf := bytes.NewBuffer(v)
 	strs := []string{}
 	if err := gob.NewDecoder(buf).Decode(&strs); err != nil && !errors.Is(err, io.EOF) {

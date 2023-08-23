@@ -41,7 +41,7 @@ func (d DuplicateKindReporter) Report(w io.Writer) error {
 	var rec DuplicateReportRecord
 
 	checkDuplicate := func(k []byte, v []byte) {
-		ids := bytesToStringArray(v)
+		ids := d.bytesToStringArray(v)
 		// If there is only one id, it is not a duplicate
 		if len(ids) < 2 {
 			return
@@ -106,7 +106,7 @@ func (d SeedReporter) Report(w io.Writer) error {
 	var rec *SeedDuplicateReportRecord
 
 	checkDuplicate := func(k []byte, v []byte) {
-		ids := bytesToStringArray(v)
+		ids := d.bytesToStringArray(v)
 		// If there is only one id, it is not a duplicate
 		if len(ids) < 2 {
 			return

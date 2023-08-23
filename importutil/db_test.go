@@ -16,45 +16,25 @@ package importutil
 import (
 	"reflect"
 	"testing"
-	// configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 )
 
-func TestStringArrayToBytes(t *testing.T) {
+func TestEncodeDecodeStringArray(t *testing.T) {
 	tests := []struct {
-		name string
-		args []string
-		want []byte
+		name  string
+		value []string
 	}{
-		{"1", []string{"foo", "bar"}, []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 12, 0, 0, 12, 255, 130, 0, 2, 3, 102, 111, 111, 3, 98, 97, 114}},
-		{"2", []string{}, []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 12, 0, 0, 4, 255, 130, 0, 0}},
-		{"3", []string{"", "foo", "bar"}, []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 12, 0, 0, 13, 255, 130, 0, 3, 0, 3, 102, 111, 111, 3, 98, 97, 114}},
-		{"4", []string{""}, []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 12, 0, 0, 5, 255, 130, 0, 1, 0}},
+		{"1", []string{"foo", "bar"}},
+		{"2", []string{}},
+		{"3", []string{}},
+		{"4", []string{"", "foo", "bar"}},
+		{"5", []string{""}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := stringArrayToBytes(tt.args); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ImportDb.stringArrayToBytes() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestBytesToStringArray(t *testing.T) {
-	tests := []struct {
-		name string
-		args []byte
-		want []string
-	}{
-		{"1", []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 12, 0, 0, 12, 255, 130, 0, 2, 3, 102, 111, 111, 3, 98, 97, 114}, []string{"foo", "bar"}},
-		{"2", []byte{}, []string{}},
-		{"3", []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 12, 0, 0, 4, 255, 130, 0, 0}, []string{}},
-		{"4", []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 12, 0, 0, 13, 255, 130, 0, 3, 0, 3, 102, 111, 111, 3, 98, 97, 114}, []string{"", "foo", "bar"}},
-		{"5", []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 12, 0, 0, 5, 255, 130, 0, 1, 0}, []string{""}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := bytesToStringArray(tt.args); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ImportDb.bytesToStringArray() = %v, want %v", got, tt.want)
+			d := &ImportDb{}
+			b := d.stringArrayToBytes(tt.value)
+			if got := d.bytesToStringArray(b); !reflect.DeepEqual(got, tt.value) {
+				t.Errorf("ImportDb.bytesToStringArray(ImportDb.stringArrayToBytes()) = %v, want %v", got, tt.value)
 			}
 		})
 	}
