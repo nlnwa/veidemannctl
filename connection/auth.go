@@ -27,11 +27,11 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/golang/protobuf/ptypes/empty"
 	controllerV1 "github.com/nlnwa/veidemann-api/go/controller/v1"
 	"github.com/nlnwa/veidemannctl/config"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 const (

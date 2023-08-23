@@ -17,10 +17,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/nlnwa/veidemann-api/go/controller/v1"
 	"github.com/nlnwa/veidemannctl/connection"
 	"github.com/spf13/cobra"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 func NewStatusCmd() *cobra.Command {
