@@ -32,56 +32,44 @@ import (
 )
 
 type queryCmdOptions struct {
-	queryOrFile string
-	queryArgs   []any
-	pageSize    int32
-	page        int32
-	goTemplate  string
-	file        string
-	format      string
+	pageSize   int32
+	page       int32
+	goTemplate string
+	file       string
+	format     string
 }
 
-func (o *queryCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	o.queryOrFile = args[0]
+// query is a struct for holding query definitions
+type query struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Query       string `json:"query"`
+	Template    string `json:"template"`
 
-	for _, arg := range args[1:] {
-		o.queryArgs = append(o.queryArgs, arg)
-	}
-
-	return nil
+	opts        *queryCmdOptions
+	queryOrFile string
+	queryArgs   []any
+	request     *reportV1.ExecuteDbQueryRequest
 }
 
 // run runs the query command
-func (o *queryCmdOptions) run() error {
-	q, err := o.parseQuery()
-	if err != nil {
-		return fmt.Errorf("failed to parse query: %w", err)
-	}
-
-	request := reportV1.ExecuteDbQueryRequest{
-		Query: q.Query,
-		Limit: o.pageSize,
-	}
-
-	log.Debug().Msgf("Executing query: %s", request.GetQuery())
+func (q *query) run() error {
+	log.Debug().Msgf("Executing query: %s", q.request.GetQuery())
 
 	var w io.Writer
+	var err error
 
-	if o.file == "" || o.file == "-" {
+	if q.opts.file == "" || q.opts.file == "-" {
 		w = os.Stdout
 	} else {
-		w, err = os.Create(o.file)
+		w, err = os.Create(q.opts.file)
 		if err != nil {
-			return fmt.Errorf("failed to create file: %s: %w", o.file, err)
+			return fmt.Errorf("failed to create file: %s: %w", q.opts.file, err)
 		}
 	}
 
 	var formatter format.Formatter
-	if q.Template == "" {
-		formatter, err = format.NewFormatter("", w, o.format, o.goTemplate)
-	} else {
-		formatter, err = format.NewFormatter("", w, "template", q.Template)
-	}
+	formatter, err = format.NewFormatter("", w, q.opts.format, q.Template)
 	if err != nil {
 		return fmt.Errorf("failed to create formatter: %w", err)
 	}
@@ -94,7 +82,7 @@ func (o *queryCmdOptions) run() error {
 
 	client := reportV1.NewReportClient(conn)
 
-	stream, err := client.ExecuteDbQuery(context.Background(), &request)
+	stream, err := client.ExecuteDbQuery(context.Background(), q.request)
 	if err != nil {
 		return fmt.Errorf("failed executing query: %w", err)
 	}
@@ -137,52 +125,66 @@ func newQueryCmd() *cobra.Command {
 			}
 			return names, cobra.ShellCompDirectiveDefault
 		},
-		PreRunE: o.complete,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			q, err := o.parseQuery(args)
+			if err != nil {
+				return fmt.Errorf("failed to parse query: %w", err)
+			}
+
 			// set silence usage to true to avoid printing usage when an error occurs
 			cmd.SilenceUsage = true
 
-			return o.run()
+			return q.run()
 		},
 	}
 
 	cmd.Flags().Int32VarP(&o.pageSize, "pagesize", "s", 10, "Number of objects to get")
 	cmd.Flags().Int32VarP(&o.page, "page", "p", 0, "The page number")
-	cmd.Flags().StringVarP(&o.format, "output", "o", "json", "Output format (json|yaml|template|template-file)")
+	cmd.Flags().StringVarP(&o.format, "output", "o", "", "Output format (json|yaml|template|template-file) (default \"json\")")
 	cmd.Flags().StringVarP(&o.goTemplate, "template", "t", "", "A Go template used to format the output")
 	cmd.Flags().StringVarP(&o.file, "filename", "f", "", "Filename to write to")
 
 	return cmd
 }
 
-// query is a struct for holding query definitions
-type query struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Query       string `json:"query"`
-	Template    string `json:"template"`
-}
+func (o *queryCmdOptions) parseQuery(args []string) (*query, error) {
+	q := &query{
+		queryOrFile: args[0],
+		queryArgs:   make([]any, len(args[1:])),
+		opts:        o,
+	}
+	for i, arg := range args[1:] {
+		q.queryArgs[i] = arg
+	}
 
-func (o *queryCmdOptions) parseQuery() (*query, error) {
-	var q *query
-
-	if strings.HasPrefix(o.queryOrFile, "r.") {
-		q = &query{
-			Query: o.queryOrFile,
-		}
+	if strings.HasPrefix(q.queryOrFile, "r.") {
+		q.Query = q.queryOrFile
 	} else {
-		filename, err := findQueryFile(o.queryOrFile)
+		filename, err := findQueryFile(q.queryOrFile)
 		if err != nil {
 			return nil, err
 		}
 		log.Debug().Msgf("Using query definition from file '%s'", filename)
-		q, err = readQuery(filename)
+		err = readQuery(filename, q)
 		if err != nil {
 			return nil, err
 		}
+		if o.goTemplate != "" {
+			q.Template = o.goTemplate
+		}
+	}
+	if o.format == "" {
+		if q.Template != "" {
+			o.format = "template"
+		} else {
+			o.format = "json"
+		}
 	}
 
-	q.Query = fmt.Sprintf(q.Query, o.queryArgs...)
+	q.request = &reportV1.ExecuteDbQueryRequest{
+		Query: fmt.Sprintf(q.Query, q.queryArgs...),
+		Limit: o.pageSize,
+	}
 
 	return q, nil
 }
@@ -215,24 +217,23 @@ func findQueryFile(name string) (string, error) {
 }
 
 // readQuery reads a query definition from a file
-func readQuery(name string) (*query, error) {
+func readQuery(name string, q *query) error {
 	data, err := os.ReadFile(name)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %s: %w", name, err)
+		return fmt.Errorf("failed to read file: %s: %w", name, err)
 	}
-	qd := new(query)
 	// Found file
 	if strings.HasSuffix(name, ".yml") || strings.HasSuffix(name, ".yaml") {
-		err := yaml.Unmarshal(data, qd)
+		err := yaml.Unmarshal(data, q)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	} else {
-		qd.Query = string(data)
+		q.Query = string(data)
 	}
-	qd.Name = strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
+	q.Name = strings.TrimSuffix(filepath.Base(name), filepath.Ext(name))
 
-	return qd, nil
+	return nil
 }
 
 // listStoredQueries returns a list of query definitions stored in the query directory
@@ -242,11 +243,12 @@ func listStoredQueries(path string) []*query {
 	if files, err := os.ReadDir(path); err == nil {
 		for _, f := range files {
 			if !f.IsDir() {
-				q, err := readQuery(filepath.Join(path, f.Name()))
+				var q query
+				err := readQuery(filepath.Join(path, f.Name()), &q)
 				if err != nil {
 					return nil
 				}
-				r = append(r, q)
+				r = append(r, &q)
 			}
 		}
 	}
