@@ -17,10 +17,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"github.com/nlnwa/veidemannctl/connection"
 	"github.com/spf13/cobra"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 func newListLoggersCmd() *cobra.Command {

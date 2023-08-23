@@ -17,10 +17,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	controllerV1 "github.com/nlnwa/veidemann-api/go/controller/v1"
 	"github.com/nlnwa/veidemannctl/connection"
 	"github.com/spf13/cobra"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 type activeRolesCmdOptions struct{}
