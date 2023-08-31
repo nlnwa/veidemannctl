@@ -22,7 +22,7 @@ import (
 	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
-func NewUnpauseCmd() *cobra.Command {
+func NewCmd() *cobra.Command {
 	return &cobra.Command{
 		GroupID:      "status",
 		Use:          "unpause",

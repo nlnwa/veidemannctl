@@ -22,51 +22,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type abortCmdOptions struct {
-	// ceids is a list of crawl execution ids to abort
-	ceids []string
-}
-
-func (o *abortCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	o.ceids = args
-	return nil
-}
-
-func (o *abortCmdOptions) run() error {
-	conn, err := connection.Connect()
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	client := controllerV1.NewControllerClient(conn)
-
-	for _, ceid := range o.ceids {
-		request := controllerV1.ExecutionId{Id: ceid}
-		_, err := client.AbortCrawlExecution(context.Background(), &request)
-		if err != nil {
-			return fmt.Errorf("failed to abort execution '%v': %w", ceid, err)
-		}
-	}
-	return nil
-}
-
-func NewAbortCmd() *cobra.Command {
-	o := &abortCmdOptions{}
-
+func NewCmd() *cobra.Command {
 	return &cobra.Command{
 		GroupID: "run",
 		Use:     "abort CRAWL-EXECUTION-ID ...",
 		Short:   "Abort crawl executions",
-		Long:    `Abort one or many crawl executions.`,
+		Long:    `Abort one or more crawl executions.`,
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_ = o.complete(cmd, args)
-
 			// silence usage to avoid showing usage when an error occurs
 			cmd.SilenceUsage = true
 
-			return o.run()
+			conn, err := connection.Connect()
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			client := controllerV1.NewControllerClient(conn)
+
+			// ceids is a list of crawl execution ids to abort
+			for _, ceid := range args {
+				request := controllerV1.ExecutionId{Id: ceid}
+				_, err := client.AbortCrawlExecution(context.Background(), &request)
+				if err != nil {
+					return fmt.Errorf("failed to abort execution '%v': %w", ceid, err)
+				}
+			}
+			return nil
 		},
 	}
 }

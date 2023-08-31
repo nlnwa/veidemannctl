@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package importcmd
+package duplicatereport
 
 import (
 	"fmt"
@@ -28,8 +28,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// duplicateReportCmdOptions is the options for the convert oos command
-type duplicateReportCmdOptions struct {
+// options is the options for the convert oos command
+type options struct {
 	Kind         configV1.Kind
 	OutFile      string
 	DbDir        string
@@ -39,14 +39,40 @@ type duplicateReportCmdOptions struct {
 	SkipImport   bool
 }
 
-// complete completes the duplicate report command options
-func (o *duplicateReportCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	kind := format.GetKind(args[0])
-	if kind == configV1.Kind_undefined {
-		return fmt.Errorf("undefined kind: %v", kind)
+func NewCmd() *cobra.Command {
+	o := &options{}
+
+	cmd := &cobra.Command{
+		Use:   "duplicatereport KIND",
+		Short: "List duplicated seeds or crawl entities in Veidemann",
+		Long:  ``,
+		Args:  cobra.ExactArgs(1),
+		ValidArgs: []string{
+			configV1.Kind_seed.String(),
+			configV1.Kind_crawlEntity.String(),
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			kind := format.GetKind(args[0])
+			if kind == configV1.Kind_undefined {
+				return fmt.Errorf("undefined kind: %v", kind)
+			}
+			o.Kind = kind
+
+			// silence usage to prevent printing usage when error occurs
+			cmd.SilenceUsage = true
+
+			return run(o)
+		},
 	}
-	o.Kind = kind
-	return nil
+
+	cmd.Flags().StringVarP(&o.OutFile, "out-file", "o", "", "File to write output.")
+	cmd.Flags().StringVarP(&o.DbDir, "db-dir", "b", "/tmp/veidemannctl", "Directory for storing state db")
+	cmd.Flags().BoolVarP(&o.Toplevel, "toplevel", "", false, "Convert URI to toplevel by removing path before checking for duplicates.")
+	cmd.Flags().BoolVarP(&o.IgnoreScheme, "ignore-scheme", "", false, "Ignore the URL's scheme when checking for duplicates.")
+	cmd.Flags().BoolVar(&o.ResetDb, "truncate", false, "Truncate state database")
+	cmd.Flags().BoolVar(&o.SkipImport, "skip-import", false, "Do not import existing seeds into state database")
+
+	return cmd
 }
 
 type DuplicateReporter interface {
@@ -54,7 +80,7 @@ type DuplicateReporter interface {
 }
 
 // run runs the convert oos command with the given options
-func (o *duplicateReportCmdOptions) run() error {
+func run(o *options) error {
 	// Create output writer (file or stdout)
 	var out io.Writer
 	if o.OutFile == "" {
@@ -80,7 +106,7 @@ func (o *duplicateReportCmdOptions) run() error {
 	// Create key normalizer
 	var keyNormalizer importutil.KeyNormalizer
 	if o.Kind == configV1.Kind_seed {
-		keyNormalizer = &UriKeyNormalizer{toplevel: o.Toplevel, ignoreScheme: o.IgnoreScheme}
+		keyNormalizer = &importutil.UriKeyNormalizer{Toplevel: o.Toplevel, IgnoreScheme: o.IgnoreScheme}
 	}
 
 	dbDir := path.Join(o.DbDir, config.GetContext(), o.Kind.String())
@@ -110,38 +136,4 @@ func (o *duplicateReportCmdOptions) run() error {
 	}
 
 	return duplicateReporter.Report(out)
-}
-
-func newDuplicateReportCmd() *cobra.Command {
-	o := &duplicateReportCmdOptions{}
-
-	cmd := &cobra.Command{
-		Use:   "duplicatereport KIND",
-		Short: "List duplicated seeds or crawl entities in Veidemann",
-		Long:  ``,
-		Args:  cobra.ExactArgs(1),
-		ValidArgs: []string{
-			configV1.Kind_seed.String(),
-			configV1.Kind_crawlEntity.String(),
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := o.complete(cmd, args); err != nil {
-				return err
-			}
-
-			// silence usage to prevent printing usage when error occurs
-			cmd.SilenceUsage = true
-
-			return o.run()
-		},
-	}
-
-	cmd.Flags().StringVarP(&o.OutFile, "out-file", "o", "", "File to write output.")
-	cmd.Flags().StringVarP(&o.DbDir, "db-dir", "b", "/tmp/veidemannctl", "Directory for storing state db")
-	cmd.Flags().BoolVarP(&o.Toplevel, "toplevel", "", false, "Convert URI to toplevel by removing path before checking for duplicates.")
-	cmd.Flags().BoolVarP(&o.IgnoreScheme, "ignore-scheme", "", false, "Ignore the URL's scheme when checking for duplicates.")
-	cmd.Flags().BoolVar(&o.ResetDb, "truncate", false, "Truncate state database")
-	cmd.Flags().BoolVar(&o.SkipImport, "skip-import", false, "Do not import existing seeds into state database")
-
-	return cmd
 }

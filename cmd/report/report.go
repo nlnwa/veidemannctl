@@ -14,21 +14,26 @@
 package report
 
 import (
+	"github.com/nlnwa/veidemannctl/cmd/report/crawlexecution"
+	"github.com/nlnwa/veidemannctl/cmd/report/crawllog"
+	"github.com/nlnwa/veidemannctl/cmd/report/jobexecution"
+	"github.com/nlnwa/veidemannctl/cmd/report/pagelog"
+	"github.com/nlnwa/veidemannctl/cmd/report/query"
 	"github.com/spf13/cobra"
 )
 
-func NewReportCmd() *cobra.Command {
+func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		GroupID: "advanced",
 		Use:     "report",
 		Short:   "Request a report",
 	}
 
-	cmd.AddCommand(newJobExecutionCmd())   // jobexecution
-	cmd.AddCommand(newCrawlExecutionCmd()) // crawlexecution
-	cmd.AddCommand(newCrawlLogCmd())       // crawllog
-	cmd.AddCommand(newQueryCmd())          // query
-	cmd.AddCommand(newPageLogCmd())        // pagelog
+	cmd.AddCommand(jobexecution.NewCmd())   // jobexecution
+	cmd.AddCommand(crawlexecution.NewCmd()) // crawlexecution
+	cmd.AddCommand(crawllog.NewCmd())       // crawllog
+	cmd.AddCommand(query.NewCmd())          // query
+	cmd.AddCommand(pagelog.NewCmd())        // pagelog
 
 	return cmd
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package importcmd
+package importutil
 
 import (
 	"testing"
@@ -90,7 +90,7 @@ func Test_UriKeyNormalizer_toplevelFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &UriKeyNormalizer{toplevel: true}
+			n := &UriKeyNormalizer{Toplevel: true}
 			got, err := n.Normalize(tt.uri)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Normalize() error = %v, wantErr %v", err, tt.wantErr)
@@ -131,7 +131,7 @@ func Test_UriKeyNormalizer_ignoreSchemeFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			i := &UriKeyNormalizer{ignoreScheme: true}
+			i := &UriKeyNormalizer{IgnoreScheme: true}
 			got, err := i.Normalize(tt.uri)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Normalize() error = %v, wantErr %v", err, tt.wantErr)

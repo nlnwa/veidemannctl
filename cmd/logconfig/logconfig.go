@@ -14,10 +14,13 @@
 package logconfig
 
 import (
+	"github.com/nlnwa/veidemannctl/cmd/logconfig/delete"
+	"github.com/nlnwa/veidemannctl/cmd/logconfig/list"
+	"github.com/nlnwa/veidemannctl/cmd/logconfig/set"
 	"github.com/spf13/cobra"
 )
 
-func NewLogConfigCmd() *cobra.Command {
+func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		GroupID: "debug",
 		Use:     "logconfig",
@@ -25,9 +28,9 @@ func NewLogConfigCmd() *cobra.Command {
 		Long:    `Configure logging.`,
 	}
 
-	cmd.AddCommand(newDeleteLoggerCmd()) // delete
-	cmd.AddCommand(newListLoggersCmd())  // list
-	cmd.AddCommand(newSetLoggerCmd())    // set
+	cmd.AddCommand(delete.NewCmd()) // delete
+	cmd.AddCommand(list.NewCmd())   // list
+	cmd.AddCommand(set.NewCmd())    // set
 
 	return cmd
 }

@@ -1,4 +1,4 @@
-package importcmd
+package importutil
 
 import (
 	"testing"

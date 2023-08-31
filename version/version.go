@@ -18,8 +18,6 @@ import (
 	"runtime"
 )
 
-var versionInfo Version
-
 // Version contains version information
 type Version struct {
 	ClientVersion string
@@ -27,20 +25,22 @@ type Version struct {
 	BuildDate     string
 }
 
-// Set sets the version information
-func Set(gitVersion, gitCommit, buildDate string) {
-	versionInfo.ClientVersion = gitVersion
-	versionInfo.GitCommit = gitCommit
-	versionInfo.BuildDate = buildDate
-}
-
-// String returns a string representation of the version information
-func String() string {
+// String returns the version information as a string
+func (v *Version) String() string {
 	return fmt.Sprintf("Client version: %s, Git commit: %s, Build date: %s, Go version: %s, Platform: %s/%s",
-		versionInfo.ClientVersion,
-		versionInfo.GitCommit,
-		versionInfo.BuildDate,
+		v.ClientVersion,
+		v.GitCommit,
+		v.BuildDate,
 		runtime.Version(),
 		runtime.GOOS,
 		runtime.GOARCH)
 }
+
+// Set sets the version information
+func (v *Version) Set(gitVersion, gitCommit, buildDate string) {
+	v.ClientVersion = gitVersion
+	v.GitCommit = gitCommit
+	v.BuildDate = buildDate
+}
+
+var ClientVersion = &Version{}

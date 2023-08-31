@@ -11,21 +11,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logout
+package list
 
 import (
+	"context"
+	"fmt"
+
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"github.com/nlnwa/veidemannctl/connection"
 	"github.com/spf13/cobra"
+	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
 func NewCmd() *cobra.Command {
 	return &cobra.Command{
-		GroupID: "login",
-		Use:     "logout",
-		Short:   "Log out of Veidemann",
-		Long:    `Log out of Veidemann.`,
+		Use:   "list",
+		Short: "List configured loggers",
+		Long:  `List configured loggers.`,
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return connection.Logout()
+			conn, err := connection.Connect()
+			if err != nil {
+				return fmt.Errorf("failed to connect: %w", err)
+			}
+			defer conn.Close()
+
+			client := configV1.NewConfigClient(conn)
+
+			r, err := client.GetLogConfig(context.Background(), &empty.Empty{})
+			if err != nil {
+				return fmt.Errorf("could not get log config: %w", err)
+			}
+
+			fmt.Printf("%-45s %s\n", "LOGGER", "LEVEL")
+			for _, l := range r.LogLevel {
+				fmt.Printf("%-45s %s\n", l.Logger, l.Level)
+			}
+			return nil
 		},
 	}
 }

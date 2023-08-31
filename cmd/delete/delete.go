@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type deleteCmdOptions struct {
+type options struct {
 	kind    configV1.Kind
 	ids     []string
 	label   string
@@ -35,26 +35,55 @@ type deleteCmdOptions struct {
 	dryRun  bool
 }
 
-// complete completes the delete command by parsing the arguments passed to the command
-func (o *deleteCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	k := args[0]
+func NewCmd() *cobra.Command {
+	o := &options{}
 
-	o.kind = format.GetKind(k)
-	o.ids = args[1:]
+	cmd := &cobra.Command{
+		GroupID: "basic",
+		Use:     "delete KIND ID ...",
+		Short:   "Delete config objects",
+		Long: `Delete one or many config objects.
 
-	if o.kind == configV1.Kind_undefined {
-		return fmt.Errorf("undefined kind '%s'", k)
+` +
+			format.ListObjectNames() +
+			`Examples:
+  # Delete a seed.
+  veidemannctl delete seed 407a9600-4f25-4f17-8cff-ee1b8ee950f6`,
+		Args: cobra.MatchAll(
+			cobra.MinimumNArgs(1),
+			func(cmd *cobra.Command, args []string) error {
+				return cobra.OnlyValidArgs(cmd, args[:1])
+			}),
+		ValidArgs: format.GetObjectNames(),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			k := args[0]
+
+			o.kind = format.GetKind(k)
+			o.ids = args[1:]
+
+			if o.kind == configV1.Kind_undefined {
+				return fmt.Errorf("undefined kind '%s'", k)
+			}
+
+			if len(o.ids) == 0 && o.filters == nil && o.label == "" {
+				return fmt.Errorf("Either the -f or -q flags, or one or more id's must be provided\n")
+			}
+
+			// set silence usage to true to avoid printing usage when an error occurs
+			cmd.SilenceUsage = true
+
+			return run(o)
+		},
 	}
+	cmd.PersistentFlags().StringVarP(&o.label, "label", "l", "", "Delete objects by label {TYPE:VALUE | VALUE}")
+	cmd.PersistentFlags().StringArrayVarP(&o.filters, "filter", "q", nil, "Delete objects by field (i.e. meta.description=foo)")
+	cmd.PersistentFlags().BoolVarP(&o.dryRun, "dry-run", "", true, "Set to false to execute delete")
 
-	if len(o.ids) == 0 && o.filters == nil && o.label == "" {
-		return fmt.Errorf("Either the -f or -q flags, or one or more id's must be provided\n")
-	}
-
-	return nil
+	return cmd
 }
 
 // run runs the delete command which deletes one or more config objects
-func (o *deleteCmdOptions) run() error {
+func run(o *options) error {
 	conn, err := connection.Connect()
 	if err != nil {
 		return err
@@ -123,39 +152,4 @@ func (o *deleteCmdOptions) run() error {
 	log.Info().Msgf("Deleted %d objects of %d selected", deleted, count.Count)
 
 	return nil
-}
-
-func NewDeleteCmd() *cobra.Command {
-	o := &deleteCmdOptions{}
-
-	cmd := &cobra.Command{
-		GroupID: "basic",
-		Use:     "delete KIND (ID ...)",
-		Short:   "Delete config objects",
-		Long: `Delete one or many config objects.
-
-` +
-			format.ListObjectNames() +
-			`Examples:
-  # Delete a seed.
-  veidemannctl delete seed 407a9600-4f25-4f17-8cff-ee1b8ee950f6`,
-		Args: cobra.MatchAll(
-			cobra.MinimumNArgs(1),
-			func(cmd *cobra.Command, args []string) error {
-				return cobra.OnlyValidArgs(cmd, args[:1])
-			}),
-		ValidArgs: format.GetObjectNames(),
-		PreRunE:   o.complete,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			// set silence usage to true to avoid printing usage when an error occurs
-			cmd.SilenceUsage = true
-
-			return o.run()
-		},
-	}
-	cmd.PersistentFlags().StringVarP(&o.label, "label", "l", "", "Delete objects by label (<type>:<value> | <value>)")
-	cmd.PersistentFlags().StringArrayVarP(&o.filters, "filter", "q", nil, "Delete objects by field (i.e. meta.description=foo)")
-	cmd.PersistentFlags().BoolVarP(&o.dryRun, "dry-run", "", true, "Set to false to execute delete")
-
-	return cmd
 }

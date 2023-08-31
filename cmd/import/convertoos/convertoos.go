@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package importcmd
+package convertoos
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"path"
@@ -30,11 +31,10 @@ import (
 	"github.com/nlnwa/veidemannctl/importutil"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 )
 
 // ConvertOosCmdOptions is the options for the convert oos command
-type ConvertOosCmdOptions struct {
+type options struct {
 	Filename        string
 	ErrorFile       string
 	OutFile         string
@@ -52,8 +52,43 @@ type ConvertOosCmdOptions struct {
 	SeedLabels      []string
 }
 
+// NewCmd creates the convert oos command
+func NewCmd() *cobra.Command {
+	o := &options{}
+
+	var cmd = &cobra.Command{
+		Use:   "convertoos",
+		Short: "Convert Out of Scope file(s) to seed import file",
+		Long:  ``,
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return run(o)
+		},
+	}
+
+	cmd.Flags().StringVarP(&o.Filename, "filename", "f", "", "Filename or directory to read from. "+
+		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
+	_ = cmd.MarkFlagRequired("filename")
+	cmd.Flags().StringVarP(&o.ErrorFile, "err-file", "e", "-", "File to write errors to. '-' writes to stderr.")
+	cmd.Flags().StringVarP(&o.OutFile, "out-file", "o", "-", "File to write result to. '-' writes to stdout.")
+	cmd.Flags().BoolVar(&o.Toplevel, "toplevel", true, "Convert URI to toplevel by removing path")
+	cmd.Flags().BoolVar(&o.IgnoreScheme, "ignore-scheme", true, "Ignore the URL's scheme when checking if this URL is already imported.")
+	cmd.Flags().BoolVarP(&o.CheckUri, "check-uri", "", true, "Check the uri for liveness and follow 301")
+	cmd.Flags().DurationVarP(&o.CheckUriTimeout, "check-uri-timeout", "", 2*time.Second, "Timeout when checking uri for liveness")
+	cmd.Flags().StringVarP(&o.DbDir, "db-dir", "b", "/tmp/veidemannctl", "Directory for storing state db")
+	cmd.Flags().BoolVar(&o.ResetDb, "truncate", false, "Truncate state database")
+	cmd.Flags().IntVarP(&o.Concurrency, "concurrency", "c", 16, "Number of concurrent workers")
+	cmd.Flags().BoolVar(&o.SkipImport, "skip-import", false, "Do not import existing seeds into state database")
+	cmd.Flags().StringVar(&o.EntityId, "entity-id", "", "Entity id to use for all seeds (overrides entity-name and entity-label)")
+	cmd.Flags().StringVar(&o.EntityName, "entity-name", "", "Entity name to use for all seeds")
+	cmd.Flags().StringSliceVar(&o.EntityLabels, "entity-label", []string{"source:oos"}, "Entity labels to use for all seeds")
+	cmd.Flags().StringSliceVar(&o.SeedLabels, "seed-label", []string{"source:oos"}, "Seed labels to use for all seeds")
+
+	return cmd
+}
+
 // run runs the convert oos command
-func (o *ConvertOosCmdOptions) run() error {
+func run(o *options) error {
 	// Create output writer (file or stdout)
 	out, err := format.ResolveWriter(o.OutFile)
 	if err != nil {
@@ -84,15 +119,15 @@ func (o *ConvertOosCmdOptions) run() error {
 	client := configV1.NewConfigClient(conn)
 
 	// Create uri checker for checking liveness of uri
-	var uriChecker *UriChecker
+	var uriChecker *importutil.UriChecker
 	if o.CheckUri {
-		uriChecker = &UriChecker{
-			Client: NewHttpClient(o.CheckUriTimeout, false),
+		uriChecker = &importutil.UriChecker{
+			Client: importutil.NewHttpClient(o.CheckUriTimeout, false),
 		}
 	}
 
 	// Create key normalizer for state database
-	uriNormalizer := &UriKeyNormalizer{ignoreScheme: o.IgnoreScheme, toplevel: o.Toplevel}
+	uriNormalizer := &importutil.UriKeyNormalizer{IgnoreScheme: o.IgnoreScheme, Toplevel: o.Toplevel}
 
 	dbDir := path.Join(o.DbDir, config.GetContext(), configV1.Kind_seed.String())
 
@@ -113,7 +148,7 @@ func (o *ConvertOosCmdOptions) run() error {
 	}
 
 	// Create Record reader for file input
-	rr, err := importutil.NewRecordReader(o.Filename, &LineAsStringDecoder{}, "*.txt")
+	rr, err := importutil.NewRecordReader(o.Filename, &importutil.LineAsStringDecoder{}, "*.txt")
 	if err != nil {
 		return fmt.Errorf("unable to open file '%v': %w", o.Filename, err)
 	}
@@ -150,7 +185,7 @@ func (o *ConvertOosCmdOptions) run() error {
 
 	// Processor for converting oos records into import records
 	proc := func(uri string) error {
-		seed := &seedDesc{
+		seed := &importutil.SeedDesc{
 			EntityId:    entityId,
 			EntityName:  entityName,
 			EntityLabel: entityLabels,
@@ -178,14 +213,14 @@ func (o *ConvertOosCmdOptions) run() error {
 		if ids, err := seedDb.Get(normalizedUri); err != nil {
 			return err
 		} else if len(ids) > 0 {
-			return errAlreadyExists{key: normalizedUri}
+			return importutil.ErrAlreadyExists(normalizedUri)
 		}
 
-		json, err := json.Marshal(seed)
+		j, err := json.Marshal(seed)
 		if err != nil {
 			return err
 		}
-		if _, err = fmt.Fprintf(out, "%s\n", json); err != nil {
+		if _, err = fmt.Fprintf(out, "%s\n", j); err != nil {
 			return err
 		}
 		return nil
@@ -201,7 +236,7 @@ func (o *ConvertOosCmdOptions) run() error {
 			Str("filename", state.GetFilename()).
 			Int("recNum", state.GetRecordNum()).Logger()
 
-		var err errAlreadyExists
+		var err importutil.ErrAlreadyExists
 		if errors.As(state.GetError(), &err) {
 			l.Info().Msg(err.Error())
 		} else {
@@ -236,39 +271,4 @@ func (o *ConvertOosCmdOptions) run() error {
 	errorLog.Info().Int("total", count).Int("success", success).Int("failed", failed).Msg("Finished converting records")
 
 	return nil
-}
-
-// newConvertOosCmd creates the convert oos command
-func newConvertOosCmd() *cobra.Command {
-	o := &ConvertOosCmdOptions{}
-
-	var cmd = &cobra.Command{
-		Use:   "convertoos",
-		Short: "Convert Out of Scope file(s) to seed import file",
-		Long:  ``,
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return o.run()
-		},
-	}
-
-	cmd.Flags().StringVarP(&o.Filename, "filename", "f", "", "Filename or directory to read from. "+
-		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
-	_ = cmd.MarkFlagRequired("filename")
-	cmd.Flags().StringVarP(&o.ErrorFile, "err-file", "e", "-", "File to write errors to. '-' writes to stderr.")
-	cmd.Flags().StringVarP(&o.OutFile, "out-file", "o", "-", "File to write result to. '-' writes to stdout.")
-	cmd.Flags().BoolVar(&o.Toplevel, "toplevel", true, "Convert URI to toplevel by removing path")
-	cmd.Flags().BoolVar(&o.IgnoreScheme, "ignore-scheme", true, "Ignore the URL's scheme when checking if this URL is already imported.")
-	cmd.Flags().BoolVarP(&o.CheckUri, "check-uri", "", true, "Check the uri for liveness and follow 301")
-	cmd.Flags().DurationVarP(&o.CheckUriTimeout, "check-uri-timeout", "", 2*time.Second, "Timeout when checking uri for liveness")
-	cmd.Flags().StringVarP(&o.DbDir, "db-dir", "b", "/tmp/veidemannctl", "Directory for storing state db")
-	cmd.Flags().BoolVar(&o.ResetDb, "truncate", false, "Truncate state database")
-	cmd.Flags().IntVarP(&o.Concurrency, "concurrency", "c", 16, "Number of concurrent workers")
-	cmd.Flags().BoolVar(&o.SkipImport, "skip-import", false, "Do not import existing seeds into state database")
-	cmd.Flags().StringVar(&o.EntityId, "entity-id", "", "Entity id to use for all seeds (overrides entity-name and entity-label)")
-	cmd.Flags().StringVar(&o.EntityName, "entity-name", "", "Entity name to use for all seeds")
-	cmd.Flags().StringSliceVar(&o.EntityLabels, "entity-label", []string{"source:oos"}, "Entity labels to use for all seeds")
-	cmd.Flags().StringSliceVar(&o.SeedLabels, "seed-label", []string{"source:oos"}, "Seed labels to use for all seeds")
-
-	return cmd
 }

@@ -22,54 +22,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type abortJobExecutionCmdOptions struct {
-	// jeids is a list of job execution ids to abort
-	jeids []string
-}
-
-func (opt *abortJobExecutionCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	opt.jeids = args
-	return nil
-}
-
-func (opt *abortJobExecutionCmdOptions) run() error {
-	conn, err := connection.Connect()
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	client := controllerV1.NewControllerClient(conn)
-
-	for _, jeid := range opt.jeids {
-		request := controllerV1.ExecutionId{Id: jeid}
-		_, err := client.AbortJobExecution(context.Background(), &request)
-		if err != nil {
-			return fmt.Errorf("failed to abort job execution '%v': %w", jeid, err)
-		}
-	}
-	return nil
-}
-
-func NewAbortJobExecutionCmd() *cobra.Command {
-	o := &abortJobExecutionCmdOptions{}
-
+func NewCmd() *cobra.Command {
 	return &cobra.Command{
 		GroupID: "run",
 		Use:     "abortjobexecution JOB-EXECUTION-ID ...",
 		Short:   "Abort job executions",
-		Long:    `Abort one or many job executions.`,
+		Long:    `Abort one or more job executions.`,
 		Aliases: []string{"abortjob"},
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := o.complete(cmd, args)
-			if err != nil {
-				return err
-			}
 			// silence usage to prevent printing usage when an error occurs
 			cmd.SilenceUsage = true
 
-			return o.run()
+			conn, err := connection.Connect()
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			client := controllerV1.NewControllerClient(conn)
+
+			// jeids is a list of job execution ids to abort
+			for _, jeid := range args {
+				request := controllerV1.ExecutionId{Id: jeid}
+				_, err := client.AbortJobExecution(context.Background(), &request)
+				if err != nil {
+					return fmt.Errorf("failed to abort job execution '%v': %w", jeid, err)
+				}
+			}
+			return nil
 		},
 	}
 }

@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewScriptParametersCmd() *cobra.Command {
+func NewCmd() *cobra.Command {
 	// scriptParametersCmd represents the script-parameters command
 	return &cobra.Command{
 		GroupID: "debug",

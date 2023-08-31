@@ -14,10 +14,13 @@
 package importcmd
 
 import (
+	"github.com/nlnwa/veidemannctl/cmd/import/convertoos"
+	"github.com/nlnwa/veidemannctl/cmd/import/duplicatereport"
+	"github.com/nlnwa/veidemannctl/cmd/import/seeds"
 	"github.com/spf13/cobra"
 )
 
-func NewImportCmd() *cobra.Command {
+func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		GroupID: "advanced",
 		Use:     "import",
@@ -25,9 +28,9 @@ func NewImportCmd() *cobra.Command {
 		Long:    ``,
 	}
 
-	cmd.AddCommand(newConvertOosCmd())      // convertoos
-	cmd.AddCommand(newImportSeedCmd())      // seed
-	cmd.AddCommand(newDuplicateReportCmd()) // duplicate
+	cmd.AddCommand(convertoos.NewCmd())      // convertoos
+	cmd.AddCommand(seeds.NewCmd())           // seed
+	cmd.AddCommand(duplicatereport.NewCmd()) // duplicate
 
 	return cmd
 }

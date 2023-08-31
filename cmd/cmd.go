@@ -35,8 +35,8 @@ import (
 	"github.com/nlnwa/veidemannctl/cmd/status"
 	"github.com/nlnwa/veidemannctl/cmd/unpause"
 	"github.com/nlnwa/veidemannctl/cmd/update"
-	"github.com/nlnwa/veidemannctl/cmd/version"
 	"github.com/nlnwa/veidemannctl/config"
+	"github.com/nlnwa/veidemannctl/version"
 
 	"github.com/spf13/cobra"
 )
@@ -50,6 +50,7 @@ func NewRootCmd() *cobra.Command {
 		Short:             "veidemannctl controls the Veidemann web crawler",
 		Long:              "veidemannctl controls the Veidemann web crawler",
 		DisableAutoGenTag: true,
+		Version:           version.ClientVersion.String(),
 	}
 
 	// Add global flags
@@ -71,50 +72,48 @@ func NewRootCmd() *cobra.Command {
 		ID:    "basic",
 		Title: "Basic Commands:",
 	})
-	cmd.AddCommand(get.NewGetCmd())          // get
-	cmd.AddCommand(create.NewCreateCmd())    // create
-	cmd.AddCommand(update.NewUpdateCmd())    // update
-	cmd.AddCommand(deletecmd.NewDeleteCmd()) // delete
+	cmd.AddCommand(get.NewCmd())       // get
+	cmd.AddCommand(create.NewCmd())    // create
+	cmd.AddCommand(update.NewCmd())    // update
+	cmd.AddCommand(deletecmd.NewCmd()) // delete
 
 	cmd.AddGroup(&cobra.Group{
 		ID:    "advanced",
 		Title: "Advanced Commands:",
 	})
-	cmd.AddCommand(report.NewReportCmd())    // report
-	cmd.AddCommand(importcmd.NewImportCmd()) // import
+	cmd.AddCommand(report.NewCmd())    // report
+	cmd.AddCommand(importcmd.NewCmd()) // import
 
 	cmd.AddGroup(&cobra.Group{
 		ID:    "run",
 		Title: "Crawl Commands:",
 	})
-	cmd.AddCommand(run.NewRunCmd())                             // run
-	cmd.AddCommand(abort.NewAbortCmd())                         // abort
-	cmd.AddCommand(abortjobexecution.NewAbortJobExecutionCmd()) // abortjobexecution
+	cmd.AddCommand(run.NewCmd())               // run
+	cmd.AddCommand(abort.NewCmd())             // abort
+	cmd.AddCommand(abortjobexecution.NewCmd()) // abortjobexecution
 
 	cmd.AddGroup(&cobra.Group{
 		ID:    "status",
 		Title: "Management Commands:",
 	})
-	cmd.AddCommand(status.NewStatusCmd())   // status
-	cmd.AddCommand(pause.NewPauseCmd())     // pause
-	cmd.AddCommand(unpause.NewUnpauseCmd()) // unpause
+	cmd.AddCommand(status.NewCmd())  // status
+	cmd.AddCommand(pause.NewCmd())   // pause
+	cmd.AddCommand(unpause.NewCmd()) // unpause
 
 	cmd.AddGroup(&cobra.Group{
 		ID:    "login",
 		Title: "Authentication Commands:",
 	})
-	cmd.AddCommand(login.NewLoginCmd())   // login
-	cmd.AddCommand(logout.NewLogoutCmd()) // logout
-
-	cmd.AddCommand(version.NewVersionCmd()) // version
+	cmd.AddCommand(login.NewCmd())  // login
+	cmd.AddCommand(logout.NewCmd()) // logout
 
 	cmd.AddGroup(&cobra.Group{
 		ID:    "debug",
 		Title: "Troubleshooting and Debug Commands:",
 	})
-	cmd.AddCommand(scriptparameters.NewScriptParametersCmd()) // script-parameters
-	cmd.AddCommand(logconfig.NewLogConfigCmd())               // logconfig
-	cmd.AddCommand(activeroles.NewActiveRolesCmd())           // activeroles
+	cmd.AddCommand(scriptparameters.NewCmd()) // script-parameters
+	cmd.AddCommand(logconfig.NewCmd())        // logconfig
+	cmd.AddCommand(activeroles.NewCmd())      // activeroles
 
 	return cmd
 }

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package report
+package crawllog
 
 import (
 	"context"
@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type crawlLogCmdOptions struct {
+type options struct {
 	ids         []string
 	executionId string
 	pageSize    int32
@@ -37,19 +37,36 @@ type crawlLogCmdOptions struct {
 	file        string
 }
 
-func (o *crawlLogCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	o.ids = args
+func NewCmd() *cobra.Command {
+	o := &options{}
+	cmd := &cobra.Command{
+		Use:   "crawllog [ID ...]",
+		Short: "View crawl log",
+		Long:  `View crawl log.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			o.ids = args
 
-	if len(o.ids) == 0 && o.executionId == "" {
-		return fmt.Errorf("request must provide either warcId or executionId")
+			if len(o.ids) == 0 && o.executionId == "" {
+				return fmt.Errorf("request must provide either warcId or executionId")
+			}
+
+			// set silence usage to true to avoid printing usage when an error occurs
+			cmd.SilenceUsage = true
+			return run(o)
+		},
 	}
-	// set silence usage to true to avoid printing usage when an error occurs
-	cmd.SilenceUsage = true
 
-	return nil
+	cmd.Flags().Int32VarP(&o.pageSize, "pagesize", "s", 10, "Number of objects to get")
+	cmd.Flags().Int32VarP(&o.page, "page", "p", 0, "The page number")
+	cmd.Flags().StringVarP(&o.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
+	cmd.Flags().StringVarP(&o.goTemplate, "template", "t", "", "A Go template used to format the output")
+	cmd.Flags().StringVarP(&o.file, "filename", "f", "", "Filename to write to")
+	cmd.Flags().StringVar(&o.executionId, "execution-id", "", "Execution ID")
+
+	return cmd
 }
 
-func (o *crawlLogCmdOptions) run() error {
+func run(o *options) error {
 	conn, err := connection.Connect()
 	if err != nil {
 		return err
@@ -94,31 +111,7 @@ func (o *crawlLogCmdOptions) run() error {
 	return nil
 }
 
-func newCrawlLogCmd() *cobra.Command {
-	o := &crawlLogCmdOptions{}
-	cmd := &cobra.Command{
-		Use:   "crawllog [ID ...]",
-		Short: "View crawl log",
-		Long:  `View crawl log.`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := o.complete(cmd, args); err != nil {
-				return err
-			}
-			return o.run()
-		},
-	}
-
-	cmd.Flags().Int32VarP(&o.pageSize, "pagesize", "s", 10, "Number of objects to get")
-	cmd.Flags().Int32VarP(&o.page, "page", "p", 0, "The page number")
-	cmd.Flags().StringVarP(&o.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
-	cmd.Flags().StringVarP(&o.goTemplate, "template", "t", "", "A Go template used to format the output")
-	cmd.Flags().StringVarP(&o.file, "filename", "f", "", "Filename to write to")
-	cmd.Flags().StringVar(&o.executionId, "execution-id", "", "Execution ID")
-
-	return cmd
-}
-
-func createCrawlLogListRequest(o *crawlLogCmdOptions) (*logV1.CrawlLogListRequest, error) {
+func createCrawlLogListRequest(o *options) (*logV1.CrawlLogListRequest, error) {
 	request := &logV1.CrawlLogListRequest{}
 	request.WarcId = o.ids
 	request.Offset = o.page

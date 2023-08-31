@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logconfig
+package set
 
 import (
 	"context"
@@ -23,13 +23,28 @@ import (
 	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
-func newListLoggersCmd() *cobra.Command {
+func NewCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "list",
-		Short: "List configured loggers",
-		Long:  `List configured loggers.`,
-		Args:  cobra.NoArgs,
+		Use:   "set LOGGER LEVEL",
+		Short: "Configure logger",
+		Long:  `Configure logger.`,
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			logger := args[0]
+
+			l, ok := configV1.LogLevels_Level_value[args[1]]
+			if !ok {
+				return fmt.Errorf("invalid log level: %s", args[1])
+			}
+
+			level := configV1.LogLevels_Level(l)
+			if level == configV1.LogLevels_UNDEFINED {
+				return fmt.Errorf("invalid log level: %s", args[1])
+			}
+
+			// silence usage to avoid printing usage when an error occurs
+			cmd.SilenceUsage = true
+
 			conn, err := connection.Connect()
 			if err != nil {
 				return fmt.Errorf("failed to connect: %w", err)
@@ -43,9 +58,22 @@ func newListLoggersCmd() *cobra.Command {
 				return fmt.Errorf("could not get log config: %w", err)
 			}
 
-			fmt.Printf("%-45s %s\n", "LOGGER", "LEVEL")
+			loggers := make(map[string]configV1.LogLevels_Level)
 			for _, l := range r.LogLevel {
-				fmt.Printf("%-45s %s\n", l.Logger, l.Level)
+				if l.Logger != "" {
+					loggers[l.Logger] = l.Level
+				}
+			}
+
+			loggers[logger] = level
+			n := &configV1.LogLevels{}
+			for k, v := range loggers {
+				n.LogLevel = append(n.LogLevel, &configV1.LogLevels_LogLevel{Logger: k, Level: v})
+			}
+
+			_, err = client.SaveLogConfig(context.Background(), n)
+			if err != nil {
+				return fmt.Errorf("failed to save log config: %w", err)
 			}
 			return nil
 		},

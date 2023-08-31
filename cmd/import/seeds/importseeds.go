@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package importcmd
+package seeds
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"path"
@@ -29,10 +30,9 @@ import (
 	"github.com/nlnwa/veidemannctl/importutil"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 )
 
-type ImportSeedCmdOptions struct {
+type options struct {
 	Toplevel        bool
 	IgnoreScheme    bool
 	CheckUri        bool
@@ -47,7 +47,47 @@ type ImportSeedCmdOptions struct {
 	Concurrency     int
 }
 
-func (o *ImportSeedCmdOptions) run() error {
+func NewCmd() *cobra.Command {
+	o := &options{}
+
+	// cmd represents the import command
+	cmd := &cobra.Command{
+		Use:   "seed",
+		Short: "Import seeds",
+		Long: `Import new seeds and entities from a line oriented JSON file on the following format: 
+
+{"entityName":"foo","uri":"https://www.example.com/","entityDescription":"desc","entityLabel":[{"key":"foo","value":"bar"}],"seedLabel":[{"key":"foo","value":"bar"},{"key":"foo2","value":"bar"}],"seedDescription":"foo"}
+
+Every record must be formatted on a single line.
+
+
+`,
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return run(o)
+		},
+	}
+
+	// filename is required
+	cmd.Flags().StringVarP(&o.Filename, "filename", "f", "", "Filename or directory to read from. "+
+		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
+	_ = cmd.MarkFlagRequired("filename")
+	cmd.Flags().StringVarP(&o.ErrorFile, "err-file", "e", "-", "File to write errors to. \"-\" writes to stderr")
+	cmd.Flags().BoolVarP(&o.Toplevel, "toplevel", "", false, "Convert URI by removing path")
+	cmd.Flags().BoolVarP(&o.IgnoreScheme, "ignore-scheme", "", true, "Ignore the URL's scheme when checking if this URL is already imported")
+	cmd.Flags().BoolVarP(&o.CheckUri, "check-uri", "", false, "Check the uri for liveness and follow permanent redirects")
+	cmd.Flags().DurationVarP(&o.CheckUriTimeout, "check-uri-timeout", "", 2*time.Second, "Timeout duration when checking uri for liveness")
+	cmd.Flags().StringVarP(&o.CrawlJobId, "crawljob-id", "", "", "Set crawlJob ID for new seeds")
+	cmd.Flags().StringVarP(&o.DbDir, "db-dir", "b", "/tmp/veidemannctl", "Directory for storing state db")
+	cmd.Flags().BoolVar(&o.Truncate, "truncate", false, "Truncate state database")
+	cmd.Flags().BoolVarP(&o.DryRun, "dry-run", "", false, "Run without actually writing anything to Veidemann")
+	cmd.Flags().BoolVar(&o.SkipImport, "skip-import", false, "Do not import existing seeds into state database")
+	cmd.Flags().IntVarP(&o.Concurrency, "concurrency", "c", 16, "Number of concurrent workers")
+
+	return cmd
+}
+
+func run(o *options) error {
 	// Create error writer (file or stderr)
 	var errFile io.Writer
 	if o.ErrorFile == "" || o.ErrorFile == "-" {
@@ -77,7 +117,7 @@ func (o *ImportSeedCmdOptions) run() error {
 	}
 	defer entityDb.Close()
 
-	uriNormalizer := &UriKeyNormalizer{ignoreScheme: o.IgnoreScheme, toplevel: o.Toplevel}
+	uriNormalizer := &importutil.UriKeyNormalizer{IgnoreScheme: o.IgnoreScheme, Toplevel: o.Toplevel}
 
 	// Create/open state database for seeds
 	seedDbDir := path.Join(o.DbDir, config.GetContext(), configV1.Kind_seed.String())
@@ -102,15 +142,15 @@ func (o *ImportSeedCmdOptions) run() error {
 	}
 
 	// Create Record reader for file input
-	rr, err := importutil.NewRecordReader(o.Filename, &JsonYamlDecoder{}, "*.json")
+	rr, err := importutil.NewRecordReader(o.Filename, &importutil.JsonYamlDecoder{}, "*.json")
 	if err != nil {
 		return fmt.Errorf("failed to initialize reader: %w", err)
 	}
 
-	var uriChecker *UriChecker
+	var uriChecker *importutil.UriChecker
 	if o.CheckUri {
-		uriChecker = &UriChecker{
-			Client: NewHttpClient(o.CheckUriTimeout, false),
+		uriChecker = &importutil.UriChecker{
+			Client: importutil.NewHttpClient(o.CheckUriTimeout, false),
 		}
 	}
 
@@ -122,9 +162,9 @@ func (o *ImportSeedCmdOptions) run() error {
 	errorLog := log.Output(zerolog.ConsoleWriter{Out: errFile, TimeFormat: time.RFC3339})
 
 	// Create processor function for each record in input file
-	proc := func(sd *seedDesc) error {
+	proc := func(sd *importutil.SeedDesc) error {
 		if o.CrawlJobId != "" {
-			sd.crawlJobRef = crawlJobRef
+			sd.CrawlJobRef = crawlJobRef
 		}
 
 		if uriChecker != nil {
@@ -151,7 +191,7 @@ func (o *ImportSeedCmdOptions) run() error {
 		if err != nil {
 			return err
 		} else if len(seedIds) > 0 {
-			return errAlreadyExists{key: normalizedUri}
+			return importutil.ErrAlreadyExists(normalizedUri)
 		}
 
 		if o.DryRun {
@@ -172,7 +212,7 @@ func (o *ImportSeedCmdOptions) run() error {
 				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 				defer cancel()
 
-				entity, err = client.SaveConfigObject(ctx, sd.toEntity())
+				entity, err = client.SaveConfigObject(ctx, sd.ToEntity())
 				if err != nil {
 					return fmt.Errorf("failed to create entity in Veidemann: %w", err)
 				}
@@ -190,7 +230,7 @@ func (o *ImportSeedCmdOptions) run() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		seed, err := client.SaveConfigObject(ctx, sd.toSeed())
+		seed, err := client.SaveConfigObject(ctx, sd.ToSeed())
 		if err != nil {
 			if entity != nil { // Delete created entity if seed creation failed
 				if _, err := client.DeleteConfigObject(ctx, entity); err != nil {
@@ -213,13 +253,13 @@ func (o *ImportSeedCmdOptions) run() error {
 		return nil
 	}
 
-	errHandler := func(state importutil.Job[*seedDesc]) {
+	errHandler := func(state importutil.Job[*importutil.SeedDesc]) {
 		l := errorLog.With().
 			Str("uri", state.Val.Uri).
 			Str("filename", state.GetFilename()).
 			Int("recNum", state.GetRecordNum()).Logger()
 
-		var err errAlreadyExists
+		var err importutil.ErrAlreadyExists
 		if errors.As(state.GetError(), &err) {
 			l.Warn().Msgf("Skipping: %v", err.Error())
 		} else {
@@ -231,7 +271,7 @@ func (o *ImportSeedCmdOptions) run() error {
 
 	// Process each record in input file and add to import db if not already present
 	for {
-		var sd seedDesc
+		var sd importutil.SeedDesc
 		state, err := rr.Next(&sd)
 		if errors.Is(err, io.EOF) {
 			break
@@ -240,7 +280,7 @@ func (o *ImportSeedCmdOptions) run() error {
 			errorLog.Error().Err(err).Msgf("error decoding record: %v", state)
 			continue
 		}
-		executor.Queue <- importutil.Job[*seedDesc]{State: state, Val: &sd}
+		executor.Queue <- importutil.Job[*importutil.SeedDesc]{State: state, Val: &sd}
 	}
 
 	count, success, failed := executor.Wait()
@@ -248,44 +288,4 @@ func (o *ImportSeedCmdOptions) run() error {
 	errorLog.Info().Int("processed", count).Int("imported", success).Int("errors", failed).Msg("Import completed")
 
 	return err
-}
-
-func newImportSeedCmd() *cobra.Command {
-	o := &ImportSeedCmdOptions{}
-
-	// cmd represents the import command
-	cmd := &cobra.Command{
-		Use:   "seed",
-		Short: "Import seeds",
-		Long: `Import new seeds and entities from a line oriented JSON file on the following format: 
-
-{"entityName":"foo","uri":"https://www.example.com/","entityDescription":"desc","entityLabel":[{"key":"foo","value":"bar"}],"seedLabel":[{"key":"foo","value":"bar"},{"key":"foo2","value":"bar"}],"seedDescription":"foo"}
-
-Every record must be formatted on a single line.
-
-
-`,
-		Args: cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return o.run()
-		},
-	}
-
-	// filename is required
-	cmd.Flags().StringVarP(&o.Filename, "filename", "f", "", "Filename or directory to read from. "+
-		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
-	_ = cmd.MarkFlagRequired("filename")
-	cmd.Flags().StringVarP(&o.ErrorFile, "err-file", "e", "-", "File to write errors to. \"-\" writes to stderr")
-	cmd.Flags().BoolVarP(&o.Toplevel, "toplevel", "", false, "Convert URI by removing path")
-	cmd.Flags().BoolVarP(&o.IgnoreScheme, "ignore-scheme", "", true, "Ignore the URL's scheme when checking if this URL is already imported")
-	cmd.Flags().BoolVarP(&o.CheckUri, "check-uri", "", false, "Check the uri for liveness and follow permanent redirects")
-	cmd.Flags().DurationVarP(&o.CheckUriTimeout, "check-uri-timeout", "", 2*time.Second, "Timeout duration when checking uri for liveness")
-	cmd.Flags().StringVarP(&o.CrawlJobId, "crawljob-id", "", "", "Set crawlJob ID for new seeds")
-	cmd.Flags().StringVarP(&o.DbDir, "db-dir", "b", "/tmp/veidemannctl", "Directory for storing state db")
-	cmd.Flags().BoolVar(&o.Truncate, "truncate", false, "Truncate state database")
-	cmd.Flags().BoolVarP(&o.DryRun, "dry-run", "", false, "Run without actually writing anything to Veidemann")
-	cmd.Flags().BoolVar(&o.SkipImport, "skip-import", false, "Do not import existing seeds into state database")
-	cmd.Flags().IntVarP(&o.Concurrency, "concurrency", "c", 16, "Number of concurrent workers")
-
-	return cmd
 }
