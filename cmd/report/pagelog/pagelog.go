@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package report
+package pagelog
 
 import (
 	"context"
@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type pageLogCmdOptions struct {
+type options struct {
 	ids         []string
 	executionId string
 	pageSize    int32
@@ -36,17 +36,36 @@ type pageLogCmdOptions struct {
 	file        string
 }
 
-func (o *pageLogCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	o.ids = args
-	if len(o.ids) == 0 && o.executionId == "" {
-		return fmt.Errorf("request must provide either warcId or executionId")
+func NewCmd() *cobra.Command {
+	o := &options{}
+
+	cmd := &cobra.Command{
+		Use:   "pagelog [ID ...]",
+		Short: "View page log",
+		Long:  `View page log.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			o.ids = args
+			if len(o.ids) == 0 && o.executionId == "" {
+				return fmt.Errorf("request must provide either warcId or executionId")
+			}
+
+			// set silence usage to true to avoid printing usage when an error occurs
+			cmd.SilenceUsage = true
+			return run(o)
+		},
 	}
-	// set silence usage to true to avoid printing usage when an error occurs
-	cmd.SilenceUsage = true
-	return nil
+
+	cmd.Flags().Int32VarP(&o.pageSize, "pagesize", "s", 10, "Number of objects to get")
+	cmd.Flags().Int32VarP(&o.page, "page", "p", 0, "The page number")
+	cmd.Flags().StringVarP(&o.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
+	cmd.Flags().StringVarP(&o.goTemplate, "template", "t", "", "A Go template used to format the output")
+	cmd.Flags().StringVarP(&o.file, "filename", "f", "", "Filename to write to")
+	cmd.Flags().StringVar(&o.executionId, "execution-id", "", "Execution ID")
+
+	return cmd
 }
 
-func (o *pageLogCmdOptions) run() error {
+func run(o *options) error {
 	// initialize output writer
 	out, err := format.ResolveWriter(o.file)
 	if err != nil {
@@ -68,7 +87,7 @@ func (o *pageLogCmdOptions) run() error {
 	client := logV1.NewLogClient(conn)
 
 	// create request
-	request := o.createPageLogListRequest()
+	request := createPageLogListRequest(o)
 
 	r, err := client.ListPageLogs(context.Background(), request)
 	if err != nil {
@@ -90,32 +109,7 @@ func (o *pageLogCmdOptions) run() error {
 	return nil
 }
 
-func newPageLogCmd() *cobra.Command {
-	o := &pageLogCmdOptions{}
-
-	cmd := &cobra.Command{
-		Use:     "pagelog [ID ...]",
-		Short:   "View page log",
-		Long:    `View page log.`,
-		PreRunE: o.complete,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			// set silence usage to true to avoid printing usage when an error occurs
-			cmd.SilenceUsage = true
-			return o.run()
-		},
-	}
-
-	cmd.Flags().Int32VarP(&o.pageSize, "pagesize", "s", 10, "Number of objects to get")
-	cmd.Flags().Int32VarP(&o.page, "page", "p", 0, "The page number")
-	cmd.Flags().StringVarP(&o.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
-	cmd.Flags().StringVarP(&o.goTemplate, "template", "t", "", "A Go template used to format the output")
-	cmd.Flags().StringVarP(&o.file, "filename", "f", "", "Filename to write to")
-	cmd.Flags().StringVar(&o.executionId, "execution-id", "", "Execution ID")
-
-	return cmd
-}
-
-func (o *pageLogCmdOptions) createPageLogListRequest() *logV1.PageLogListRequest {
+func createPageLogListRequest(o *options) *logV1.PageLogListRequest {
 	request := &logV1.PageLogListRequest{}
 	request.WarcId = o.ids
 	request.Offset = o.page

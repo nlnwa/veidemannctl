@@ -28,7 +28,64 @@ import (
 	"github.com/nlnwa/veidemannctl/format"
 )
 
-type getCmdOptions struct {
+func NewCmd() *cobra.Command {
+	o := &opts{}
+
+	cmd := &cobra.Command{
+		GroupID: "basic",
+		Use:     "get KIND [ID ...]",
+		Short:   "Display config objects",
+		Long: `Display one or many config objects.
+
+` +
+			`Valid object types:
+` +
+			format.ListObjectNames() +
+			`Examples:
+  # List all seeds.
+  veidemannctl get seed
+
+  # List all seeds in yaml output format.
+  veidemannctl get seed -o yaml`,
+		ValidArgs: format.GetObjectNames(),
+		Args:      cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			o.ids = args[1:]
+			o.kind = format.GetKind(args[0])
+			if o.kind == configV1.Kind_undefined {
+				return fmt.Errorf(`undefined kind "%v"`, args[0])
+			}
+
+			// set SilenceUsage to true to prevent printing usage when an error occurs
+			cmd.SilenceUsage = true
+
+			return run(o)
+		},
+	}
+
+	cmd.Flags().StringVarP(&o.label, "label", "l", "", "List objects by label {TYPE:VALUE | VALUE}")
+	cmd.Flags().StringVarP(&o.name, "name", "n", "", "List objects by name (accepts regular expressions)")
+	_ = cmd.RegisterFlagCompletionFunc("name", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		names, err := apiutil.CompleteName(args[0], toComplete)
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+		return names, cobra.ShellCompDirectiveDefault
+	})
+	cmd.Flags().StringArrayVarP(&o.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo)")
+	cmd.Flags().StringVarP(&o.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
+	_ = cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return []string{"json", "table", "yaml", "wide", "template", "template-file"}, cobra.ShellCompDirectiveDefault
+	})
+	cmd.Flags().StringVarP(&o.goTemplate, "template", "t", "", "A Go template used to format the output")
+	cmd.Flags().StringVarP(&o.filename, "filename", "f", "", "Filename to write to")
+	cmd.Flags().Int32VarP(&o.pageSize, "pagesize", "s", 10, "Number of objects to get")
+	cmd.Flags().Int32VarP(&o.page, "page", "p", 0, "The page number")
+
+	return cmd
+}
+
+type opts struct {
 	kind       configV1.Kind
 	ids        []string
 	label      string
@@ -41,19 +98,7 @@ type getCmdOptions struct {
 	page       int32
 }
 
-func (o *getCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	kind := args[0]
-	o.ids = args[1:]
-
-	o.kind = format.GetKind(kind)
-
-	if o.kind == configV1.Kind_undefined {
-		return fmt.Errorf(`undefined kind "%v"`, kind)
-	}
-	return nil
-}
-
-func (o *getCmdOptions) run() error {
+func run(o *opts) error {
 	request, err := apiutil.CreateListRequest(o.kind, o.ids, o.name, o.label, o.filters, o.pageSize, o.page)
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
@@ -96,58 +141,4 @@ func (o *getCmdOptions) run() error {
 		}
 	}
 	return nil
-}
-
-func NewGetCmd() *cobra.Command {
-	o := &getCmdOptions{}
-
-	cmd := &cobra.Command{
-		GroupID: "basic",
-		Use:     "get KIND [ID ...]",
-		Short:   "Display config objects",
-		Long: `Display one or many config objects.
-
-` +
-			`Valid object types:
-` +
-			format.ListObjectNames() +
-			`Examples:
-  # List all seeds.
-  veidemannctl get seed
-
-  # List all seeds in yaml output format.
-  veidemannctl get seed -o yaml`,
-		ValidArgs: format.GetObjectNames(),
-		Args:      cobra.MinimumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := o.complete(cmd, args); err != nil {
-				return err
-			}
-			// set SilenceUsage to true to prevent printing usage when an error occurs
-			cmd.SilenceUsage = true
-
-			return o.run()
-		},
-	}
-
-	cmd.Flags().StringVarP(&o.label, "label", "l", "", "List objects by label (<type>:<value> | <value>)")
-	cmd.Flags().StringVarP(&o.name, "name", "n", "", "List objects by name (accepts regular expressions)")
-	_ = cmd.RegisterFlagCompletionFunc("name", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		names, err := apiutil.CompleteName(args[0], toComplete)
-		if err != nil {
-			return nil, cobra.ShellCompDirectiveError
-		}
-		return names, cobra.ShellCompDirectiveDefault
-	})
-	cmd.Flags().StringArrayVarP(&o.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo)")
-	cmd.Flags().StringVarP(&o.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
-	_ = cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{"json", "table", "yaml", "wide", "template", "template-file"}, cobra.ShellCompDirectiveDefault
-	})
-	cmd.Flags().StringVarP(&o.goTemplate, "template", "t", "", "A Go template used to format the output")
-	cmd.Flags().StringVarP(&o.filename, "filename", "f", "", "Filename to write to")
-	cmd.Flags().Int32VarP(&o.pageSize, "pagesize", "s", 10, "Number of objects to get")
-	cmd.Flags().Int32VarP(&o.page, "page", "p", 0, "The page number")
-
-	return cmd
 }

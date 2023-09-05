@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package importcmd
+package importutil
 
 import (
 	"errors"
@@ -23,8 +23,10 @@ import (
 )
 
 type UriKeyNormalizer struct {
-	toplevel     bool
-	ignoreScheme bool
+	// Toplevel will normalize the uri to the top level domain
+	Toplevel bool
+	// IgnoreScheme will ignore the scheme when normalizing
+	IgnoreScheme bool
 }
 
 func (u *UriKeyNormalizer) Normalize(s string) (string, error) {
@@ -40,7 +42,7 @@ func (u *UriKeyNormalizer) Normalize(s string) (string, error) {
 		return "", errors.New("missing hostname")
 	}
 
-	if u.toplevel {
+	if u.Toplevel {
 		uri.Path = "/"
 		uri.RawQuery = ""
 	}
@@ -49,7 +51,7 @@ func (u *UriKeyNormalizer) Normalize(s string) (string, error) {
 		uri.Path = "/"
 	}
 
-	if u.ignoreScheme {
+	if u.IgnoreScheme {
 		uri.Scheme = ""
 	}
 

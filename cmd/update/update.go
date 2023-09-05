@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type updateCmdOptions struct {
+type options struct {
 	kind        configV1.Kind
 	ids         []string
 	name        string
@@ -35,23 +35,72 @@ type updateCmdOptions struct {
 	pageSize    int32
 }
 
-func (o *updateCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	// first arg is kind
-	k := args[0]
-	o.kind = format.GetKind(k)
+func NewCmd() *cobra.Command {
+	o := &options{}
 
-	if o.kind == configV1.Kind_undefined {
-		return fmt.Errorf("undefined kind '%s'", k)
+	cmd := &cobra.Command{
+		GroupID: "basic",
+		Use:     "update KIND [ID ...]",
+		Short:   "Update fields of config objects of the same kind",
+		Long:    `Update a field of one or many config objects of the same kind`,
+		Example: `# Add CrawlJob for a seed.
+veidemannctl update seed -n "https://www.gwpda.org/" -u seed.jobRef+=crawlJob:e46863ae-d076-46ca-8be3-8a8ef72e709
+
+# Replace all configured CrawlJobs for a seed with a new one.
+veidemannctl update seed -n "https://www.gwpda.org/" -u seed.jobRef=crawlJob:e46863ae-d076-46ca-8be3-8a8ef72e709`,
+
+		Args: cobra.MatchAll(
+			cobra.MinimumNArgs(1),
+			func(cmd *cobra.Command, args []string) error {
+				return cobra.OnlyValidArgs(cmd, args[:1])
+			},
+		),
+		ValidArgs: format.GetObjectNames(),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// first arg is kind
+			o.kind = format.GetKind(args[0])
+			if o.kind == configV1.Kind_undefined {
+				return fmt.Errorf("undefined kind '%s'", args[0])
+			}
+
+			// rest of args are ids
+			o.ids = args[1:]
+
+			// silence usage to prevent printing usage when an error occurs
+			cmd.SilenceUsage = true
+			return run(o)
+		},
 	}
 
-	// rest of args are ids
-	o.ids = args[1:]
+	// update-field is required
+	cmd.Flags().StringVarP(&o.updateField, "update-field", "u", "", "Which field to update (i.e. meta.description=foo)")
+	_ = cmd.MarkFlagRequired("update-field")
 
-	return nil
+	// label is optional
+	cmd.Flags().StringVarP(&o.label, "label", "l", "", "Filter objects by label {TYPE:VALUE | VALUE}")
+
+	// name is optional
+	cmd.Flags().StringVarP(&o.name, "name", "n", "", "Filter objects by name (accepts regular expressions)")
+	// register name flag completion func
+	_ = cmd.RegisterFlagCompletionFunc("name", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		names, err := apiutil.CompleteName(args[0], toComplete)
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+		return names, cobra.ShellCompDirectiveDefault
+	})
+
+	// filters is optional
+	cmd.Flags().StringArrayVarP(&o.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo)")
+
+	// limit is optional
+	cmd.Flags().Int32VarP(&o.pageSize, "limit", "s", 0, "Limit the number of objects to update. 0 = no limit")
+
+	return cmd
 }
 
 // run runs the update command
-func (o *updateCmdOptions) run() error {
+func run(o *options) error {
 	conn, err := connection.Connect()
 	if err != nil {
 		return err
@@ -83,62 +132,4 @@ func (o *updateCmdOptions) run() error {
 	}
 	fmt.Printf("Objects updated: %v\n", u.Updated)
 	return nil
-}
-
-func NewUpdateCmd() *cobra.Command {
-	o := &updateCmdOptions{}
-
-	cmd := &cobra.Command{
-		GroupID: "basic",
-		Use:     "update KIND [ID ...]",
-		Short:   "Update fields of config objects of the same kind",
-		Long:    `Update a field of one or many config objects of the same kind`,
-		Example: `# Add CrawlJob for a seed.
-veidemannctl update seed -n "https://www.gwpda.org/" -u seed.jobRef+=crawlJob:e46863ae-d076-46ca-8be3-8a8ef72e709
-
-# Replace all configured CrawlJobs for a seed with a new one.
-veidemannctl update seed -n "https://www.gwpda.org/" -u seed.jobRef=crawlJob:e46863ae-d076-46ca-8be3-8a8ef72e709`,
-
-		Args: cobra.MatchAll(
-			cobra.MinimumNArgs(1),
-			func(cmd *cobra.Command, args []string) error {
-				return cobra.OnlyValidArgs(cmd, args[:1])
-			},
-		),
-		ValidArgs: format.GetObjectNames(),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := o.complete(cmd, args); err != nil {
-				return err
-			}
-			// silence usage to prevent printing usage when an error occurs
-			cmd.SilenceUsage = true
-			return o.run()
-		},
-	}
-
-	// update-field is required
-	cmd.Flags().StringVarP(&o.updateField, "update-field", "u", "", "Which field to update (i.e. meta.description=foo)")
-	_ = cmd.MarkFlagRequired("update-field")
-
-	// label is optional
-	cmd.Flags().StringVarP(&o.label, "label", "l", "", "Filter objects by label (<type>:<value> | <value>)")
-
-	// name is optional
-	cmd.Flags().StringVarP(&o.name, "name", "n", "", "Filter objects by name (accepts regular expressions)")
-	// register name flag completion func
-	_ = cmd.RegisterFlagCompletionFunc("name", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		names, err := apiutil.CompleteName(args[0], toComplete)
-		if err != nil {
-			return nil, cobra.ShellCompDirectiveError
-		}
-		return names, cobra.ShellCompDirectiveDefault
-	})
-
-	// filters is optional
-	cmd.Flags().StringArrayVarP(&o.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo)")
-
-	// limit is optional
-	cmd.Flags().Int32VarP(&o.pageSize, "limit", "s", 0, "Limit the number of objects to update. 0 = no limit")
-
-	return cmd
 }

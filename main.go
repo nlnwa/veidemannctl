@@ -14,20 +14,20 @@
 package main
 
 import (
+	"github.com/nlnwa/veidemannctl/cmd"
 	"time"
 
-	"github.com/nlnwa/veidemannctl/cmd"
 	v "github.com/nlnwa/veidemannctl/version"
 )
 
 var (
-	version = ""
-	commit  = ""
+	version = "dev"
+	commit  = "none"
 	date    = time.Now().Format(time.RFC3339)
 )
 
 //go:generate go run ./docs
 func main() {
-	v.Set(version, commit, date)
+	v.ClientVersion.Set(version, commit, date)
 	cmd.Execute()
 }

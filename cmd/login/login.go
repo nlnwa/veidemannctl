@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewLoginCmd() *cobra.Command {
+func NewCmd() *cobra.Command {
 	var manualLogin bool
 
 	var cmd = &cobra.Command{

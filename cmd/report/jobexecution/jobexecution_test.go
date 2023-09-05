@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package report
+package jobexecution
 
 import (
 	"testing"
@@ -28,25 +28,25 @@ import (
 func TestCreateJobExecutionsListRequest(t *testing.T) {
 	tests := []struct {
 		name    string
-		opt     jobExecutionCmdOptions
+		opt     options
 		want    *reportV1.JobExecutionsListRequest
 		wantErr bool
 	}{
 		{
 			"1",
-			jobExecutionCmdOptions{pageSize: 10},
+			options{pageSize: 10},
 			&reportV1.JobExecutionsListRequest{PageSize: 10},
 			false,
 		},
 		{
 			"2",
-			jobExecutionCmdOptions{ids: []string{"id1", "id2"}, pageSize: 10},
+			options{ids: []string{"id1", "id2"}, pageSize: 10},
 			&reportV1.JobExecutionsListRequest{Id: []string{"id1", "id2"}, PageSize: 10},
 			false,
 		},
 		{
 			"3",
-			jobExecutionCmdOptions{filters: []string{"jobId=jobId1"}, pageSize: 10},
+			options{filters: []string{"jobId=jobId1"}, pageSize: 10},
 			&reportV1.JobExecutionsListRequest{
 				QueryTemplate: &frontierV1.JobExecutionStatus{JobId: "jobId1"},
 				QueryMask:     &commons.FieldMask{Paths: []string{"jobId"}},
@@ -56,7 +56,7 @@ func TestCreateJobExecutionsListRequest(t *testing.T) {
 		},
 		{
 			"4",
-			jobExecutionCmdOptions{filters: []string{"jobId=jobId1"}, pageSize: 10, watch: true},
+			options{filters: []string{"jobId=jobId1"}, pageSize: 10, watch: true},
 			&reportV1.JobExecutionsListRequest{
 				QueryTemplate: &frontierV1.JobExecutionStatus{JobId: "jobId1"},
 				QueryMask:     &commons.FieldMask{Paths: []string{"jobId"}},
@@ -67,7 +67,7 @@ func TestCreateJobExecutionsListRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.opt.createJobExecutionsListRequest()
+			got, err := createJobExecutionsListRequest(&tt.opt)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CreateJobExecutionsListRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return

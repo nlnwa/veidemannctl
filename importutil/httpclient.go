@@ -1,4 +1,4 @@
-// Copyright © 2023 National Library of Norway
+// Copyright © 2017 National Library of Norway
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,14 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package importcmd
+package importutil
 
-import "fmt"
+import (
+	"net/http"
+	"time"
+)
 
-type errAlreadyExists struct {
-	key string
-}
-
-func (e errAlreadyExists) Error() string {
-	return fmt.Sprintf("already exists: %s", e.key)
+func NewHttpClient(timeout time.Duration, followRedirects bool) *http.Client {
+	c := &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives:     true,
+			ResponseHeaderTimeout: timeout,
+		},
+		Timeout: timeout,
+	}
+	if !followRedirects {
+		c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+	}
+	return c
 }

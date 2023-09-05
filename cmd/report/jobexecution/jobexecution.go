@@ -11,26 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package report
+package jobexecution
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
-	"time"
-
 	commonsV1 "github.com/nlnwa/veidemann-api/go/commons/v1"
 	frontierV1 "github.com/nlnwa/veidemann-api/go/frontier/v1"
 	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
 	"github.com/nlnwa/veidemannctl/apiutil"
 	"github.com/nlnwa/veidemannctl/connection"
 	"github.com/nlnwa/veidemannctl/format"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"io"
 )
 
-type jobExecutionCmdOptions struct {
+type options struct {
 	ids         []string
 	filters     []string
 	states      []string
@@ -38,38 +37,56 @@ type jobExecutionCmdOptions struct {
 	page        int32
 	orderByPath string
 	orderDesc   bool
-	to          *time.Time
-	from        *time.Time
+	from        *timestamppb.Timestamp
+	to          *timestamppb.Timestamp
 	goTemplate  string
 	format      string
 	file        string
 	watch       bool
 }
 
-func (o *jobExecutionCmdOptions) complete(cmd *cobra.Command, args []string) error {
-	o.ids = args
+func NewCmd() *cobra.Command {
+	o := &options{}
+	var cmd = &cobra.Command{
+		Use:   "jobexecution [ID ...]",
+		Short: "Get current status for job executions",
+		Long:  `Get current status for job executions.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			o.ids = args
 
-	v := viper.New()
+			f := cmd.Flag("from")
+			if f.Changed {
+				o.from = timestamppb.New(cast.ToTime(f.Value.String()))
+			}
 
-	if err := v.BindPFlag("to", cmd.Flag("to")); err != nil {
-		return fmt.Errorf("failed to bind flag: %w", err)
-	}
-	if v.IsSet("to") {
-		to := v.GetTime("to")
-		o.to = &to
-	}
-	if err := v.BindPFlag("from", cmd.Flag("from")); err != nil {
-		return fmt.Errorf("failed to bind flag: %w", err)
-	}
-	if v.IsSet("from") {
-		from := v.GetTime("from")
-		o.from = &from
+			f = cmd.Flag("to")
+			if f.Changed {
+				o.to = timestamppb.New(cast.ToTime(f.Value.String()))
+			}
+
+			// set silence usage to true to avoid printing usage when an error occurs
+			cmd.SilenceUsage = true
+			return run(o)
+		},
 	}
 
-	return nil
+	cmd.Flags().Int32VarP(&o.pageSize, "pagesize", "s", 10, "Number of objects to get")
+	cmd.Flags().Int32VarP(&o.page, "page", "p", 0, "The page number")
+	cmd.Flags().StringVarP(&o.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
+	cmd.Flags().StringVarP(&o.goTemplate, "template", "t", "", "A Go template used to format the output")
+	cmd.Flags().StringSliceVarP(&o.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo")
+	cmd.Flags().StringSliceVar(&o.states, "state", nil, "Filter objects by state(s)")
+	cmd.Flags().StringVarP(&o.file, "filename", "f", "", "Filename to write to")
+	cmd.Flags().StringVar(&o.orderByPath, "order-by", "", "Order by path")
+	cmd.Flags().BoolVar(&o.orderDesc, "desc", false, "Order descending")
+	cmd.Flags().String("to", "", "To start time")
+	cmd.Flags().String("from", "", "From start time")
+	cmd.Flags().BoolVarP(&o.watch, "watch", "w", false, "Get a continous stream of changes")
+
+	return cmd
 }
 
-func (o *jobExecutionCmdOptions) run() error {
+func run(o *options) error {
 	conn, err := connection.Connect()
 	if err != nil {
 		return err
@@ -78,7 +95,7 @@ func (o *jobExecutionCmdOptions) run() error {
 
 	client := reportV1.NewReportClient(conn)
 
-	request, err := o.createJobExecutionsListRequest()
+	request, err := createJobExecutionsListRequest(o)
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
 	}
@@ -113,37 +130,7 @@ func (o *jobExecutionCmdOptions) run() error {
 	return nil
 }
 
-func newJobExecutionCmd() *cobra.Command {
-	o := &jobExecutionCmdOptions{}
-	var cmd = &cobra.Command{
-		Use:     "jobexecution [ID ...]",
-		Short:   "Get current status for job executions",
-		Long:    `Get current status for job executions.`,
-		PreRunE: o.complete,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			// set silence usage to true to avoid printing usage when an error occurs
-			cmd.SilenceUsage = true
-			return o.run()
-		},
-	}
-
-	cmd.Flags().Int32VarP(&o.pageSize, "pagesize", "s", 10, "Number of objects to get")
-	cmd.Flags().Int32VarP(&o.page, "page", "p", 0, "The page number")
-	cmd.Flags().StringVarP(&o.format, "output", "o", "table", "Output format (table|wide|json|yaml|template|template-file)")
-	cmd.Flags().StringVarP(&o.goTemplate, "template", "t", "", "A Go template used to format the output")
-	cmd.Flags().StringSliceVarP(&o.filters, "filter", "q", nil, "Filter objects by field (i.e. meta.description=foo")
-	cmd.Flags().StringSliceVar(&o.states, "state", nil, "Filter objects by state(s)")
-	cmd.Flags().StringVarP(&o.file, "filename", "f", "", "Filename to write to")
-	cmd.Flags().StringVar(&o.orderByPath, "order-by", "", "Order by path")
-	cmd.Flags().BoolVar(&o.orderDesc, "desc", false, "Order descending")
-	cmd.Flags().String("to", "", "To start time")
-	cmd.Flags().String("from", "", "From start time")
-	cmd.Flags().BoolVarP(&o.watch, "watch", "w", false, "Get a continous stream of changes")
-
-	return cmd
-}
-
-func (o *jobExecutionCmdOptions) createJobExecutionsListRequest() (*reportV1.JobExecutionsListRequest, error) {
+func createJobExecutionsListRequest(o *options) (*reportV1.JobExecutionsListRequest, error) {
 	request := &reportV1.JobExecutionsListRequest{
 		Id:              o.ids,
 		Watch:           o.watch,
@@ -151,6 +138,8 @@ func (o *jobExecutionCmdOptions) createJobExecutionsListRequest() (*reportV1.Job
 		Offset:          o.page,
 		OrderByPath:     o.orderByPath,
 		OrderDescending: o.orderDesc,
+		StartTimeFrom:   o.from,
+		StartTimeTo:     o.to,
 	}
 	if o.watch {
 		request.PageSize = 0

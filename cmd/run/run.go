@@ -23,8 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewRunCmd() *cobra.Command {
-	// runCmd represents the run command
+func NewCmd() *cobra.Command {
 	return &cobra.Command{
 		GroupID: "run",
 		Use:     "run JOB-ID [SEED-ID]",

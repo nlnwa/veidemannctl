@@ -16,6 +16,7 @@ package create
 import (
 	"context"
 	"fmt"
+	"github.com/spf13/cobra"
 	"os"
 	"os/signal"
 	"sync"
@@ -24,17 +25,42 @@ import (
 	"github.com/nlnwa/veidemannctl/connection"
 	"github.com/nlnwa/veidemannctl/format"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-type createCmdOptions struct {
+type options struct {
 	filename    string
 	concurrency int
 }
 
-func (o *createCmdOptions) run() error {
+func NewCmd() *cobra.Command {
+	o := &options{}
+
+	cmd := &cobra.Command{
+		GroupID: "basic",
+		Use:     "create",
+		Short:   "Create or update config objects",
+		Long:    `Create or update one or many config objects`,
+		Args:    cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// silence usage to prevent printing usage when an error occurs
+			cmd.SilenceUsage = true
+
+			return run(o)
+		},
+	}
+
+	// filename is a required flag
+	cmd.Flags().StringVarP(&o.filename, "filename", "f", "", "Filename or directory to read from. "+
+		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
+	_ = cmd.MarkFlagRequired("filename")
+	cmd.Flags().IntVarP(&o.concurrency, "concurrency", "c", 32, "Number of concurrent requests")
+
+	return cmd
+}
+
+func run(o *options) error {
 	if o.filename == "-" {
 		o.filename = ""
 	}
@@ -119,30 +145,4 @@ func (o *createCmdOptions) run() error {
 	wg.Wait()
 
 	return nil
-}
-
-func NewCreateCmd() *cobra.Command {
-	o := &createCmdOptions{}
-
-	cmd := &cobra.Command{
-		GroupID: "basic",
-		Use:     "create",
-		Short:   "Create or update config objects",
-		Long:    `Create or update one or many config objects`,
-		Args:    cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			// silence usage to prevent printing usage when an error occurs
-			cmd.SilenceUsage = true
-
-			return o.run()
-		},
-	}
-
-	// filename is a required flag
-	cmd.Flags().StringVarP(&o.filename, "filename", "f", "", "Filename or directory to read from. "+
-		"If input is a directory, all files ending in .yaml or .json will be tried. An input of '-' will read from stdin.")
-	_ = cmd.MarkFlagRequired("filename")
-	cmd.Flags().IntVarP(&o.concurrency, "concurrency", "c", 32, "Number of concurrent requests")
-
-	return cmd
 }

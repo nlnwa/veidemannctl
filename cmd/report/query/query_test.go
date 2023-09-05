@@ -1,4 +1,4 @@
-package report
+package query
 
 import (
 	reportV1 "github.com/nlnwa/veidemann-api/go/report/v1"
@@ -9,13 +9,13 @@ import (
 func Test_queryCmdOptions_parseQuery(t *testing.T) {
 	tests := []struct {
 		name            string
-		fieldsFromFlags *queryCmdOptions
+		fieldsFromFlags *options
 		args            []string
 		want            *query
 		wantErr         assert.ErrorAssertionFunc
 	}{
 		{"template file",
-			&queryCmdOptions{},
+			&options{},
 			[]string{"testdata/template1.yaml"},
 			&query{
 				Name:        "template1",
@@ -27,13 +27,13 @@ func Test_queryCmdOptions_parseQuery(t *testing.T) {
 				request: &reportV1.ExecuteDbQueryRequest{
 					Query: "r.db('veidemann').table('config_crawl_entities')\n",
 				},
-				opts: &queryCmdOptions{
+				opts: &options{
 					format: "template",
 				},
 			},
 			assert.NoError},
 		{"template file with template flag",
-			&queryCmdOptions{
+			&options{
 				goTemplate: "{{.id}}",
 			},
 			[]string{"testdata/template1.yaml"},
@@ -47,14 +47,14 @@ func Test_queryCmdOptions_parseQuery(t *testing.T) {
 				request: &reportV1.ExecuteDbQueryRequest{
 					Query: "r.db('veidemann').table('config_crawl_entities')\n",
 				},
-				opts: &queryCmdOptions{
+				opts: &options{
 					goTemplate: "{{.id}}",
 					format:     "template",
 				},
 			},
 			assert.NoError},
 		{"template file with format flag",
-			&queryCmdOptions{
+			&options{
 				format: "yaml",
 			},
 			[]string{"testdata/template1.yaml"},
@@ -68,18 +68,18 @@ func Test_queryCmdOptions_parseQuery(t *testing.T) {
 				request: &reportV1.ExecuteDbQueryRequest{
 					Query: "r.db('veidemann').table('config_crawl_entities')\n",
 				},
-				opts: &queryCmdOptions{
+				opts: &options{
 					format: "yaml",
 				},
 			},
 			assert.NoError},
 		{"nonexisting template file",
-			&queryCmdOptions{},
+			&options{},
 			[]string{"missing.yaml"},
 			nil,
 			assert.Error},
 		{"query",
-			&queryCmdOptions{},
+			&options{},
 			[]string{"r.db('veidemann').table('config_crawl_entities')"},
 			&query{
 				Query:       "r.db('veidemann').table('config_crawl_entities')",
@@ -88,7 +88,7 @@ func Test_queryCmdOptions_parseQuery(t *testing.T) {
 				request: &reportV1.ExecuteDbQueryRequest{
 					Query: "r.db('veidemann').table('config_crawl_entities')",
 				},
-				opts: &queryCmdOptions{
+				opts: &options{
 					format: "json",
 				},
 			},

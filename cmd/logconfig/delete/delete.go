@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package status
+package delete
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/nlnwa/veidemann-api/go/controller/v1"
+	configV1 "github.com/nlnwa/veidemann-api/go/config/v1"
 	"github.com/nlnwa/veidemannctl/connection"
 	"github.com/spf13/cobra"
 	empty "google.golang.org/protobuf/types/known/emptypb"
@@ -25,26 +25,45 @@ import (
 
 func NewCmd() *cobra.Command {
 	return &cobra.Command{
-		GroupID:      "status",
-		Use:          "status",
-		Short:        "Display crawler status",
-		Long:         `Display crawler status.`,
-		SilenceUsage: true,
+		Use:   "delete LOGGER",
+		Short: "Delete a logger",
+		Long:  `Delete a logger.`,
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			logger := args[0]
+
+			// silence usage to prevent printing usage when error occurs
+			cmd.SilenceUsage = true
+
 			conn, err := connection.Connect()
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to connect: %w", err)
 			}
 			defer conn.Close()
 
-			client := controller.NewControllerClient(conn)
+			client := configV1.NewConfigClient(conn)
 
-			crawlerStatus, err := client.Status(context.Background(), &empty.Empty{})
+			r, err := client.GetLogConfig(context.Background(), &empty.Empty{})
 			if err != nil {
-				return fmt.Errorf("failed to get crawler status: %w", err)
+				return fmt.Errorf("failed to get log config: %w", err)
 			}
-			fmt.Printf("Status: %v, Url queue size: %v, Busy crawl host groups: %v\n",
-				crawlerStatus.RunStatus, crawlerStatus.QueueSize, crawlerStatus.BusyCrawlHostGroupCount)
+
+			loggers := make(map[string]configV1.LogLevels_Level)
+			for _, l := range r.LogLevel {
+				if l.Logger != "" && l.Logger != logger {
+					loggers[l.Logger] = l.Level
+				}
+			}
+
+			n := &configV1.LogLevels{}
+			for k, v := range loggers {
+				n.LogLevel = append(n.LogLevel, &configV1.LogLevels_LogLevel{Logger: k, Level: v})
+			}
+
+			_, err = client.SaveLogConfig(context.Background(), n)
+			if err != nil {
+				return fmt.Errorf("failed to save log config: %w", err)
+			}
 			return nil
 		},
 	}

@@ -23,31 +23,7 @@ import (
 	empty "google.golang.org/protobuf/types/known/emptypb"
 )
 
-type activeRolesCmdOptions struct{}
-
-func (o *activeRolesCmdOptions) run() error {
-	conn, err := connection.Connect()
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	client := controllerV1.NewControllerClient(conn)
-
-	r, err := client.GetRolesForActiveUser(context.Background(), &empty.Empty{})
-	if err != nil {
-		return err
-	}
-
-	for _, role := range r.Role {
-		fmt.Println(role)
-	}
-	return nil
-}
-
-func NewActiveRolesCmd() *cobra.Command {
-	o := &activeRolesCmdOptions{}
-
+func NewCmd() *cobra.Command {
 	return &cobra.Command{
 		GroupID:      "debug",
 		Use:          "activeroles",
@@ -56,7 +32,23 @@ func NewActiveRolesCmd() *cobra.Command {
 		Args:         cobra.NoArgs,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return o.run()
+			conn, err := connection.Connect()
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			client := controllerV1.NewControllerClient(conn)
+
+			r, err := client.GetRolesForActiveUser(context.Background(), &empty.Empty{})
+			if err != nil {
+				return err
+			}
+
+			for _, role := range r.Role {
+				fmt.Println(role)
+			}
+			return nil
 		},
 	}
 }
