@@ -1,19 +1,31 @@
-## veidemannctl abort
+## veidemannctl completion fish
 
-Abort crawl executions
+Generate the autocompletion script for fish
 
 ### Synopsis
 
-Abort one or more crawl executions.
+Generate the autocompletion script for the fish shell.
+
+To load completions in your current shell session:
+
+	veidemannctl completion fish | source
+
+To load completions for every new session, execute once:
+
+	veidemannctl completion fish > ~/.config/fish/completions/veidemannctl.fish
+
+You will need to start a new shell for this setup to take effect.
+
 
 ```
-veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
+veidemannctl completion fish [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for abort
+  -h, --help              help for fish
+      --no-descriptions   disable completion descriptions
 ```
 
 ### Options inherited from parent commands
@@ -31,5 +43,5 @@ veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
 
 ### SEE ALSO
 
-* [veidemannctl](veidemannctl.md)	 - veidemannctl controls the Veidemann web crawler
+* [veidemannctl completion](veidemannctl_completion.md)	 - Generate the autocompletion script for the specified shell
 

@@ -4,7 +4,7 @@ Abort job executions
 
 ### Synopsis
 
-Abort one or many job executions.
+Abort one or more job executions.
 
 ```
 veidemannctl abortjobexecution JOB-EXECUTION-ID ... [flags]

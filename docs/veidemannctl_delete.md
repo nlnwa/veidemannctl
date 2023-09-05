@@ -23,7 +23,7 @@ Examples:
   veidemannctl delete seed 407a9600-4f25-4f17-8cff-ee1b8ee950f6
 
 ```
-veidemannctl delete KIND (ID ...) [flags]
+veidemannctl delete KIND ID ... [flags]
 ```
 
 ### Options
@@ -32,7 +32,7 @@ veidemannctl delete KIND (ID ...) [flags]
       --dry-run              Set to false to execute delete (default true)
   -q, --filter stringArray   Delete objects by field (i.e. meta.description=foo)
   -h, --help                 help for delete
-  -l, --label string         Delete objects by label (<type>:<value> | <value>)
+  -l, --label string         Delete objects by label {TYPE:VALUE | VALUE}
 ```
 
 ### Options inherited from parent commands

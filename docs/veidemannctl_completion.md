@@ -1,19 +1,17 @@
-## veidemannctl abort
+## veidemannctl completion
 
-Abort crawl executions
+Generate the autocompletion script for the specified shell
 
 ### Synopsis
 
-Abort one or more crawl executions.
+Generate the autocompletion script for veidemannctl for the specified shell.
+See each sub-command's help for details on how to use the generated script.
 
-```
-veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
-```
 
 ### Options
 
 ```
-  -h, --help   help for abort
+  -h, --help   help for completion
 ```
 
 ### Options inherited from parent commands
@@ -32,4 +30,8 @@ veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
 ### SEE ALSO
 
 * [veidemannctl](veidemannctl.md)	 - veidemannctl controls the Veidemann web crawler
+* [veidemannctl completion bash](veidemannctl_completion_bash.md)	 - Generate the autocompletion script for bash
+* [veidemannctl completion fish](veidemannctl_completion_fish.md)	 - Generate the autocompletion script for fish
+* [veidemannctl completion powershell](veidemannctl_completion_powershell.md)	 - Generate the autocompletion script for powershell
+* [veidemannctl completion zsh](veidemannctl_completion_zsh.md)	 - Generate the autocompletion script for zsh
 
