@@ -7,7 +7,7 @@ A command line client for Veidemann
 Install the latest release version (currently only for linux/amd64)
 
 ```console
-curl -sL https://raw.githubusercontent.com/nlnwa/veidemannctl/master/install.sh | bash
+curl -sL https://raw.githubusercontent.com/nlnwa/veidemannctl/main/install.sh | bash
 ```
 
 ## Documentation
