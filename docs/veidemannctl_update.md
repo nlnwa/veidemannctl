@@ -25,7 +25,7 @@ veidemannctl update seed -n "https://www.gwpda.org/" -u seed.jobRef=crawlJob:e46
 ```
   -q, --filter stringArray    Filter objects by field (i.e. meta.description=foo)
   -h, --help                  help for update
-  -l, --label string          Filter objects by label (<type>:<value> | <value>)
+  -l, --label string          Filter objects by label {TYPE:VALUE | VALUE}
   -s, --limit int32           Limit the number of objects to update. 0 = no limit
   -n, --name string           Filter objects by name (accepts regular expressions)
   -u, --update-field string   Which field to update (i.e. meta.description=foo)

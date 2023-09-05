@@ -1,19 +1,28 @@
-## veidemannctl abort
+## veidemannctl completion powershell
 
-Abort crawl executions
+Generate the autocompletion script for powershell
 
 ### Synopsis
 
-Abort one or more crawl executions.
+Generate the autocompletion script for powershell.
+
+To load completions in your current shell session:
+
+	veidemannctl completion powershell | Out-String | Invoke-Expression
+
+To load completions for every new session, add the output of the above command
+to your powershell profile.
+
 
 ```
-veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
+veidemannctl completion powershell [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for abort
+  -h, --help              help for powershell
+      --no-descriptions   disable completion descriptions
 ```
 
 ### Options inherited from parent commands
@@ -31,5 +40,5 @@ veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
 
 ### SEE ALSO
 
-* [veidemannctl](veidemannctl.md)	 - veidemannctl controls the Veidemann web crawler
+* [veidemannctl completion](veidemannctl_completion.md)	 - Generate the autocompletion script for the specified shell
 

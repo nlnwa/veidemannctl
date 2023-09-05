@@ -31,7 +31,10 @@ func main() {
 	var _, b, _, _ = runtime.Caller(0)
 	var dir = filepath.Dir(b)
 	fmt.Println("Generating documentation...")
-	err := doc.GenMarkdownTree(cmd.NewRootCmd(), dir)
+	c := cmd.NewRootCmd()
+	c.InitDefaultCompletionCmd()
+	c.InitDefaultVersionFlag()
+	err := doc.GenMarkdownTree(c, dir)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

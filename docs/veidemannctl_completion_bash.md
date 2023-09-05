@@ -1,19 +1,40 @@
-## veidemannctl abort
+## veidemannctl completion bash
 
-Abort crawl executions
+Generate the autocompletion script for bash
 
 ### Synopsis
 
-Abort one or more crawl executions.
+Generate the autocompletion script for the bash shell.
+
+This script depends on the 'bash-completion' package.
+If it is not installed already, you can install it via your OS's package manager.
+
+To load completions in your current shell session:
+
+	source <(veidemannctl completion bash)
+
+To load completions for every new session, execute once:
+
+#### Linux:
+
+	veidemannctl completion bash > /etc/bash_completion.d/veidemannctl
+
+#### macOS:
+
+	veidemannctl completion bash > $(brew --prefix)/etc/bash_completion.d/veidemannctl
+
+You will need to start a new shell for this setup to take effect.
+
 
 ```
-veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
+veidemannctl completion bash
 ```
 
 ### Options
 
 ```
-  -h, --help   help for abort
+  -h, --help              help for bash
+      --no-descriptions   disable completion descriptions
 ```
 
 ### Options inherited from parent commands
@@ -31,5 +52,5 @@ veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
 
 ### SEE ALSO
 
-* [veidemannctl](veidemannctl.md)	 - veidemannctl controls the Veidemann web crawler
+* [veidemannctl completion](veidemannctl_completion.md)	 - Generate the autocompletion script for the specified shell
 

@@ -1,19 +1,42 @@
-## veidemannctl abort
+## veidemannctl completion zsh
 
-Abort crawl executions
+Generate the autocompletion script for zsh
 
 ### Synopsis
 
-Abort one or more crawl executions.
+Generate the autocompletion script for the zsh shell.
+
+If shell completion is not already enabled in your environment you will need
+to enable it.  You can execute the following once:
+
+	echo "autoload -U compinit; compinit" >> ~/.zshrc
+
+To load completions in your current shell session:
+
+	source <(veidemannctl completion zsh)
+
+To load completions for every new session, execute once:
+
+#### Linux:
+
+	veidemannctl completion zsh > "${fpath[1]}/_veidemannctl"
+
+#### macOS:
+
+	veidemannctl completion zsh > $(brew --prefix)/share/zsh/site-functions/_veidemannctl
+
+You will need to start a new shell for this setup to take effect.
+
 
 ```
-veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
+veidemannctl completion zsh [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for abort
+  -h, --help              help for zsh
+      --no-descriptions   disable completion descriptions
 ```
 
 ### Options inherited from parent commands
@@ -31,5 +54,5 @@ veidemannctl abort CRAWL-EXECUTION-ID ... [flags]
 
 ### SEE ALSO
 
-* [veidemannctl](veidemannctl.md)	 - veidemannctl controls the Veidemann web crawler
+* [veidemannctl completion](veidemannctl_completion.md)	 - Generate the autocompletion script for the specified shell
 

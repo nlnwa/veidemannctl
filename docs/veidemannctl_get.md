@@ -36,7 +36,7 @@ veidemannctl get KIND [ID ...] [flags]
   -f, --filename string      Filename to write to
   -q, --filter stringArray   Filter objects by field (i.e. meta.description=foo)
   -h, --help                 help for get
-  -l, --label string         List objects by label (<type>:<value> | <value>)
+  -l, --label string         List objects by label {TYPE:VALUE | VALUE}
   -n, --name string          List objects by name (accepts regular expressions)
   -o, --output string        Output format (table|wide|json|yaml|template|template-file) (default "table")
   -p, --page int32           The page number

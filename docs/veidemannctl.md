@@ -18,6 +18,7 @@ veidemannctl controls the Veidemann web crawler
       --log-level string              set log level, available levels are "panic", "fatal", "error", "warn", "info", "debug" and "trace" (default "info")
       --server string                 The address of the Veidemann server to use
       --server-name-override string   If set, it will override the virtual host name of authority (e.g. :authority header field) in requests
+  -v, --version                       version for veidemannctl
 ```
 
 ### SEE ALSO
@@ -25,6 +26,7 @@ veidemannctl controls the Veidemann web crawler
 * [veidemannctl abort](veidemannctl_abort.md)	 - Abort crawl executions
 * [veidemannctl abortjobexecution](veidemannctl_abortjobexecution.md)	 - Abort job executions
 * [veidemannctl activeroles](veidemannctl_activeroles.md)	 - Get the active roles for the currently logged in user
+* [veidemannctl completion](veidemannctl_completion.md)	 - Generate the autocompletion script for the specified shell
 * [veidemannctl config](veidemannctl_config.md)	 - Modify or view configuration files
 * [veidemannctl create](veidemannctl_create.md)	 - Create or update config objects
 * [veidemannctl delete](veidemannctl_delete.md)	 - Delete config objects
@@ -40,5 +42,4 @@ veidemannctl controls the Veidemann web crawler
 * [veidemannctl status](veidemannctl_status.md)	 - Display crawler status
 * [veidemannctl unpause](veidemannctl_unpause.md)	 - Request crawler to unpause
 * [veidemannctl update](veidemannctl_update.md)	 - Update fields of config objects of the same kind
-* [veidemannctl version](veidemannctl_version.md)	 - Print the client version information
 
