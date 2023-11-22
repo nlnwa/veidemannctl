@@ -144,6 +144,7 @@ func run(o *options) error {
 		r, err := client.DeleteConfigObject(context.Background(), request)
 		if err != nil {
 			log.Error().Err(err).Str("id", msg.Id).Msgf("Could not delete object")
+			continue
 		}
 		if r.Deleted {
 			deleted++
