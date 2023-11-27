@@ -103,7 +103,7 @@ type SeedReporter struct {
 func (d SeedReporter) Report(w io.Writer) error {
 	var nrOfDuplicateKeys int32
 	var nrOfDuplicateValues int32
-	var rec *SeedDuplicateReportRecord
+	rec := &SeedDuplicateReportRecord{}
 
 	checkDuplicate := func(k []byte, v []byte) {
 		ids := d.bytesToStringArray(v)
