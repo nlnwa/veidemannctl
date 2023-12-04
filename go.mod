@@ -3,7 +3,7 @@ module github.com/nlnwa/veidemannctl
 go 1.19
 
 require (
-	github.com/coreos/go-oidc/v3 v3.7.0
+	github.com/coreos/go-oidc/v3 v3.8.0
 	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/invopop/yaml v0.2.0
