@@ -198,7 +198,6 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	}
 	idTokenVerifier = p.Verifier(&oc)
 
-
 	// create nonce and use nonce as state
 	nonce := randStringBytesMaskImprSrc(16)
 	state := nonce
@@ -235,7 +234,6 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	op.refreshToken = oauth2Token.RefreshToken
 
 	// Extract the ID Token from OAuth2 token.
@@ -245,12 +243,13 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	}
 	op.idToken = rawIDToken
 
-	// Parse and verify ID Token payload.
+	// Verify ID Token
 	idToken, err := idTokenVerifier.Verify(ctx, rawIDToken)
 	if err != nil {
 		return nil, err
 	}
 
+	// Verify nonce
 	if idToken.Nonce != nonce {
 		return nil, errors.New("nonce did not match")
 	}
