@@ -83,9 +83,7 @@ func loginOIDC(oidcConfig *config.OIDCConfig, manualLogin bool) (*claims, error)
 		clientID = "veidemann-cli"
 	}
 	clientSecret := oidcConfig.ClientSecret
-	if clientSecret == "" {
-		clientSecret = "cli-app-secret"
-	}
+
 	// Does the provider use "offline_access" scope to request a refresh token
 	// or does it use "access_type=offline" (e.g. Google)?
 	offlineAsScope := false
