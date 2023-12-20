@@ -192,10 +192,12 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	p, err := oidc.NewProvider(ctx, op.idpIssuerUrl)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to identity provider \"%s\": %w", op.idpIssuerUrl, err)
-	} else {
-		oc := oidc.Config{ClientID: op.clientID}
-		idTokenVerifier = p.Verifier(&oc)
 	}
+	oc := oidc.Config{
+		ClientID: op.clientID,
+	}
+	idTokenVerifier = p.Verifier(&oc)
+
 
 	// create nonce and use nonce as state
 	nonce := randStringBytesMaskImprSrc(16)
