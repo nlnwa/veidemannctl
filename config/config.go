@@ -80,7 +80,7 @@ func GetApiKeyConfig() (*ApiKeyConfig, error) {
 // OIDCConfig is the configuration for the oidc authentication provider.
 type OIDCConfig struct {
 	ClientID     string `yaml:"client-id" mapstructure:"client-id"`
-	ClientSecret string `yaml:"client-secret" mapstructure:"client-secret"`
+	ClientSecret string `yaml:"client-secret,omitempty" mapstructure:"client-secret"`
 	IdToken      string `yaml:"id-token" mapstructure:"id-token"`
 	RefreshToken string `yaml:"refresh-token,omitempty" mapstructure:"refresh-token"`
 	IdpIssuerUrl string `yaml:"idp-issuer-url" mapstructure:"idp-issuer-url"`
