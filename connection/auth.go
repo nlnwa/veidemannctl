@@ -123,7 +123,7 @@ func loginOIDC(oidcConfig *config.OIDCConfig, manualLogin bool) (*claims, error)
 		Config: config.OIDCConfig{
 			ClientID:     o.clientID,
 			ClientSecret: o.clientSecret,
-			IdToken:      o.rawIdToken,
+			IdToken:      o.idToken,
 			RefreshToken: o.refreshToken,
 			IdpIssuerUrl: o.idpIssuerUrl,
 		},
@@ -170,7 +170,7 @@ func getIdpIssuer() (string, error) {
 type oidcProvider struct {
 	clientID     string
 	clientSecret string
-	rawIdToken   string
+	idToken      string
 	refreshToken string
 	idpIssuerUrl string
 	scopes       []string
@@ -255,10 +255,10 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	if !ok {
 		return nil, errors.New("token not found")
 	}
-	op.rawIdToken = rawIDToken
+	op.idToken = rawIDToken
 
 	// Parse and verify ID Token payload.
-	idToken, err := idTokenVerifier.Verify(ctx, op.rawIdToken)
+	idToken, err := idTokenVerifier.Verify(ctx, rawIDToken)
 	if err != nil {
 		return nil, err
 	}
