@@ -221,26 +221,12 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	var code string
 
 	if manual {
-		fmt.Println("Paste this uri in a browser window. Follow the login steps and paste the code here.")
-		fmt.Println(authCodeURL)
-
-		fmt.Print("Code: ")
-		if _, err := fmt.Scan(&code); err != nil {
-			return nil, err
-		}
+		code, err = manualFlow(authCodeURL)
 	} else {
-		var gotState string
-		err := openBrowser(authCodeURL)
-		if err != nil {
-			return nil, err
-		}
-		code, gotState, err = listenAndWaitForAuthorizationCode(autoRedirectURI)
-		if err != nil {
-			return nil, err
-		}
-		if gotState != state {
-			return nil, errors.New("state is not equal")
-		}
+		code, err = openBrowserFlow(authCodeURL, state)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get authorization code: %w", err)
 	}
 
 	oauth2Token, err := oauth2Config.Exchange(ctx, code)
@@ -271,8 +257,33 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	if err := idToken.Claims(claims); err != nil {
 		return nil, err
 	}
+	return claims, nil
+}
 
-	return claims, err
+func manualFlow(authCodeURL string) (string, error) {
+	var code string
+	fmt.Printf("Open the following link in your browser:\n%v\n", authCodeURL)
+	fmt.Printf("Paste the code from the browser: ")
+	if _, err := fmt.Scan(&code); err != nil {
+		return "", err
+	}
+	return code, nil
+}
+
+func openBrowserFlow(authCodeURL string, state string) (string, error) {
+	err := openBrowser(authCodeURL)
+	if err != nil {
+		return "", err
+	}
+
+	code, gotState, err := listenAndWaitForAuthorizationCode(autoRedirectURI)
+	if err != nil {
+		return "", err
+	}
+	if gotState != state {
+		return "", fmt.Errorf("state did not match")
+	}
+	return code, nil
 }
 
 // oidcCredentials implements credentials.PerRPCCredentials for oidc authentication.
