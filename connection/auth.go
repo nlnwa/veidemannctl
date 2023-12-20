@@ -87,7 +87,7 @@ func loginOIDC(oidcConfig *config.OIDCConfig, manualLogin bool) (*claims, error)
 	// Does the provider use "offline_access" scope to request a refresh token
 	// or does it use "access_type=offline" (e.g. Google)?
 	offlineAsScope := false
-	scopes := []string{oidc.ScopeOpenID, "profile", "email", "groups", "audience:server:client_id:veidemann-api"}
+	scopes := []string{oidc.ScopeOpenID, "profile", "email", "groups"}
 	if offlineAsScope {
 		scopes = append(scopes, "offline_access")
 	}
