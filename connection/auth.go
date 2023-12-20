@@ -15,8 +15,10 @@ package connection
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -176,7 +178,7 @@ type oidcProvider struct {
 	scopes       []string
 }
 
-// login using oidc code flow.
+// Login using OIDC Authorization Code flow with PKCE.
 // If manual is true, the user will be given a URL to paste in a browser window,
 // else a browser window will be opened automatically.
 func (op *oidcProvider) login(manual bool) (*claims, error) {
@@ -198,10 +200,6 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	}
 	idTokenVerifier = p.Verifier(&oc)
 
-	// create nonce and use nonce as state
-	nonce := randStringBytesMaskImprSrc(16)
-	state := nonce
-
 	var redirectURI string
 	if manual {
 		redirectURI = manualRedirectURI
@@ -209,6 +207,7 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 		redirectURI = autoRedirectURI
 	}
 
+	// Authorization code flow with PKCE
 	oauth2Config := &oauth2.Config{
 		ClientID:     op.clientID,
 		ClientSecret: op.clientSecret,
@@ -217,7 +216,16 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 		RedirectURL:  redirectURI,
 	}
 
-	authCodeURL := oauth2Config.AuthCodeURL(nonce, oidc.Nonce(nonce))
+	// PKCE requires a code verifier and a code challenge.
+	codeVerifier, codeChallenge := pkceChallenge()
+
+	nonce := randStringBytesMaskImprSrc(16)
+	state := randStringBytesMaskImprSrc(16)
+	authCodeURL := oauth2Config.AuthCodeURL(state,
+		oidc.Nonce(nonce),
+		oauth2.SetAuthURLParam("code_challenge", codeChallenge),
+		oauth2.SetAuthURLParam("code_challenge_method", "S256"),
+	)
 
 	var code string
 
@@ -230,7 +238,7 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 		return nil, fmt.Errorf("failed to get authorization code: %w", err)
 	}
 
-	oauth2Token, err := oauth2Config.Exchange(ctx, code)
+	oauth2Token, err := oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
 	if err != nil {
 		return nil, err
 	}
@@ -259,6 +267,17 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 		return nil, err
 	}
 	return claims, nil
+}
+
+// pkceChallenge generates a code verifier and a code challenge.
+func pkceChallenge() (codeVerifier string, codeChallenge string) {
+	codeVerifier = randStringBytesMaskImprSrc(64)
+	// sha256 hash code verifier
+	h := sha256.New()
+	h.Write([]byte(codeVerifier))
+	codeChallenge = base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+
+	return
 }
 
 func manualFlow(authCodeURL string) (string, error) {
