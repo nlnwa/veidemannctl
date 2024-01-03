@@ -15,8 +15,10 @@ package connection
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -81,13 +83,11 @@ func loginOIDC(oidcConfig *config.OIDCConfig, manualLogin bool) (*claims, error)
 		clientID = "veidemann-cli"
 	}
 	clientSecret := oidcConfig.ClientSecret
-	if clientSecret == "" {
-		clientSecret = "cli-app-secret"
-	}
+
 	// Does the provider use "offline_access" scope to request a refresh token
 	// or does it use "access_type=offline" (e.g. Google)?
 	offlineAsScope := false
-	scopes := []string{oidc.ScopeOpenID, "profile", "email", "groups", "audience:server:client_id:veidemann-api"}
+	scopes := []string{oidc.ScopeOpenID, "profile", "email", "groups"}
 	if offlineAsScope {
 		scopes = append(scopes, "offline_access")
 	}
@@ -123,7 +123,7 @@ func loginOIDC(oidcConfig *config.OIDCConfig, manualLogin bool) (*claims, error)
 		Config: config.OIDCConfig{
 			ClientID:     o.clientID,
 			ClientSecret: o.clientSecret,
-			IdToken:      o.rawIdToken,
+			IdToken:      o.idToken,
 			RefreshToken: o.refreshToken,
 			IdpIssuerUrl: o.idpIssuerUrl,
 		},
@@ -170,13 +170,13 @@ func getIdpIssuer() (string, error) {
 type oidcProvider struct {
 	clientID     string
 	clientSecret string
-	rawIdToken   string
+	idToken      string
 	refreshToken string
 	idpIssuerUrl string
 	scopes       []string
 }
 
-// login using oidc code flow.
+// Login using OIDC Authorization Code flow with PKCE.
 // If manual is true, the user will be given a URL to paste in a browser window,
 // else a browser window will be opened automatically.
 func (op *oidcProvider) login(manual bool) (*claims, error) {
@@ -192,14 +192,11 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	p, err := oidc.NewProvider(ctx, op.idpIssuerUrl)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to identity provider \"%s\": %w", op.idpIssuerUrl, err)
-	} else {
-		oc := oidc.Config{ClientID: op.clientID}
-		idTokenVerifier = p.Verifier(&oc)
 	}
-
-	// create nonce and use nonce as state
-	nonce := randStringBytesMaskImprSrc(16)
-	state := nonce
+	oc := oidc.Config{
+		ClientID: op.clientID,
+	}
+	idTokenVerifier = p.Verifier(&oc)
 
 	var redirectURI string
 	if manual {
@@ -208,6 +205,7 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 		redirectURI = autoRedirectURI
 	}
 
+	// Authorization code flow with PKCE
 	oauth2Config := &oauth2.Config{
 		ClientID:     op.clientID,
 		ClientSecret: op.clientSecret,
@@ -216,38 +214,32 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 		RedirectURL:  redirectURI,
 	}
 
-	authCodeURL := oauth2Config.AuthCodeURL(nonce, oidc.Nonce(nonce))
+	// PKCE requires a code verifier and a code challenge.
+	codeVerifier, codeChallenge := pkceChallenge()
+
+	nonce := randStringBytesMaskImprSrc(16)
+	state := randStringBytesMaskImprSrc(16)
+	authCodeURL := oauth2Config.AuthCodeURL(state,
+		oidc.Nonce(nonce),
+		oauth2.SetAuthURLParam("code_challenge", codeChallenge),
+		oauth2.SetAuthURLParam("code_challenge_method", "S256"),
+	)
 
 	var code string
 
 	if manual {
-		fmt.Println("Paste this uri in a browser window. Follow the login steps and paste the code here.")
-		fmt.Println(authCodeURL)
-
-		fmt.Print("Code: ")
-		if _, err := fmt.Scan(&code); err != nil {
-			return nil, err
-		}
+		code, err = manualFlow(authCodeURL)
 	} else {
-		var gotState string
-		err := openBrowser(authCodeURL)
-		if err != nil {
-			return nil, err
-		}
-		code, gotState, err = listenAndWaitForAuthorizationCode(autoRedirectURI)
-		if err != nil {
-			return nil, err
-		}
-		if gotState != state {
-			return nil, errors.New("state is not equal")
-		}
+		code, err = openBrowserFlow(authCodeURL, state)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get authorization code: %w", err)
 	}
 
-	oauth2Token, err := oauth2Config.Exchange(ctx, code)
+	oauth2Token, err := oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
 	if err != nil {
 		return nil, err
 	}
-
 	op.refreshToken = oauth2Token.RefreshToken
 
 	// Extract the ID Token from OAuth2 token.
@@ -255,14 +247,15 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	if !ok {
 		return nil, errors.New("token not found")
 	}
-	op.rawIdToken = rawIDToken
+	op.idToken = rawIDToken
 
-	// Parse and verify ID Token payload.
-	idToken, err := idTokenVerifier.Verify(ctx, op.rawIdToken)
+	// Verify ID Token
+	idToken, err := idTokenVerifier.Verify(ctx, rawIDToken)
 	if err != nil {
 		return nil, err
 	}
 
+	// Verify nonce
 	if idToken.Nonce != nonce {
 		return nil, errors.New("nonce did not match")
 	}
@@ -271,8 +264,44 @@ func (op *oidcProvider) login(manual bool) (*claims, error) {
 	if err := idToken.Claims(claims); err != nil {
 		return nil, err
 	}
+	return claims, nil
+}
 
-	return claims, err
+// pkceChallenge generates a code verifier and a code challenge.
+func pkceChallenge() (codeVerifier string, codeChallenge string) {
+	codeVerifier = randStringBytesMaskImprSrc(64)
+	// sha256 hash code verifier
+	h := sha256.New()
+	h.Write([]byte(codeVerifier))
+	codeChallenge = base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+
+	return
+}
+
+func manualFlow(authCodeURL string) (string, error) {
+	var code string
+	fmt.Printf("Open the following link in your browser:\n%v\n", authCodeURL)
+	fmt.Printf("Paste the code from the browser: ")
+	if _, err := fmt.Scan(&code); err != nil {
+		return "", err
+	}
+	return code, nil
+}
+
+func openBrowserFlow(authCodeURL string, state string) (string, error) {
+	err := openBrowser(authCodeURL)
+	if err != nil {
+		return "", err
+	}
+
+	code, gotState, err := listenAndWaitForAuthorizationCode(autoRedirectURI)
+	if err != nil {
+		return "", err
+	}
+	if gotState != state {
+		return "", fmt.Errorf("state did not match")
+	}
+	return code, nil
 }
 
 // oidcCredentials implements credentials.PerRPCCredentials for oidc authentication.
