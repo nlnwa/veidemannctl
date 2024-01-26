@@ -67,6 +67,9 @@ func Login(manualLogin bool) error {
 		if err != nil {
 			return err
 		}
+		if claims == nil {
+			return nil
+		}
 		fmt.Printf("Hello, %s!\n", claims.Name)
 	case config.ProviderApiKey:
 		// no login procedure for apikey
