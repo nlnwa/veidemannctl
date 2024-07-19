@@ -61,6 +61,7 @@ func NewRootCmd() *cobra.Command {
 		"If set, it will override the virtual host name of authority (e.g. :authority header field) in requests")
 	cmd.PersistentFlags().String("api-key", "",
 		"If set, it will be used as the bearer token for authentication")
+	cmd.PersistentFlags().Bool("insecure", false, "If set, it will use an insecure connection")
 	cmd.PersistentFlags().String("log-level", "info", `set log level, available levels are "panic", "fatal", "error", "warn", "info", "debug" and "trace"`)
 	cmd.PersistentFlags().String("log-format", "pretty", `set log format, available formats are: "pretty" or "json"`)
 	cmd.PersistentFlags().Bool("log-caller", false, "include information about caller in log output")

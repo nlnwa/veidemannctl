@@ -211,6 +211,10 @@ func GetAuthProvider() *AuthProvider {
 	return cfg.AuthProvider
 }
 
+func GetInsecure() bool {
+	return viper.GetBool("insecure")
+}
+
 // SetServerAddress sets the server address.
 func SetServerAddress(server string) error {
 	cfg.Server = server
