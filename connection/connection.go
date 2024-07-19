@@ -14,10 +14,8 @@
 package connection
 
 import (
-	"context"
 	"crypto/x509"
 	"fmt"
-	"strings"
 
 	"github.com/nlnwa/veidemannctl/config"
 	"github.com/rs/zerolog/log"
@@ -55,30 +53,18 @@ func Connect() (*grpc.ClientConn, error) {
 }
 
 // connect returns a connection to the server.
-// If tls is true, the connection will be encrypted with TLS.
 func connect(opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	address := config.GetServer()
-	dialOptions := append(opts,
-		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
-		grpc.WithBlock(),
-		grpc.FailOnNonTempDialError(true),
-	)
+	dialOptions := append(opts, grpc.WithDefaultCallOptions(grpc.WaitForReady(true)))
 
-	log.Debug().Msgf("Connecting to %v", address)
-	conn, err := grpc.DialContext(context.Background(), address, append(dialOptions, grpc.WithTransportCredentials(clientTransportCredentials()))...)
-	if err != nil {
-		if strings.Contains(err.Error(), "first record does not look like a TLS handshake") {
-			log.Debug().Msg("Failed to connect with TLS, retrying with insecure transport credentials")
-			conn, err = grpc.DialContext(context.Background(), address, append(dialOptions, grpc.WithTransportCredentials(insecure.NewCredentials()))...)
-			if err != nil {
-				return nil, err
-			}
-			log.Warn().Msg("Connected with insecure transport. Server does not support TLS")
-		} else {
-			return nil, err
-		}
+	if config.GetInsecure() {
+		dialOptions = append(dialOptions, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	} else {
+		dialOptions = append(dialOptions, grpc.WithTransportCredentials(clientTransportCredentials()))
 	}
-	return conn, nil
+
+	address := config.GetServer()
+
+	return grpc.NewClient(address, dialOptions...)
 }
 
 // clientTransportCredentials returns the transport credentials to use for the client
